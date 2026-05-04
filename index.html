@@ -3,136 +3,819 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNP Demo Website</title>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>NexCore AI — Intelligent Solutions & Web Development</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --purple: #6b21a8;
-    --purple-dark: #4a0e7a;
-    --pink: #c026a0;
-    --gold: #f5c842;
-    --white: #ffffff;
-    --cream: #fdf8ff;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: 'Source Sans 3', sans-serif; background: var(--cream); }
-
-  nav {
-    background: linear-gradient(135deg, var(--purple-dark), var(--purple));
-    padding: 16px 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(107,33,168,0.3);
-  }
-  .nav-logo { display: flex; align-items: center; gap: 12px; }
-  .nav-logo img { width: 44px; height: 44px; object-fit: contain; }
-  .nav-logo span { font-family: 'Lora', serif; color: var(--white); font-size: 18px; font-weight: 600; }
-  .nav-links { display: flex; gap: 28px; }
-  .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
-  .nav-links a:hover { color: var(--gold); }
-
-  .hero {
-    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 50%, var(--pink) 100%);
-    padding: 80px 40px; text-align: center; color: var(--white);
-    position: relative; overflow: hidden;
-  }
-  .hero-badge {
-    display: inline-block; background: rgba(245,200,66,0.2);
-    border: 1px solid var(--gold); color: var(--gold);
-    border-radius: 20px; padding: 6px 16px; font-size: 12px;
-    font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-    margin-bottom: 20px; position: relative;
-  }
-  .hero h1 { font-family: 'Lora', serif; font-size: 48px; font-weight: 600; line-height: 1.2; margin-bottom: 20px; position: relative; }
-  .hero h1 span { color: var(--gold); }
-  .hero p { font-size: 18px; opacity: 0.85; max-width: 600px; margin: 0 auto 32px; line-height: 1.6; font-weight: 300; position: relative; }
-  .hero-btn {
-    display: inline-block; background: var(--gold); color: var(--purple-dark);
-    padding: 14px 32px; border-radius: 30px; font-weight: 700; font-size: 15px;
-    text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
-    position: relative; box-shadow: 0 4px 20px rgba(245,200,66,0.4);
-  }
-  .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.5); }
-
-  .gold-bar { height: 4px; background: linear-gradient(90deg, var(--purple), var(--gold), var(--pink)); }
-
-  .section { padding: 60px 40px; }
-  .section h2 { font-family: 'Lora', serif; font-size: 32px; color: var(--purple-dark); text-align: center; margin-bottom: 40px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
-  .card {
-    background: var(--white); border-radius: 16px; padding: 28px;
-    box-shadow: 0 4px 20px rgba(107,33,168,0.1); border: 1px solid rgba(107,33,168,0.08);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(107,33,168,0.18); }
-  .card-icon { font-size: 36px; margin-bottom: 14px; }
-  .card h3 { font-family: 'Lora', serif; font-size: 18px; color: var(--purple-dark); margin-bottom: 10px; }
-  .card p { font-size: 14px; color: #555; line-height: 1.6; }
-  .card-tag { display: inline-block; background: rgba(107,33,168,0.08); color: var(--purple); border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; margin-top: 14px; }
-
-  footer { background: var(--purple-dark); color: rgba(255,255,255,0.7); text-align: center; padding: 24px; font-size: 13px; }
-  footer span { color: var(--gold); }
+:root {
+  --black: #050507;
+  --black2: #0d0d12;
+  --black3: #13131a;
+  --red: #e8193c;
+  --red-dark: #a01028;
+  --red-glow: rgba(232,25,60,0.18);
+  --red-dim: rgba(232,25,60,0.08);
+  --white: #f5f5f7;
+  --gray: #8a8a9a;
+  --gray2: #2a2a35;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--black);
+  color:var(--white);
+  overflow-x:hidden;
+}
+ 
+/* ── CURSOR ── */
+.cursor{position:fixed;width:10px;height:10px;background:var(--red);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(232,25,60,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.18s ease;}
+ 
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 60px;
+  background:rgba(5,5,7,0.7);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(232,25,60,0.08);
+  transition:padding 0.3s;
+}
+nav.scrolled{padding:14px 60px;background:rgba(5,5,7,0.95);}
+.nav-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--white);}
+.nav-logo span{color:var(--red);}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{color:var(--gray);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:0.3px;transition:color 0.2s;position:relative;}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--red);transition:width 0.3s;}
+.nav-links a:hover{color:var(--white);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{background:var(--red);color:var(--white)!important;padding:9px 22px;border-radius:6px;font-weight:600!important;letter-spacing:0.4px;transition:background 0.2s,transform 0.2s!important;}
+.nav-cta:hover{background:#c0112e!important;transform:translateY(-1px);}
+.nav-cta::after{display:none!important;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+.hamburger span{width:26px;height:2px;background:var(--white);transition:all 0.3s;}
+ 
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  padding:120px 60px 80px;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 70% at 60% 50%, rgba(232,25,60,0.12) 0%, transparent 65%),
+             radial-gradient(ellipse 40% 40% at 20% 80%, rgba(232,25,60,0.06) 0%, transparent 60%);
+}
+.grid-overlay{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(232,25,60,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,25,60,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:gridShift 20s linear infinite;
+}
+@keyframes gridShift{
+  0%{background-position:0 0;}
+  100%{background-position:60px 60px;}
+}
+.hero-content{position:relative;z-index:2;max-width:1000px;margin:0 auto;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(232,25,60,0.1);
+  border:1px solid rgba(232,25,60,0.25);
+  border-radius:40px;padding:7px 18px;
+  font-size:12px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--red);
+  margin-bottom:32px;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp 0.8s ease 0.2s forwards;
+}
+.hero-eyebrow::before{content:'';width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:0.5;}}
+h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(46px,6.5vw,90px);
+  font-weight:800;line-height:1.02;
+  letter-spacing:-2px;
+  margin-bottom:28px;
+  opacity:0;transform:translateY(30px);
+  animation:fadeUp 0.9s ease 0.4s forwards;
+}
+h1 .line-red{color:var(--red);display:block;}
+h1 .stroke-text{
+  -webkit-text-stroke:1px rgba(245,245,247,0.3);
+  color:transparent;display:block;
+}
+.hero-desc{
+  font-size:18px;font-weight:300;color:var(--gray);
+  max-width:560px;line-height:1.7;margin-bottom:44px;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp 0.9s ease 0.6s forwards;
+}
+.hero-actions{
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+  opacity:0;transform:translateY(20px);
+  animation:fadeUp 0.9s ease 0.8s forwards;
+}
+.btn-primary{
+  background:var(--red);color:var(--white);
+  padding:15px 32px;border-radius:8px;font-size:15px;
+  font-weight:600;text-decoration:none;letter-spacing:0.3px;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:background 0.2s,transform 0.2s,box-shadow 0.2s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  transition:left 0.5s;
+}
+.btn-primary:hover::before{left:100%;}
+.btn-primary:hover{background:#c0112e;transform:translateY(-2px);box-shadow:0 12px 40px rgba(232,25,60,0.35);}
+.btn-ghost{
+  border:1px solid var(--gray2);color:var(--gray);
+  padding:15px 32px;border-radius:8px;font-size:15px;
+  font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+  transition:border-color 0.2s,color 0.2s;
+}
+.btn-ghost:hover{border-color:rgba(232,25,60,0.4);color:var(--white);}
+.btn-arrow{font-size:18px;transition:transform 0.2s;}
+.btn-primary:hover .btn-arrow{transform:translateX(4px);}
+ 
+.hero-stats{
+  display:flex;gap:48px;margin-top:64px;
+  padding-top:48px;border-top:1px solid var(--gray2);
+  opacity:0;animation:fadeIn 1s ease 1.2s forwards;
+}
+.stat-item{}
+.stat-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--white);display:flex;align-items:baseline;gap:4px;}
+.stat-num span{color:var(--red);}
+.stat-label{font-size:13px;color:var(--gray);margin-top:4px;letter-spacing:0.3px;}
+ 
+/* floating chips */
+.hero-chips{
+  position:absolute;right:80px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:16px;
+  opacity:0;animation:fadeIn 1s ease 1s forwards;
+}
+.chip{
+  background:var(--black3);border:1px solid var(--gray2);
+  border-radius:12px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+  font-size:13px;color:var(--gray);
+  transform:translateX(40px);
+  animation:slideChip 0.6s ease forwards;
+}
+.chip:nth-child(1){animation-delay:1.2s;}
+.chip:nth-child(2){animation-delay:1.4s;}
+.chip:nth-child(3){animation-delay:1.6s;}
+.chip:nth-child(4){animation-delay:1.8s;}
+@keyframes slideChip{to{transform:translateX(0);}}
+.chip-icon{width:32px;height:32px;background:var(--red-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--red);}
+.chip-text strong{display:block;color:var(--white);font-size:13px;}
+ 
+/* ── MARQUEE ── */
+.marquee-wrap{
+  background:var(--black3);border-top:1px solid var(--gray2);border-bottom:1px solid var(--gray2);
+  padding:18px 0;overflow:hidden;
+}
+.marquee-inner{display:flex;gap:0;animation:marquee 30s linear infinite;white-space:nowrap;}
+.marquee-item{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:0 40px;font-size:13px;font-weight:500;
+  color:var(--gray);letter-spacing:0.5px;text-transform:uppercase;
+}
+.marquee-dot{width:4px;height:4px;background:var(--red);border-radius:50%;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+ 
+/* ── SERVICES ── */
+.section{padding:100px 60px;}
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--red);margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-label::before{content:'';width:24px;height:1px;background:var(--red);}
+.section-title{
+  font-family:'Syne',sans-serif;font-size:clamp(32px,3.5vw,52px);
+  font-weight:800;letter-spacing:-1px;line-height:1.1;
+  margin-bottom:16px;
+}
+.section-title em{color:var(--red);font-style:normal;}
+.section-sub{color:var(--gray);font-size:16px;font-weight:300;max-width:480px;line-height:1.7;}
+ 
+.services-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:2px;margin-top:60px;
+}
+.service-card{
+  background:var(--black3);padding:36px;position:relative;overflow:hidden;
+  border:1px solid transparent;
+  transition:border-color 0.3s,background 0.3s;
+  cursor:default;
+}
+.service-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--red-dim),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.service-card:hover{border-color:rgba(232,25,60,0.2);background:var(--black2);}
+.service-card:hover::before{opacity:1;}
+.sc-num{
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
+  color:rgba(232,25,60,0.35);letter-spacing:2px;margin-bottom:24px;
+}
+.sc-icon{
+  width:52px;height:52px;background:var(--red-dim);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:22px;
+  transition:background 0.3s;
+}
+.service-card:hover .sc-icon{background:rgba(232,25,60,0.2);}
+.sc-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px;}
+.sc-desc{font-size:14px;color:var(--gray);line-height:1.7;font-weight:300;}
+.sc-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+.sc-tag{
+  font-size:11px;font-weight:600;letter-spacing:0.5px;
+  padding:4px 10px;border-radius:4px;
+  background:var(--black2);border:1px solid var(--gray2);
+  color:var(--gray);text-transform:uppercase;
+  transition:border-color 0.2s,color 0.2s;
+}
+.service-card:hover .sc-tag{border-color:rgba(232,25,60,0.2);color:rgba(232,25,60,0.7);}
+.sc-arrow{
+  position:absolute;bottom:28px;right:28px;
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--gray2);display:flex;align-items:center;justify-content:center;
+  color:var(--gray);font-size:16px;
+  transition:background 0.3s,border-color 0.3s,color 0.3s,transform 0.3s;
+}
+.service-card:hover .sc-arrow{background:var(--red);border-color:var(--red);color:var(--white);transform:rotate(45deg);}
+ 
+/* ── PROCESS ── */
+.process-section{background:var(--black2);padding:100px 60px;}
+.process-steps{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;margin-top:60px;position:relative;
+}
+.process-steps::before{
+  content:'';position:absolute;top:40px;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+  opacity:0.3;
+}
+.process-step{
+  padding:32px 28px;text-align:center;position:relative;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.5s,transform 0.5s;
+}
+.process-step.visible{opacity:1;transform:translateY(0);}
+.step-num{
+  width:80px;height:80px;margin:0 auto 24px;
+  background:var(--black3);border:1px solid var(--gray2);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  transition:border-color 0.3s,background 0.3s,color 0.3s;
+  position:relative;z-index:2;
+}
+.process-step:hover .step-num{
+  background:var(--red);border-color:var(--red);color:var(--white);
+}
+.step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;}
+.step-desc{font-size:13px;color:var(--gray);line-height:1.6;font-weight:300;}
+ 
+/* ── TECH STACK ── */
+.tech-section{padding:100px 60px;}
+.tech-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:2px;margin-top:60px;
+}
+.tech-item{
+  background:var(--black3);padding:28px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  font-size:12px;font-weight:600;letter-spacing:0.5px;
+  text-transform:uppercase;color:var(--gray);
+  transition:background 0.2s,color 0.2s;cursor:default;
+}
+.tech-item:hover{background:var(--black2);color:var(--white);}
+.tech-item:hover .tech-ico{filter:brightness(1.4) saturate(1.5);}
+.tech-ico{font-size:30px;transition:filter 0.2s;}
+ 
+/* ── WHY US ── */
+.why-section{background:var(--black2);padding:100px 60px;}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px;}
+.why-visual{
+  position:relative;height:420px;
+  background:var(--black3);border:1px solid var(--gray2);border-radius:16px;
+  overflow:hidden;
+}
+.why-visual-inner{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+}
+.circle-anim{
+  width:200px;height:200px;border-radius:50%;
+  border:1px solid rgba(232,25,60,0.2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;animation:rotate 12s linear infinite;
+}
+.circle-anim::before{
+  content:'';position:absolute;inset:-20px;border-radius:50%;
+  border:1px dashed rgba(232,25,60,0.1);
+  animation:rotate 20s linear reverse infinite;
+}
+@keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.circle-core{
+  width:100px;height:100px;border-radius:50%;
+  background:var(--red-dim);border:1px solid rgba(232,25,60,0.3);
+  display:flex;align-items:center;justify-content:center;
+  animation:rotate 12s linear reverse infinite;
+  font-size:32px;
+}
+.orbit-dot{
+  position:absolute;width:10px;height:10px;background:var(--red);
+  border-radius:50%;
+}
+.orbit-dot:nth-child(2){top:0;left:50%;transform:translate(-50%,-50%);}
+.orbit-dot:nth-child(3){bottom:0;left:50%;transform:translate(-50%,50%);}
+.orbit-dot:nth-child(4){left:0;top:50%;transform:translate(-50%,-50%);}
+.orbit-dot:nth-child(5){right:0;top:50%;transform:translate(50%,-50%);}
+.why-benefits{display:flex;flex-direction:column;gap:24px;}
+.benefit-item{
+  display:flex;gap:18px;align-items:flex-start;
+  padding:24px;background:var(--black3);
+  border:1px solid var(--gray2);border-radius:12px;
+  transition:border-color 0.3s,transform 0.2s;
+}
+.benefit-item:hover{border-color:rgba(232,25,60,0.25);transform:translateX(6px);}
+.benefit-ico{
+  width:42px;height:42px;min-width:42px;background:var(--red-dim);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.benefit-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;}
+.benefit-desc{font-size:13px;color:var(--gray);line-height:1.6;font-weight:300;}
+ 
+/* ── CTA SECTION ── */
+.cta-section{
+  padding:120px 60px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(232,25,60,0.1),transparent 70%);
+}
+.cta-section .section-title{font-size:clamp(36px,4vw,60px);position:relative;}
+.cta-section p{color:var(--gray);font-size:17px;max-width:500px;margin:16px auto 44px;position:relative;font-weight:300;line-height:1.7;}
+.cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
+ 
+/* ── FOOTER ── */
+footer{
+  background:var(--black3);border-top:1px solid var(--gray2);
+  padding:60px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;
+}
+.footer-brand .nav-logo{font-size:24px;display:block;margin-bottom:14px;}
+.footer-brand p{font-size:14px;color:var(--gray);line-height:1.7;font-weight:300;max-width:240px;}
+.footer-col h4{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.5px;margin-bottom:18px;color:var(--white);}
+.footer-col a{display:block;color:var(--gray);text-decoration:none;font-size:13px;font-weight:400;margin-bottom:10px;transition:color 0.2s;}
+.footer-col a:hover{color:var(--red);}
+.footer-bottom{
+  background:var(--black2);border-top:1px solid var(--gray2);
+  padding:20px 60px;display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;color:var(--gray);
+}
+.footer-bottom span{color:var(--red);}
+ 
+/* ── SCROLL ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s,transform 0.7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+ 
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .hero-chips{display:none;}
+  .process-steps{grid-template-columns:1fr 1fr;}
+  .why-grid{grid-template-columns:1fr;}
+  .why-visual{height:280px;}
+  footer{grid-template-columns:1fr 1fr;gap:40px;}
+}
+@media(max-width:768px){
+  nav{padding:18px 24px;}
+  nav.scrolled{padding:12px 24px;}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .hero{padding:100px 24px 60px;}
+  .section,.process-section,.why-section,.tech-section,.cta-section{padding:70px 24px;}
+  .services-grid{grid-template-columns:1fr;}
+  .process-steps{grid-template-columns:1fr;}
+  .process-steps::before{display:none;}
+  footer{grid-template-columns:1fr;padding:40px 24px;gap:32px;}
+  .footer-bottom{flex-direction:column;gap:8px;padding:16px 24px;text-align:center;}
+  .hero-stats{flex-wrap:wrap;gap:28px;}
+  h1{letter-spacing:-1px;}
+}
 </style>
 </head>
 <body>
-
-<nav>
-  <div class="nav-logo">
-    <img src="https://www.nutritional-psychology.org/wp-content/uploads/2022/04/cnp-logo.png" onerror="this.style.display='none'" alt="CNP"/>
-    <span>CNP Demo</span>
-  </div>
+ 
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+ 
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">Nex<span>Core</span> AI</div>
   <div class="nav-links">
-    <a href="#">Home</a>
-    <a href="#">Courses</a>
-    <a href="#">Research</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
+    <a href="#services">Services</a>
+    <a href="#process">Process</a>
+    <a href="#tech">Tech Stack</a>
+    <a href="#about">About</a>
+    <a href="#contact" class="nav-cta">Get in Touch</a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
   </div>
 </nav>
-
-<div class="gold-bar"></div>
-
-<div class="hero">
-  <div class="hero-badge">✨ Practice Website</div>
-  <h1>Center for <span>Nutritional</span><br>Psychology</h1>
-  <p>Bridging the science of nutrition with mental health and psychology for a healthier world.</p>
-  <a href="#" class="hero-btn">Explore Our Courses →</a>
-</div>
-
-<div class="gold-bar"></div>
-
-<div class="section">
-  <h2>What We Offer</h2>
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon">🎓</div>
-      <h3>Online Courses</h3>
-      <p>Evidence-based courses connecting nutrition science with mental health for professionals and students.</p>
-      <span class="card-tag">Education</span>
+ 
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span>AI-Powered Solutions</span>
     </div>
-    <div class="card">
-      <div class="card-icon">🔬</div>
-      <h3>Research Library</h3>
-      <p>Access thousands of peer-reviewed studies on nutrition and psychological wellbeing.</p>
-      <span class="card-tag">Research</span>
+    <h1>
+      We Build the
+      <span class="line-red">Future of Web</span>
+      <span class="stroke-text">& Intelligence.</span>
+    </h1>
+    <p class="hero-desc">Cutting-edge AI solutions and high-performance web development — engineered to transform your business into a digital powerhouse.</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">Explore Services <span class="btn-arrow">→</span></a>
+      <a href="#contact" class="btn-ghost">Start a Project</a>
     </div>
-    <div class="card">
-      <div class="card-icon">🤝</div>
-      <h3>Membership</h3>
-      <p>Join our global community of practitioners, researchers, and educators in nutritional psychology.</p>
-      <span class="card-tag">Community</span>
-    </div>
-    <div class="card">
-      <div class="card-icon">📋</div>
-      <h3>Certification</h3>
-      <p>Get certified in nutritional psychology and advance your professional career.</p>
-      <span class="card-tag">Career</span>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">120<span>+</span></div>
+        <div class="stat-label">Projects Delivered</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">98<span>%</span></div>
+        <div class="stat-label">Client Satisfaction</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">6<span>+</span></div>
+        <div class="stat-label">Years of Experience</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">40<span>+</span></div>
+        <div class="stat-label">Expert Engineers</div>
+      </div>
     </div>
   </div>
+  <!-- floating chips -->
+  <div class="hero-chips">
+    <div class="chip">
+      <div class="chip-icon">🤖</div>
+      <div class="chip-text"><strong>AI Integration</strong>Ready to deploy</div>
+    </div>
+    <div class="chip">
+      <div class="chip-icon">⚡</div>
+      <div class="chip-text"><strong>99.9% Uptime</strong>Always online</div>
+    </div>
+    <div class="chip">
+      <div class="chip-icon">🔒</div>
+      <div class="chip-text"><strong>Enterprise Security</strong>SOC2 Certified</div>
+    </div>
+    <div class="chip">
+      <div class="chip-icon">🚀</div>
+      <div class="chip-text"><strong>Fast Delivery</strong>Agile sprints</div>
+    </div>
+  </div>
+</section>
+ 
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner" id="marquee">
+    <span class="marquee-item"><span class="marquee-dot"></span>Artificial Intelligence</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Machine Learning</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Web Development</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Cloud Architecture</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Data Engineering</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>UI / UX Design</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DevOps & CI/CD</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>NLP & Chatbots</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Artificial Intelligence</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Machine Learning</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Web Development</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Cloud Architecture</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Data Engineering</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>UI / UX Design</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>DevOps & CI/CD</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>NLP & Chatbots</span>
+  </div>
 </div>
-
+ 
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="reveal">
+    <div class="section-label">What We Do</div>
+    <div class="section-title">Our Core <em>Services</em></div>
+    <div class="section-sub">From intelligent automation to pixel-perfect interfaces — we engineer solutions that drive real results.</div>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="sc-num">01</div>
+      <div class="sc-icon">🧠</div>
+      <div class="sc-title">AI & Machine Learning</div>
+      <div class="sc-desc">Custom AI models, LLM integrations, computer vision, and intelligent automation pipelines built for production at scale.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">LLMs</span>
+        <span class="sc-tag">PyTorch</span>
+        <span class="sc-tag">Computer Vision</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+    <div class="service-card reveal">
+      <div class="sc-num">02</div>
+      <div class="sc-icon">🌐</div>
+      <div class="sc-title">Web Development</div>
+      <div class="sc-desc">High-performance web applications using modern stacks. From landing pages to complex SaaS platforms that scale effortlessly.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">React</span>
+        <span class="sc-tag">Next.js</span>
+        <span class="sc-tag">Node.js</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+    <div class="service-card reveal">
+      <div class="sc-num">03</div>
+      <div class="sc-icon">☁️</div>
+      <div class="sc-title">Cloud & DevOps</div>
+      <div class="sc-desc">Resilient cloud infrastructure, CI/CD pipelines, containerization, and microservices architecture for enterprise-grade reliability.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">AWS</span>
+        <span class="sc-tag">Docker</span>
+        <span class="sc-tag">Kubernetes</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+    <div class="service-card reveal">
+      <div class="sc-num">04</div>
+      <div class="sc-icon">💬</div>
+      <div class="sc-title">AI Chatbots & NLP</div>
+      <div class="sc-desc">Intelligent conversational agents, RAG systems, and NLP solutions that understand context and deliver human-like interactions.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">ChatGPT API</span>
+        <span class="sc-tag">RAG</span>
+        <span class="sc-tag">Claude</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+    <div class="service-card reveal">
+      <div class="sc-num">05</div>
+      <div class="sc-icon">📊</div>
+      <div class="sc-title">Data Engineering</div>
+      <div class="sc-desc">End-to-end data pipelines, real-time analytics dashboards, and data warehousing solutions that turn raw data into competitive advantage.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">Python</span>
+        <span class="sc-tag">Spark</span>
+        <span class="sc-tag">Tableau</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+    <div class="service-card reveal">
+      <div class="sc-num">06</div>
+      <div class="sc-icon">🎨</div>
+      <div class="sc-title">UI/UX Design</div>
+      <div class="sc-desc">User-centric design systems, interactive prototypes, and brand identities that captivate users and drive conversion.</div>
+      <div class="sc-tags">
+        <span class="sc-tag">Figma</span>
+        <span class="sc-tag">Framer</span>
+        <span class="sc-tag">Design Systems</span>
+      </div>
+      <div class="sc-arrow">↗</div>
+    </div>
+  </div>
+</section>
+ 
+<!-- PROCESS -->
+<section class="process-section" id="process">
+  <div class="reveal">
+    <div class="section-label">How We Work</div>
+    <div class="section-title">Our <em>Process</em></div>
+  </div>
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Discovery</div>
+      <div class="step-desc">Deep dive into your goals, challenges, and technical requirements to craft the perfect strategy.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Architecture</div>
+      <div class="step-desc">Design scalable system architecture, tech stack selection, and detailed project roadmap.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Build & Iterate</div>
+      <div class="step-desc">Agile development sprints with continuous delivery, testing, and feedback loops.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Launch & Scale</div>
+      <div class="step-desc">Seamless deployment, monitoring, performance optimization, and ongoing support.</div>
+    </div>
+  </div>
+</section>
+ 
+<!-- TECH STACK -->
+<section class="tech-section" id="tech">
+  <div class="reveal">
+    <div class="section-label">Technology</div>
+    <div class="section-title">Our <em>Tech Stack</em></div>
+    <div class="section-sub">We work with the best modern technologies to deliver future-proof solutions.</div>
+  </div>
+  <div class="tech-grid reveal">
+    <div class="tech-item"><div class="tech-ico">⚛️</div>React</div>
+    <div class="tech-item"><div class="tech-ico">▲</div>Next.js</div>
+    <div class="tech-item"><div class="tech-ico">🟨</div>JavaScript</div>
+    <div class="tech-item"><div class="tech-ico">🐍</div>Python</div>
+    <div class="tech-item"><div class="tech-ico">🔷</div>TypeScript</div>
+    <div class="tech-item"><div class="tech-ico">🟢</div>Node.js</div>
+    <div class="tech-item"><div class="tech-ico">☁️</div>AWS</div>
+    <div class="tech-item"><div class="tech-ico">🐳</div>Docker</div>
+    <div class="tech-item"><div class="tech-ico">☸️</div>Kubernetes</div>
+    <div class="tech-item"><div class="tech-ico">🧠</div>PyTorch</div>
+    <div class="tech-item"><div class="tech-ico">🔴</div>Redis</div>
+    <div class="tech-item"><div class="tech-ico">🍃</div>MongoDB</div>
+    <div class="tech-item"><div class="tech-ico">🐘</div>PostgreSQL</div>
+    <div class="tech-item"><div class="tech-ico">🌊</div>Kafka</div>
+    <div class="tech-item"><div class="tech-ico">🎨</div>Figma</div>
+    <div class="tech-item"><div class="tech-ico">🔥</div>Firebase</div>
+  </div>
+</section>
+ 
+<!-- WHY US -->
+<section class="why-section" id="about">
+  <div class="reveal">
+    <div class="section-label">Why Choose Us</div>
+    <div class="section-title">Built for the <em>Bold</em></div>
+  </div>
+  <div class="why-grid">
+    <div class="why-visual reveal">
+      <div class="why-visual-inner">
+        <div class="circle-anim">
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+          <div class="circle-core">🤖</div>
+        </div>
+      </div>
+    </div>
+    <div class="why-benefits reveal">
+      <div class="benefit-item">
+        <div class="benefit-ico">⚡</div>
+        <div>
+          <div class="benefit-title">Blazing Fast Delivery</div>
+          <div class="benefit-desc">Agile sprints with weekly milestones. We ship faster without compromising quality — because your time is your biggest asset.</div>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-ico">🎯</div>
+        <div>
+          <div class="benefit-title">Precision Engineering</div>
+          <div class="benefit-desc">Every line of code, every model parameter is optimized. We don't just build — we craft with obsessive attention to detail.</div>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-ico">🔒</div>
+        <div>
+          <div class="benefit-title">Enterprise-Grade Security</div>
+          <div class="benefit-desc">Security-first architecture with end-to-end encryption, compliance standards, and proactive vulnerability monitoring.</div>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-ico">📈</div>
+        <div>
+          <div class="benefit-title">Scalable Architecture</div>
+          <div class="benefit-desc">Systems built to grow. From startup MVP to millions of users — our infrastructure scales effortlessly with your success.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="reveal">
+    <div class="section-label" style="justify-content:center;">Ready?</div>
+    <div class="section-title">Let's Build Something <em>Extraordinary</em></div>
+    <p>Have a project in mind? Let's turn your vision into a high-performing AI-powered reality.</p>
+    <div class="cta-actions">
+      <a href="mailto:hello@nexcore.ai" class="btn-primary">Start a Project <span class="btn-arrow">→</span></a>
+      <a href="#services" class="btn-ghost">View Services</a>
+    </div>
+  </div>
+</section>
+ 
+<!-- FOOTER -->
 <footer>
-  <p>© 2026 <span>Center for Nutritional Psychology</span> · Demo Website for Practice</p>
+  <div class="footer-brand">
+    <div class="nav-logo">Nex<span style="color:var(--red)">Core</span> AI</div>
+    <p>Building the future with intelligent software and cutting-edge web engineering.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Services</h4>
+    <a href="#">AI & ML Solutions</a>
+    <a href="#">Web Development</a>
+    <a href="#">Cloud & DevOps</a>
+    <a href="#">Data Engineering</a>
+  </div>
+  <div class="footer-col">
+    <h4>Company</h4>
+    <a href="#">About Us</a>
+    <a href="#">Our Team</a>
+    <a href="#">Careers</a>
+    <a href="#">Blog</a>
+  </div>
+  <div class="footer-col">
+    <h4>Contact</h4>
+    <a href="#">hello@nexcore.ai</a>
+    <a href="#">+92 300 0000000</a>
+    <a href="#">Rawalpindi, PK</a>
+    <a href="#">LinkedIn</a>
+  </div>
 </footer>
-<script src="https://jahanzaibtahir2006.github.io/cnp-chatbot/cnp-chatbot.js" async></script>
+<div class="footer-bottom">
+  <span>© 2026 <span>NexCore AI</span>. All rights reserved.</span>
+  <span>Built with precision & passion 🔴</span>
+</div>
+ 
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button,.service-card,.benefit-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='rgba(232,25,60,0.8)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(232,25,60,0.5)';});
+});
+ 
+// Navbar scroll
+const navbar=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{navbar.classList.toggle('scrolled',window.scrollY>60);});
+ 
+// Scroll reveal
+const reveals=document.querySelectorAll('.reveal,.process-step');
+const io=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),e.target.classList.contains('process-step')?([...document.querySelectorAll('.process-step')].indexOf(e.target))*120:0);
+    }
+  });
+},{threshold:0.1});
+reveals.forEach(el=>io.observe(el));
+ 
+// Hamburger (mobile)
+document.getElementById('hamburger').addEventListener('click',function(){
+  const links=document.querySelector('.nav-links');
+  links.style.display=links.style.display==='flex'?'none':'flex';
+  links.style.flexDirection='column';
+  links.style.position='absolute';
+  links.style.top='70px';links.style.right='24px';
+  links.style.background='var(--black3)';
+  links.style.padding='24px';links.style.borderRadius='12px';
+  links.style.border='1px solid var(--gray2)';links.style.gap='20px';
+});
+ 
+// Counter animation
+function animateNum(el,target,suffix){
+  let start=0,duration=1800;
+  const step=timestamp=>{
+    if(!start) start=timestamp;
+    const p=Math.min((timestamp-start)/duration,1);
+    el.childNodes[0].textContent=Math.floor(p*target);
+    if(p<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const statsObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('.stat-num').forEach(el=>{
+        const txt=el.childNodes[0].textContent;
+        const num=parseInt(txt);
+        animateNum(el,num,'');
+      });
+      statsObs.disconnect();
+    }
+  });
+},{threshold:0.5});
+const statsEl=document.querySelector('.hero-stats');
+if(statsEl) statsObs.observe(statsEl);
+</script>
 </body>
 </html>
