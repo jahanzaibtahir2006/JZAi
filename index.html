@@ -26,11 +26,7 @@ body{
   color:var(--white);
   overflow-x:hidden;
 }
- 
-/* ── CURSOR ── */
-.cursor{position:fixed;width:10px;height:10px;background:var(--red);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;}
-.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(232,25,60,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.18s ease;}
- 
+
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
@@ -54,7 +50,7 @@ nav.scrolled{padding:14px 60px;background:rgba(5,5,7,0.95);}
 .nav-cta::after{display:none!important;}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
 .hamburger span{width:26px;height:2px;background:var(--white);transition:all 0.3s;}
- 
+
 /* ── HERO ── */
 .hero{
   min-height:100vh;
@@ -142,7 +138,7 @@ h1 .stroke-text{
 .btn-ghost:hover{border-color:rgba(232,25,60,0.4);color:var(--white);}
 .btn-arrow{font-size:18px;transition:transform 0.2s;}
 .btn-primary:hover .btn-arrow{transform:translateX(4px);}
- 
+
 .hero-stats{
   display:flex;gap:48px;margin-top:64px;
   padding-top:48px;border-top:1px solid var(--gray2);
@@ -152,7 +148,7 @@ h1 .stroke-text{
 .stat-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--white);display:flex;align-items:baseline;gap:4px;}
 .stat-num span{color:var(--red);}
 .stat-label{font-size:13px;color:var(--gray);margin-top:4px;letter-spacing:0.3px;}
- 
+
 /* floating chips */
 .hero-chips{
   position:absolute;right:80px;top:50%;transform:translateY(-50%);
@@ -174,7 +170,7 @@ h1 .stroke-text{
 @keyframes slideChip{to{transform:translateX(0);}}
 .chip-icon{width:32px;height:32px;background:var(--red-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--red);}
 .chip-text strong{display:block;color:var(--white);font-size:13px;}
- 
+
 /* ── MARQUEE ── */
 .marquee-wrap{
   background:var(--black3);border-top:1px solid var(--gray2);border-bottom:1px solid var(--gray2);
@@ -188,7 +184,7 @@ h1 .stroke-text{
 }
 .marquee-dot{width:4px;height:4px;background:var(--red);border-radius:50%;}
 @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
- 
+
 /* ── SERVICES ── */
 .section{padding:100px 60px;}
 .section-label{
@@ -204,7 +200,7 @@ h1 .stroke-text{
 }
 .section-title em{color:var(--red);font-style:normal;}
 .section-sub{color:var(--gray);font-size:16px;font-weight:300;max-width:480px;line-height:1.7;}
- 
+
 .services-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:2px;margin-top:60px;
@@ -252,7 +248,7 @@ h1 .stroke-text{
   transition:background 0.3s,border-color 0.3s,color 0.3s,transform 0.3s;
 }
 .service-card:hover .sc-arrow{background:var(--red);border-color:var(--red);color:var(--white);transform:rotate(45deg);}
- 
+
 /* ── PROCESS ── */
 .process-section{background:var(--black2);padding:100px 60px;}
 .process-steps{
@@ -283,7 +279,7 @@ h1 .stroke-text{
 }
 .step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;}
 .step-desc{font-size:13px;color:var(--gray);line-height:1.6;font-weight:300;}
- 
+
 /* ── TECH STACK ── */
 .tech-section{padding:100px 60px;}
 .tech-grid{
@@ -300,7 +296,7 @@ h1 .stroke-text{
 .tech-item:hover{background:var(--black2);color:var(--white);}
 .tech-item:hover .tech-ico{filter:brightness(1.4) saturate(1.5);}
 .tech-ico{font-size:30px;transition:filter 0.2s;}
- 
+
 /* ── WHY US ── */
 .why-section{background:var(--black2);padding:100px 60px;}
 .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px;}
@@ -353,7 +349,7 @@ h1 .stroke-text{
 }
 .benefit-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;}
 .benefit-desc{font-size:13px;color:var(--gray);line-height:1.6;font-weight:300;}
- 
+
 /* ── CTA SECTION ── */
 .cta-section{
   padding:120px 60px;text-align:center;
@@ -366,7 +362,7 @@ h1 .stroke-text{
 .cta-section .section-title{font-size:clamp(36px,4vw,60px);position:relative;}
 .cta-section p{color:var(--gray);font-size:17px;max-width:500px;margin:16px auto 44px;position:relative;font-weight:300;line-height:1.7;}
 .cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
- 
+
 /* ── FOOTER ── */
 footer{
   background:var(--black3);border-top:1px solid var(--gray2);
@@ -383,13 +379,13 @@ footer{
   font-size:13px;color:var(--gray);
 }
 .footer-bottom span{color:var(--red);}
- 
+
 /* ── SCROLL ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s,transform 0.7s;}
 .reveal.visible{opacity:1;transform:translateY(0);}
- 
+
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
   .hero-chips{display:none;}
@@ -416,10 +412,7 @@ footer{
 </style>
 </head>
 <body>
- 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
- 
+
 <!-- NAV -->
 <nav id="navbar">
   <div class="nav-logo">Nex<span>Core</span> AI</div>
@@ -434,7 +427,7 @@ footer{
     <span></span><span></span><span></span>
   </div>
 </nav>
- 
+
 <!-- HERO -->
 <section class="hero" id="home">
   <div class="hero-bg"></div>
@@ -492,7 +485,7 @@ footer{
     </div>
   </div>
 </section>
- 
+
 <!-- MARQUEE -->
 <div class="marquee-wrap">
   <div class="marquee-inner" id="marquee">
@@ -514,7 +507,7 @@ footer{
     <span class="marquee-item"><span class="marquee-dot"></span>NLP & Chatbots</span>
   </div>
 </div>
- 
+
 <!-- SERVICES -->
 <section class="section" id="services">
   <div class="reveal">
@@ -597,7 +590,7 @@ footer{
     </div>
   </div>
 </section>
- 
+
 <!-- PROCESS -->
 <section class="process-section" id="process">
   <div class="reveal">
@@ -627,7 +620,7 @@ footer{
     </div>
   </div>
 </section>
- 
+
 <!-- TECH STACK -->
 <section class="tech-section" id="tech">
   <div class="reveal">
@@ -654,7 +647,7 @@ footer{
     <div class="tech-item"><div class="tech-ico">🔥</div>Firebase</div>
   </div>
 </section>
- 
+
 <!-- WHY US -->
 <section class="why-section" id="about">
   <div class="reveal">
@@ -705,7 +698,7 @@ footer{
     </div>
   </div>
 </section>
- 
+
 <!-- CTA -->
 <section class="cta-section" id="contact">
   <div class="reveal">
@@ -718,7 +711,7 @@ footer{
     </div>
   </div>
 </section>
- 
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand">
@@ -751,23 +744,12 @@ footer{
   <span>© 2026 <span>NexCore AI</span>. All rights reserved.</span>
   <span>Built with precision & passion 🔴</span>
 </div>
- 
+
 <script>
-// Cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursorRing');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
-(function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
-document.querySelectorAll('a,button,.service-card,.benefit-item').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.borderColor='rgba(232,25,60,0.8)';});
-  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(232,25,60,0.5)';});
-});
- 
 // Navbar scroll
 const navbar=document.getElementById('navbar');
 window.addEventListener('scroll',()=>{navbar.classList.toggle('scrolled',window.scrollY>60);});
- 
+
 // Scroll reveal
 const reveals=document.querySelectorAll('.reveal,.process-step');
 const io=new IntersectionObserver(entries=>{
@@ -778,7 +760,7 @@ const io=new IntersectionObserver(entries=>{
   });
 },{threshold:0.1});
 reveals.forEach(el=>io.observe(el));
- 
+
 // Hamburger (mobile)
 document.getElementById('hamburger').addEventListener('click',function(){
   const links=document.querySelector('.nav-links');
@@ -790,7 +772,7 @@ document.getElementById('hamburger').addEventListener('click',function(){
   links.style.padding='24px';links.style.borderRadius='12px';
   links.style.border='1px solid var(--gray2)';links.style.gap='20px';
 });
- 
+
 // Counter animation
 function animateNum(el,target,suffix){
   let start=0,duration=1800;
