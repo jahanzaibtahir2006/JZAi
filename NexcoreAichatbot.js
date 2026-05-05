@@ -105,7 +105,8 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     @keyframes ncBounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
     .nc-input-area { padding: 12px 14px; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
-    .nc-input { flex: 1; border-radius: 12px; padding: 10px 14px; font-size: 13.5px; outline: none; resize: none; max-height: 90px; min-height: 40px; font-family: inherit; transition: border-color 0.2s; line-height: 1.4; }
+    .nc-input { flex: 1; border-radius: 12px; padding: 10px 14px; font-size: 13.5px; outline: none; resize: none; max-height: 90px; min-height: 40px; font-family: inherit; transition: border-color 0.2s; line-height: 1.4; overflow-y: hidden; scrollbar-width: none; }
+    .nc-input::-webkit-scrollbar { display: none; }
     .nc-input:focus { border-color: #e63946 !important; }
     .nc-send { width: 40px; height: 40px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.15s; box-shadow: 0 2px 8px rgba(230,57,70,0.4); }
     .nc-send:hover { transform: scale(1.08); }
@@ -227,13 +228,11 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     if (isOpen) {
       win.style.display = "flex";
       setTimeout(() => win.classList.add("open"), 10);
-      document.body.style.overflow = "hidden";
       addWelcome(); inputEl.focus();
       btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
     } else {
       win.classList.remove("open");
       setTimeout(() => { win.style.display = "none"; }, 200);
-      document.body.style.overflow = "";
       btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.67 1.17 5.07 3.04 6.77L4 22l4.55-1.52C9.96 20.81 10.97 21 12 21c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13h-2v-2h2v2zm0-4h-2V7h2v4z"/></svg>`;
     }
   });
