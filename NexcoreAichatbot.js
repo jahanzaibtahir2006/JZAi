@@ -84,11 +84,12 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     .nc-close-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: #888; padding: 2px 6px; border-radius: 6px; transition: color 0.2s; }
     .nc-close-btn:hover { color: #e63946; }
 
-    .nc-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
-    .nc-messages::-webkit-scrollbar { width: 3px; }
-    .nc-messages::-webkit-scrollbar-track { background: transparent; }
-    .nc-messages::-webkit-scrollbar-thumb { background: #e63946; border-radius: 10px; }
+    .nc-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: #e63946 transparent; }
+    .nc-messages::-webkit-scrollbar { width: 3px; background: transparent; }
+    .nc-messages::-webkit-scrollbar-track { background: transparent; border: none; }
+    .nc-messages::-webkit-scrollbar-thumb { background: #e63946; border-radius: 10px; border: none; }
     .nc-messages::-webkit-scrollbar-thumb:hover { background: #c1121f; }
+    .nc-messages::-webkit-scrollbar-corner { background: transparent; }
 
     .nc-msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.55; word-wrap: break-word; animation: ncFadeIn 0.2s ease; }
     @keyframes ncFadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:translateY(0); } }
@@ -226,11 +227,13 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     if (isOpen) {
       win.style.display = "flex";
       setTimeout(() => win.classList.add("open"), 10);
+      document.body.style.overflow = "hidden";
       addWelcome(); inputEl.focus();
       btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
     } else {
       win.classList.remove("open");
       setTimeout(() => { win.style.display = "none"; }, 200);
+      document.body.style.overflow = "";
       btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.67 1.17 5.07 3.04 6.77L4 22l4.55-1.52C9.96 20.81 10.97 21 12 21c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13h-2v-2h2v2zm0-4h-2V7h2v4z"/></svg>`;
     }
   });
