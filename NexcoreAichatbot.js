@@ -253,12 +253,12 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 
     /* Bubble */
     #nxc-bubble {
-      position:fixed; bottom:100px; right:28px; z-index:9997;
+      position:fixed; bottom:34px; right:96px; z-index:9997;
       background:linear-gradient(135deg,#0f0f0f,#1a0508);
       border:1px solid rgba(225,29,72,0.3);
       border-radius:14px; padding:12px 16px;
       font-family:'DM Sans',sans-serif; font-size:13px; color:#f0f0f0;
-      max-width:200px; box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      max-width:210px; box-shadow:0 8px 32px rgba(0,0,0,0.5);
       display:flex; align-items:center; gap:10px;
       animation:nxc-bubble-in 0.4s ease;
       cursor:pointer;
@@ -279,8 +279,8 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 
     /* Chat Window */
     #nxc-chat {
-      position:fixed; bottom:100px; right:28px; z-index:9999;
-      width:380px; height:580px; border-radius:16px;
+      position:fixed; bottom:96px; right:28px; z-index:9999;
+      width:380px; max-height:calc(100vh - 110px); height:580px; border-radius:16px;
       background:#080808; border:1px solid rgba(225,29,72,0.2);
       box-shadow:0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(225,29,72,0.08);
       display:none; flex-direction:column; overflow:hidden;
@@ -482,9 +482,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     .nxc-footer-dot { width:3px; height:3px; border-radius:50%; background:#222; }
 
     @media(max-width:480px){
-      #nxc-chat { right:10px; bottom:90px; width:calc(100vw - 20px); }
-      #nxc-toggle { right:14px; bottom:14px; }
-      #nxc-bubble { right:10px; bottom:90px; max-width:180px; }
+      #nxc-chat { right:10px; bottom:76px; width:calc(100vw - 20px); max-height:calc(100vh - 90px); height:520px; border-radius:12px; }
+      #nxc-toggle { right:16px; bottom:16px; width:52px; height:52px; }
+      #nxc-bubble { bottom:78px; right:76px; max-width:190px; font-size:12px; padding:10px 13px; }
     }
   `;
   document.head.appendChild(style);
