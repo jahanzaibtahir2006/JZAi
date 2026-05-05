@@ -43,7 +43,7 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
 
     #nexcore-chat-window {
       position: fixed; bottom: 100px; right: 28px;
-      width: 370px; max-height: 560px; border-radius: 18px;
+      width: 370px; height: 520px; max-height: 80vh; border-radius: 18px;
       z-index: 99998; display: none; flex-direction: column; overflow: hidden;
       box-shadow: 0 12px 48px rgba(0,0,0,0.28);
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -72,7 +72,7 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     #nexcore-chat-window.light .nc-input::placeholder { color: #999; }
     #nexcore-chat-window.light .nc-send { background: linear-gradient(135deg,#e63946,#c1121f); }
 
-    .nc-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+    .nc-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .nc-header-logo {
       width: 34px; height: 34px; background: linear-gradient(135deg,#e63946,#c1121f);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -84,7 +84,7 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     .nc-close-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: #888; padding: 2px 6px; border-radius: 6px; transition: color 0.2s; }
     .nc-close-btn:hover { color: #e63946; }
 
-    .nc-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+    .nc-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
     .nc-messages::-webkit-scrollbar { width: 4px; }
     .nc-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 
@@ -101,7 +101,7 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     .nc-dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes ncBounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
-    .nc-input-area { padding: 12px 14px; display: flex; gap: 8px; align-items: flex-end; }
+    .nc-input-area { padding: 12px 14px; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
     .nc-input { flex: 1; border-radius: 12px; padding: 10px 14px; font-size: 13.5px; outline: none; resize: none; max-height: 90px; min-height: 40px; font-family: inherit; transition: border-color 0.2s; line-height: 1.4; }
     .nc-input:focus { border-color: #e63946 !important; }
     .nc-send { width: 40px; height: 40px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.15s; box-shadow: 0 2px 8px rgba(230,57,70,0.4); }
