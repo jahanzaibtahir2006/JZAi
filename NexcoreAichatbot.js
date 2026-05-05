@@ -10,7 +10,7 @@
   /* ══════════════════════════════════════════
      CONFIG — Vercel Backend URL
   ══════════════════════════════════════════ */
-  var BACKEND_URL = 'https://nexcore-chatbot-api.vercel.app/api/chat';
+  var BACKEND_URL = 'https://vercel.com/jahanzaib-tahirs-projects/nexcore-chatbot-api';
   var MODEL    = 'claude-sonnet-4-20250514';
   var MAX_TOK  = 1024;
 
