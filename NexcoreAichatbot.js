@@ -85,8 +85,10 @@ Also help with general AI, web dev, and tech questions. Keep answers short and h
     .nc-close-btn:hover { color: #e63946; }
 
     .nc-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
-    .nc-messages::-webkit-scrollbar { width: 4px; }
-    .nc-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    .nc-messages::-webkit-scrollbar { width: 3px; }
+    .nc-messages::-webkit-scrollbar-track { background: transparent; }
+    .nc-messages::-webkit-scrollbar-thumb { background: #e63946; border-radius: 10px; }
+    .nc-messages::-webkit-scrollbar-thumb:hover { background: #c1121f; }
 
     .nc-msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.55; word-wrap: break-word; animation: ncFadeIn 0.2s ease; }
     @keyframes ncFadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:translateY(0); } }
