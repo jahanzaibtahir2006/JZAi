@@ -1,6 +1,6 @@
 /**
- * NexCore AI Chatbot
- * Powered by Claude API (Anthropic)
+ * JZAI Chatbot
+ * Powered by OpenAI API
  * Theme: Dark Black & Red
  * Author: Jahanzaib Tahir
  */
@@ -8,10 +8,11 @@
   'use strict';
   // ✅ Cloudflare Worker URL
   var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';
+
   /* ══════════════════════════════════════════
-     NEXCORE AI SYSTEM PROMPT
+     JZAI SYSTEM PROMPT
   ══════════════════════════════════════════ */
- var SYSTEM_PROMPT = `You are the official AI Assistant for NexCore AI — a cutting-edge AI engineering and web development company based in Rawalpindi, Pakistan, founded by Jahanzaib Tahir.
+  var SYSTEM_PROMPT = `You are the official AI Assistant for JZAI — a cutting-edge AI engineering and web development company based in Rawalpindi, Pakistan, founded by Jahanzaib Tahir.
 
 NEVER show your internal reasoning or thinking process. Only return the final clean answer.
 NEVER say you are made by OpenAI, Anthropic, or any other company.
@@ -22,16 +23,17 @@ NEVER act as a general AI assistant.
 =================================================
 
 ## Who You Are:
-- Name: NexCore Assistant
-- Company: NexCore AI
+- Name: JZAI Assistant
+- Company: JZAI
+- Tagline: JZAI — Engineering Intelligence
 - Founder: Jahanzaib Tahir — Associate AI Engineer
-- Website: nexcoreai.com (coming soon)
+- Website: jzai.ai (coming soon)
 
 ## Behavior Rules:
 - If user introduces their name → acknowledge and use it in future responses
-- If user greets → respond EXACTLY: "Hey! 👋 I'm NexCore Assistant, your AI guide for NexCore AI. Ask me about our services, projects, or tech stack!"
-- If user asks your name → "I am NexCore Assistant, the official AI assistant for NexCore AI."
-- If user asks who made you → "I was built exclusively for NexCore AI by Jahanzaib Tahir."
+- If user greets → respond EXACTLY: "Hey! 👋 I'm JZAI Assistant, your AI guide for JZAI. Ask me about our services, projects, or tech stack!"
+- If user asks your name → "I am JZAI Assistant, the official AI assistant for JZAI."
+- If user asks who made you → "I was built exclusively for JZAI by Jahanzaib Tahir."
 - If user asks how you are → "Doing great! Ready to help you build something amazing. 🚀"
 - Be conversational, confident, and professional
 - Never repeat greetings after first message
@@ -39,12 +41,12 @@ NEVER act as a general AI assistant.
 
 ## STRICT TOPIC RULES — MANDATORY:
 - ONLY answer questions related to:
-  * NexCore AI company, services, projects, founder, tech stack, process, pricing
-  * AI, Machine Learning, Chatbots, Web Dev — only in context of NexCore AI
-  * How to hire or contact NexCore AI
+  * JZAI company, services, projects, founder, tech stack, process, pricing
+  * AI, Machine Learning, Chatbots, Web Dev — only in context of JZAI
+  * How to hire or contact JZAI
 - If question is UNRELATED → respond EXACTLY:
-  "I'm here to assist with NexCore AI related questions only. Feel free to ask about our services, projects, or how we can help your business! 🚀"
-- NEVER answer: general knowledge, cricket, cooking, politics, weather, math, jokes, history, geography, or anything outside NexCore AI's scope
+  "I'm here to assist with JZAI related questions only. Feel free to ask about our services, projects, or how we can help your business! 🚀"
+- NEVER answer: general knowledge, cricket, cooking, politics, weather, math, jokes, history, geography, or anything outside JZAI's scope
 - If medical/legal advice → "Please consult a qualified professional for that."
 
 =================================================
@@ -94,11 +96,11 @@ Brief explanation
 - NEVER use colons or semicolons mid-sentence
 
 =================================================
-# SECTION 4: NEXCORE AI KNOWLEDGE BASE
+# SECTION 4: JZAI KNOWLEDGE BASE
 =================================================
 
-## About NexCore AI:
-NexCore AI is a next-generation AI engineering and web development agency. We specialize in building intelligent systems, automation pipelines, and high-performance digital products for businesses worldwide.
+## About JZAI:
+JZAI is a next-generation AI engineering and web development agency. We specialize in building intelligent systems, automation pipelines, and high-performance digital products for businesses worldwide.
 
 **Founder:** Jahanzaib Tahir
 - Associate AI Engineer
@@ -137,9 +139,9 @@ Technologies: Figma, Adobe XD, Design Systems
 
 ## Our Projects:
 
-**NexCore AI Website** (In Progress)
+**JZAI Website** (In Progress)
 - Company portfolio website with dark/light theme toggle, animations, and chatbot integration
-- Tech Stack: HTML, CSS, JavaScript, Claude API
+- Tech Stack: HTML, CSS, JavaScript, OpenAI API
 
 ## Our Process:
 1. **Discovery** — Deep dive into your goals and requirements
@@ -147,13 +149,13 @@ Technologies: Figma, Adobe XD, Design Systems
 3. **Build & Iterate** — Agile development with continuous delivery
 4. **Launch & Scale** — Deployment, monitoring, and ongoing support
 
-## Why NexCore AI:
+## Why JZAI:
 - **Fast Delivery** — Agile sprints with quick turnaround
 - **Precision Engineering** — Every detail is optimized
 - **AI-First Approach** — We integrate intelligence into everything we build
 - **Affordable** — Startup-friendly pricing for quality work
 
-## Contact NexCore AI:
+## Contact JZAI:
 - Email: jahanzaibtahir2006@gmail.com
 - LinkedIn: linkedin.com/in/jahanzaibtahir
 - GitHub: github.com/jahanzaibtahir2006
@@ -172,11 +174,12 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 =================================================
 # END OF SYSTEM PROMPT
 =================================================`;
+
   /* ══════════════════════════════════════════
      HISTORY & SESSION
   ══════════════════════════════════════════ */
-  var HISTORY_KEY  = 'nexcore_chat_history';
-  var SESSION_KEY  = 'nexcore_session_id';
+  var HISTORY_KEY  = 'jzai_chat_history';
+  var SESSION_KEY  = 'jzai_session_id';
   var chatHistory  = [];
   var unreadCount  = 0;
 
@@ -191,7 +194,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   }
 
   var sessionId = sessionStorage.getItem(SESSION_KEY) || (function(){
-    var id = 'nxc_' + Math.random().toString(36).substr(2,10) + '_' + Date.now();
+    var id = 'jzai_' + Math.random().toString(36).substr(2,10) + '_' + Date.now();
     sessionStorage.setItem(SESSION_KEY, id);
     return id;
   })();
@@ -200,15 +203,15 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
      QUICK QUESTIONS
   ══════════════════════════════════════════ */
   var ALL_QUESTIONS = [
-    'What services does NexCore AI offer?',
-    'Who founded NexCore AI?',
+    'What services does JZAI offer?',
+    'Who founded JZAI?',
     'What AI technologies do you use?',
-    'How can I contact NexCore AI?',
+    'How can I contact JZAI?',
     'What is your web development process?',
     'Do you build custom AI models?',
-    'What tech stack does NexCore use?',
+    'What tech stack does JZAI use?',
     'Can you build a chatbot for my business?',
-    'What makes NexCore AI different?'
+    'What makes JZAI different?'
   ];
   function getRandomQuestions(n) {
     return ALL_QUESTIONS.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, n);
@@ -223,7 +226,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   ══════════════════════════════════════════ */
   var style = document.createElement('style');
   style.textContent = `
-    /* ── Toggle Button ── */
     #nxc-toggle {
       position:fixed; bottom:28px; right:28px; z-index:9998;
       width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
@@ -236,8 +238,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     #nxc-toggle:hover { transform:scale(1.1); box-shadow:0 8px 32px rgba(225,29,72,0.6); }
     #nxc-toggle.open { transform:rotate(90deg) scale(1.05); }
     @keyframes nxc-pop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
-
-    /* Badge */
     #nxc-badge {
       position:absolute; top:-4px; right:-4px;
       background:#e11d48; color:#fff; border-radius:50%;
@@ -246,8 +246,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       border:2px solid #080808;
     }
     #nxc-badge.show { display:flex; }
-
-    /* Bubble */
     #nxc-bubble {
       position:fixed; bottom:34px; right:96px; z-index:9997;
       background:linear-gradient(135deg,#0f0f0f,#1a0508);
@@ -256,8 +254,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       font-family:'DM Sans',sans-serif; font-size:13px; color:#f0f0f0;
       max-width:210px; box-shadow:0 8px 32px rgba(0,0,0,0.5);
       display:flex; align-items:center; gap:10px;
-      animation:nxc-bubble-in 0.4s ease;
-      cursor:pointer;
+      animation:nxc-bubble-in 0.4s ease; cursor:pointer;
     }
     @keyframes nxc-bubble-in { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
     #nxc-bubble.hide { animation:nxc-bubble-out 0.3s ease forwards; }
@@ -272,8 +269,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       display:flex; align-items:center; justify-content:center;
     }
     #nxc-bubble-close:hover { background:#e11d48; color:#fff; }
-
-    /* Chat Window */
     #nxc-chat {
       position:fixed; bottom:96px; right:28px; z-index:9999;
       width:380px; max-height:calc(100vh - 110px); height:580px; border-radius:16px;
@@ -285,8 +280,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     }
     #nxc-chat.open { display:flex; }
     @keyframes nxc-slide-in { from{opacity:0;transform:translateY(20px) scale(0.95);} to{opacity:1;transform:translateY(0) scale(1);} }
-
-    /* Header */
     .nxc-header {
       background:linear-gradient(135deg,#080808 0%,#150308 60%,#1f0510 100%);
       padding:16px 18px 0; flex-shrink:0; position:relative; overflow:hidden;
@@ -315,8 +308,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     }
     .nxc-status-dot { width:6px; height:6px; border-radius:50%; background:#e11d48; animation:nxc-blink 2.2s infinite; }
     .nxc-red-bar { height:3px; background:linear-gradient(90deg,transparent,#e11d48,#9f1239,transparent); margin-top:12px; }
-
-    /* History Banner */
     #nxc-hist-banner {
       background:linear-gradient(135deg,#100306,#150308);
       border-bottom:1px solid rgba(225,29,72,0.1);
@@ -334,14 +325,14 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     #nxc-hist-yes:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(225,29,72,0.3); }
     #nxc-hist-no { background:rgba(225,29,72,0.08); color:rgba(240,240,240,0.5); }
     #nxc-hist-no:hover { background:rgba(225,29,72,0.15); }
-
-    /* Messages */
     .nxc-messages {
-      flex:1; overflow-y:auto; padding:16px 14px;
+      flex:1; min-height:0; overflow-y:auto; padding:16px 14px;
       display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth;
+      scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
     }
-    .nxc-messages::-webkit-scrollbar { width:3px; }
-    .nxc-messages::-webkit-scrollbar-thumb { background:#e11d48; border-radius:2px; }
+    .nxc-messages::-webkit-scrollbar { width:3px; background:transparent; }
+    .nxc-messages::-webkit-scrollbar-track { background:transparent; }
+    .nxc-messages::-webkit-scrollbar-thumb { background:#e11d48; border-radius:10px; }
     .nxc-msg { display:flex; gap:8px; animation:nxc-msg-in 0.28s cubic-bezier(0.34,1.56,0.64,1); }
     @keyframes nxc-msg-in { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
     .nxc-msg.nxc-user { flex-direction:row-reverse; }
@@ -387,8 +378,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     }
     .nxc-copy-btn:hover { background:rgba(225,29,72,0.1); color:#e11d48; }
     .nxc-copy-btn.copied { color:#22c55e; }
-
-    /* Typing */
     .nxc-typing-wrap { display:flex; align-items:center; gap:8px; }
     .nxc-typing-dots { display:flex; align-items:center; gap:4px; padding:4px 2px; }
     .nxc-typing-dots span {
@@ -400,8 +389,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     @keyframes nxc-bounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-7px);} }
     .nxc-typing-status { font-size:11px; color:#555; font-style:italic; animation:nxc-sfade 1.8s ease-in-out infinite; }
     @keyframes nxc-sfade { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
-
-    /* Quick Replies */
     .nxc-quick-wrap {
       padding:8px 14px 10px; border-bottom:1px solid rgba(225,29,72,0.07);
       display:none; position:relative;
@@ -430,8 +417,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       background:linear-gradient(135deg,#9f1239,#e11d48); color:#fff;
       border-color:transparent; transform:rotate(180deg) scale(1.1);
     }
-
-    /* Hint Button */
     #nxc-hint-btn {
       display:flex; align-items:center; gap:5px;
       background:rgba(225,29,72,0.1); border:1.5px solid rgba(225,29,72,0.35);
@@ -442,11 +427,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     #nxc-hint-btn:hover { background:rgba(225,29,72,0.2); transform:translateY(-1px); }
     #nxc-hint-btn.open { background:rgba(225,29,72,0.2); border-color:rgba(225,29,72,0.7); }
     .nxc-hint-dot { width:6px; height:6px; border-radius:50%; background:#e11d48; flex-shrink:0; animation:nxc-blink 2.2s infinite; }
-
-    /* Input */
     .nxc-input-area {
-      padding:10px 14px 14px;
-      background:#0a0a0a; border-top:1px solid rgba(225,29,72,0.1); flex-shrink:0;
+      padding:10px 14px 14px; flex-shrink:0;
+      background:#0a0a0a; border-top:1px solid rgba(225,29,72,0.1);
     }
     .nxc-input-row {
       display:flex; align-items:flex-end; gap:8px;
@@ -461,7 +444,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       flex:1; border:none; background:transparent;
       font-family:'DM Sans',sans-serif; font-size:13.5px; color:#f0f0f0;
       resize:none; outline:none; max-height:88px; min-height:22px; line-height:1.5;
+      overflow-y:hidden; scrollbar-width:none;
     }
+    #nxc-input::-webkit-scrollbar { display:none; }
     #nxc-input::placeholder { color:#444; }
     #nxc-send {
       width:36px; height:36px; border-radius:9px;
@@ -476,7 +461,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     }
     .nxc-powered { font-size:10px; color:#333; letter-spacing:.3px; }
     .nxc-footer-dot { width:3px; height:3px; border-radius:50%; background:#222; }
-
     @media(max-width:480px){
       #nxc-chat { right:10px; bottom:76px; width:calc(100vw - 20px); max-height:calc(100vh - 90px); height:520px; border-radius:12px; }
       #nxc-toggle { right:16px; bottom:16px; width:52px; height:52px; }
@@ -488,31 +472,31 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   /* ══════════════════════════════════════════
      BUILD UI
   ══════════════════════════════════════════ */
-
-  // Bubble
   var bubble = document.createElement('div');
   bubble.id = 'nxc-bubble';
   bubble.innerHTML = `
     <button id="nxc-bubble-close">✕</button>
     <div class="nxc-bubble-dot"></div>
     <div style="line-height:1.3;">
-      💬 Ask NexCore AI<br>
+      💬 Ask JZAI<br>
       <span style="font-size:10px;color:rgba(240,240,240,0.5);">AI Engineering & Web Dev</span>
     </div>`;
   bubble.onclick = function(e){ if(e.target.id==='nxc-bubble-close') return; openChat(); hideBubble(); };
-  document.getElementById('nxc-bubble-close') && document.getElementById('nxc-bubble-close').addEventListener('click',function(e){e.stopPropagation();hideBubble();});
   document.body.appendChild(bubble);
-  setTimeout(hideBubble, 8000);
+  setTimeout(function(){ hideBubble(); }, 8000);
+  setTimeout(function(){
+    var bc = document.getElementById('nxc-bubble-close');
+    if(bc) bc.addEventListener('click',function(e){e.stopPropagation();hideBubble();});
+  }, 0);
 
   function hideBubble(){
     bubble.classList.add('hide');
     setTimeout(function(){ bubble.style.display='none'; }, 300);
   }
 
-  // Toggle Button
   var toggleBtn = document.createElement('button');
   toggleBtn.id = 'nxc-toggle';
-  toggleBtn.setAttribute('aria-label','Open NexCore AI chat');
+  toggleBtn.setAttribute('aria-label','Open JZAI chat');
   toggleBtn.innerHTML = `
     <div id="nxc-badge"></div>
     <svg class="nxc-chat-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -524,16 +508,15 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   document.body.appendChild(toggleBtn);
   var badge = document.getElementById('nxc-badge');
 
-  // Chat Window
   var win = document.createElement('div');
   win.id = 'nxc-chat';
   win.innerHTML = `
     <div class="nxc-header">
       <div class="nxc-header-top">
-        <div class="nxc-logo-wrap">NC</div>
+        <div class="nxc-logo-wrap">JZ</div>
         <div class="nxc-header-info">
-          <h3>NexCore Assistant</h3>
-          <div class="nxc-tagline">NexCore AI — Engineering Intelligence</div>
+          <h3>JZAI Assistant</h3>
+          <div class="nxc-tagline">JZAI — Engineering Intelligence</div>
         </div>
       </div>
       <div class="nxc-header-bottom">
@@ -551,7 +534,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     <div class="nxc-quick-wrap" id="nxc-quick"></div>
     <div class="nxc-input-area">
       <div class="nxc-input-row">
-        <textarea id="nxc-input" placeholder="Ask about NexCore AI services..." rows="1"></textarea>
+        <textarea id="nxc-input" placeholder="Ask about JZAI services..." rows="1"></textarea>
         <button id="nxc-send" aria-label="Send">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -559,9 +542,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
         </button>
       </div>
       <div class="nxc-footer-bar">
-        <span class="nxc-powered">Powered by Claude AI</span>
+        <span class="nxc-powered">Powered by OpenAI</span>
         <div class="nxc-footer-dot"></div>
-        <span class="nxc-powered">NexCore AI</span>
+        <span class="nxc-powered">JZAI</span>
       </div>
     </div>`;
   document.body.appendChild(win);
@@ -574,9 +557,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   var histBanner= document.getElementById('nxc-hist-banner');
   var isOpen=false, hintOpen=false;
 
-  /* ══════════════════════════════════════════
-     HISTORY BANNER
-  ══════════════════════════════════════════ */
   var saved = loadHistory();
   if (saved.length > 1) {
     histBanner.classList.add('show');
@@ -589,15 +569,12 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     document.getElementById('nxc-hist-no').addEventListener('click', function(){
       histBanner.classList.remove('show');
       clearHistory(); chatHistory = [];
-      addMsg('bot', "Hey! 👋 I'm **NexCore Assistant**, your AI guide for all things NexCore AI.\n\nAsk me about our services, tech stack, projects, or anything else!");
+      addMsg('bot', "Hey! 👋 I'm **JZAI Assistant**, your AI guide for JZAI.\n\nAsk me about our services, tech stack, projects, or anything else!");
     });
   } else {
-    addMsg('bot', "Hey! 👋 I'm **NexCore Assistant**, your AI guide for all things NexCore AI.\n\nAsk me about our services, tech stack, projects, or anything else!");
+    addMsg('bot', "Hey! 👋 I'm **JZAI Assistant**, your AI guide for JZAI.\n\nAsk me about our services, tech stack, projects, or anything else!");
   }
 
-  /* ══════════════════════════════════════════
-     QUICK PANEL
-  ══════════════════════════════════════════ */
   function loadQuickQuestions(){
     quickDiv.innerHTML = '';
     var qs = getRandomQuestions(4);
@@ -631,22 +608,15 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     if(input.value.trim().length > 0 && hintOpen) closeQuickPanel();
   });
 
-  /* ══════════════════════════════════════════
-     TOGGLE OPEN/CLOSE
-  ══════════════════════════════════════════ */
   function openChat(){
-    isOpen = true;
-    win.classList.add('open');
-    toggleBtn.classList.add('open');
+    isOpen = true; win.classList.add('open'); toggleBtn.classList.add('open');
     toggleBtn.querySelector('.nxc-chat-icon').style.display='none';
     toggleBtn.querySelector('.nxc-close-icon').style.display='block';
     unreadCount=0; badge.classList.remove('show');
     setTimeout(function(){ input.focus(); }, 300);
   }
   function closeChat(){
-    isOpen = false;
-    win.classList.remove('open');
-    toggleBtn.classList.remove('open');
+    isOpen = false; win.classList.remove('open'); toggleBtn.classList.remove('open');
     toggleBtn.querySelector('.nxc-chat-icon').style.display='block';
     toggleBtn.querySelector('.nxc-close-icon').style.display='none';
     closeQuickPanel();
@@ -663,9 +633,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   });
   sendBtn.addEventListener('click', sendMessage);
 
-  /* ══════════════════════════════════════════
-     SEND MESSAGE → CLAUDE API
-  ══════════════════════════════════════════ */
   async function sendMessage(){
     var text = input.value.trim();
     if(!text || sendBtn.disabled) return;
@@ -675,29 +642,23 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     var status = TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
     var tid = addTyping(status);
 
-    // Build messages array for Claude API
     var apiMessages = chatHistory
       .filter(function(m){ return m.role !== 'bot' || m.text !== chatHistory[0].text; })
       .map(function(m){
         return { role: m.role==='bot'?'assistant':'user', content: m.text };
       });
-    // Last message already added to chatHistory by addMsg — remove duplicates
-    // Just send last N messages for context
     var contextMessages = apiMessages.slice(-20);
 
     try {
-      // Calling Vercel backend — API key is safe on server
       var response = await fetch(BACKEND_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: contextMessages })
       });
-
       removeTyping(tid);
       if(!response.ok) throw new Error('API Error: ' + response.status);
       var data = await response.json();
       var reply = data.reply ? data.reply : "I'm having trouble connecting. Please try again!";
-
       addMsg('bot', reply);
       if(!isOpen){
         unreadCount++;
@@ -707,14 +668,11 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     } catch(err){
       removeTyping(tid);
       addMsg('bot', '⚠️ Connection issue. Please try again in a moment.');
-      console.error('NexCore Chatbot Error:', err);
+      console.error('JZAI Chatbot Error:', err);
     }
     sendBtn.disabled=false; input.focus();
   }
 
-  /* ══════════════════════════════════════════
-     FORMAT MESSAGE
-  ══════════════════════════════════════════ */
   function formatMessage(text){
     if(/<[a-z][\s\S]*>/i.test(text)){
       return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
@@ -731,9 +689,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     return html.join('');
   }
 
-  /* ══════════════════════════════════════════
-     COPY BUTTON
-  ══════════════════════════════════════════ */
   function makeCopyBtn(bubbleEl){
     var btn=document.createElement('button'); btn.className='nxc-copy-btn'; btn.title='Copy';
     btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
@@ -747,14 +702,11 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     return btn;
   }
 
-  /* ══════════════════════════════════════════
-     RENDER MESSAGE
-  ══════════════════════════════════════════ */
   function renderMsg(role, text, withCopy){
     var isBot = role==='bot';
     var wrap=document.createElement('div'); wrap.className='nxc-msg '+(isBot?'nxc-bot':'nxc-user');
     var av=document.createElement('div'); av.className='nxc-avatar';
-    av.textContent = isBot ? 'NC' : 'You';
+    av.textContent = isBot ? 'JZ' : 'You';
     var col=document.createElement('div'); col.className='nxc-msg-col';
     var bub=document.createElement('div'); bub.className='nxc-bubble-msg'; bub.innerHTML=formatMessage(text);
     var footer=document.createElement('div'); footer.className='nxc-msg-footer';
@@ -772,14 +724,11 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
   }
 
-  /* ══════════════════════════════════════════
-     TYPING INDICATOR
-  ══════════════════════════════════════════ */
   function addTyping(statusText){
     var id='nxc-typing-'+Date.now();
     var wrap=document.createElement('div'); wrap.className='nxc-msg nxc-bot'; wrap.id=id;
     wrap.innerHTML=`
-      <div class="nxc-avatar" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:800;color:#e11d48;background:rgba(225,29,72,0.1);border:1.5px solid rgba(225,29,72,0.25);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">NC</div>
+      <div class="nxc-avatar" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:800;color:#e11d48;background:rgba(225,29,72,0.1);border:1.5px solid rgba(225,29,72,0.25);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">JZ</div>
       <div class="nxc-bubble-msg" style="background:#111;border:1px solid rgba(225,29,72,0.12);border-radius:4px 14px 14px 14px;padding:10px 13px;">
         <div class="nxc-typing-wrap">
           <div class="nxc-typing-dots"><span></span><span></span><span></span></div>
