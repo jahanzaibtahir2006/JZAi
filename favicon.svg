@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Spicy+Rice&display=swap');
-    </style>
-  </defs>
-  <text y="87" font-size="75" font-family="'Spicy Rice', cursive" font-weight="900">
+  <text y="87" font-size="75" font-family="Palatino, serif" font-weight="900">
     <tspan fill="white">J</tspan><tspan fill="#E8001E">Z</tspan>
   </text>
 </svg>
