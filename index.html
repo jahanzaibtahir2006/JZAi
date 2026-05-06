@@ -552,6 +552,16 @@ footer{
 }
 .footer-bottom span{color:var(--red);}
 
+.launch-badge {
+  opacity: 0.8;
+  transition: opacity 0.2s, filter 0.2s;
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.light-mode .launch-badge {
+  filter: none;
+}
+
 /* ═══════════════════════════════════════
    ANIMATIONS & UTILS
 ═══════════════════════════════════════ */
@@ -920,7 +930,7 @@ footer{
   <a href="https://websitelaunches.com/site/jzai.store" target="_blank" rel="noopener">
     <img src="https://websitelaunches.com/badge/jzai.store.svg" 
          alt="Established online" width="180" height="40"
-         style="opacity:0.8;transition:opacity 0.2s;"
+         class="launch-badge"
          onmouseover="this.style.opacity=1" 
          onmouseout="this.style.opacity=0.8">
   </a>
