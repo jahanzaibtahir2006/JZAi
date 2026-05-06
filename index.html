@@ -554,14 +554,13 @@ footer{
 
 .launch-badge {
   opacity: 0.8;
-  transition: opacity 0.2s, filter 0.2s;
-  filter: invert(1) hue-rotate(180deg);
+  transition: opacity 0.2s, filter 0.3s;
+  filter: invert(1) hue-rotate(180deg); /* dark mode default */
 }
 
-body.light-mode .launch-badge {
-  filter: none;
+[data-theme="light"] .launch-badge {
+  filter: none; /* light mode mein normal */
 }
-
 /* ═══════════════════════════════════════
    ANIMATIONS & UTILS
 ═══════════════════════════════════════ */
