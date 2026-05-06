@@ -330,7 +330,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth;
       scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
     }
-        /* LIGHT THEME SYNC */
+/* LIGHT THEME SYNC */
     [data-theme="light"] #nxc-chat {
       background:#fafafa !important;
       border-color:rgba(208,16,46,0.15) !important;
@@ -347,6 +347,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       background:#ffffff !important;
       color:#0f0f14 !important;
       border-color:rgba(208,16,46,0.12) !important;
+    }
+    [data-theme="light"] #nxc-chat .nxc-bubble-msg img[src*="github"] {
+      filter:invert(1) !important;
     }
     [data-theme="light"] .nxc-input-area { background:#f0f0f5 !important; }
     [data-theme="light"] .nxc-input-row {
@@ -369,6 +372,14 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       background:linear-gradient(135deg,#f0f0f5,#e8e8f0) !important;
       color:#0f0f14 !important;
       border-color:rgba(208,16,46,0.2) !important;
+    }
+    [data-theme="light"] #nxc-hint-btn {
+      color:#0f0f14 !important;
+      background:rgba(208,16,46,0.08) !important;
+      border-color:rgba(208,16,46,0.3) !important;
+    }
+    [data-theme="light"] .nxc-hint-dot {
+      background:#d0102e !important;
     }
     .nxc-messages::-webkit-scrollbar { width:3px; background:transparent; }
     .nxc-messages::-webkit-scrollbar-track { background:transparent; }
