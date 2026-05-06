@@ -673,8 +673,9 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     sendBtn.disabled=false; input.focus();
   }
 
-  function formatMessage(text){
-   return text.replace(/\n/g,'<br>');
+function formatMessage(text){
+    if(/<[a-z][\s\S]*>/i.test(text)){
+      return text.replace(/\n/g,'<br>');
     }
     text = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
     var lines=text.split('\n'), html=[], inUL=false, inOL=false;
