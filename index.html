@@ -964,13 +964,25 @@ toggleBtn.addEventListener('click', () => {
 
 function applyTheme(theme, animate) {
   if (animate) {
-    html.style.transition = 'none'; // let CSS handle it
+    html.style.transition = 'none';
   }
   html.setAttribute('data-theme', theme);
   toggleEmoji.textContent = theme === 'dark' ? '🌙' : '☀️';
   toggleBtn.setAttribute('aria-label',
     theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
   );
+  updateFavicon(theme);
+}
+
+function updateFavicon(theme) {
+  const jColor = theme === 'light' ? '#050507' : 'white';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <text y="87" font-size="75" font-family="Palatino, serif" font-weight="900">
+      <tspan fill="${jColor}">J</tspan><tspan fill="#E8001E">Z</tspan>
+    </text>
+  </svg>`;
+  const favicon = document.querySelector("link[rel='icon']");
+  if (favicon) favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 
 /* ══════════════════════════════════════
