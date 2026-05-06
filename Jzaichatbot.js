@@ -330,6 +330,46 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
       display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth;
       scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
     }
+        /* LIGHT THEME SYNC */
+    [data-theme="light"] #nxc-chat {
+      background:#fafafa !important;
+      border-color:rgba(208,16,46,0.15) !important;
+    }
+    [data-theme="light"] .nxc-header {
+      background:linear-gradient(135deg,#f0f0f5 0%,#e8e8f0 60%,#dddde8 100%) !important;
+      border-bottom-color:rgba(208,16,46,0.1) !important;
+    }
+    [data-theme="light"] .nxc-header-info h3 { color:#0f0f14 !important; }
+    [data-theme="light"] .nxc-header-info .nxc-tagline { color:rgba(15,15,20,0.5) !important; }
+    [data-theme="light"] .nxc-status-pill { color:#0f0f14 !important; }
+    [data-theme="light"] .nxc-messages { background:#fafafa !important; }
+    [data-theme="light"] .nxc-msg.nxc-bot .nxc-bubble-msg {
+      background:#ffffff !important;
+      color:#0f0f14 !important;
+      border-color:rgba(208,16,46,0.12) !important;
+    }
+    [data-theme="light"] .nxc-input-area { background:#f0f0f5 !important; }
+    [data-theme="light"] .nxc-input-row {
+      background:#ffffff !important;
+      border-color:rgba(208,16,46,0.15) !important;
+    }
+    [data-theme="light"] #nxc-input { color:#0f0f14 !important; }
+    [data-theme="light"] #nxc-input::placeholder { color:#9a9aaa !important; }
+    [data-theme="light"] .nxc-msg-time { color:#9a9aaa !important; }
+    [data-theme="light"] .nxc-powered { color:#9a9aaa !important; }
+    [data-theme="light"] .nxc-quick-btn {
+      background:#ffffff !important;
+      color:#d0102e !important;
+    }
+    [data-theme="light"] #nxc-hist-banner {
+      background:linear-gradient(135deg,#f0f0f5,#e8e8f0) !important;
+    }
+    [data-theme="light"] .nxc-hist-text { color:#0f0f14 !important; }
+    [data-theme="light"] #nxc-bubble {
+      background:linear-gradient(135deg,#f0f0f5,#e8e8f0) !important;
+      color:#0f0f14 !important;
+      border-color:rgba(208,16,46,0.2) !important;
+    }
     .nxc-messages::-webkit-scrollbar { width:3px; background:transparent; }
     .nxc-messages::-webkit-scrollbar-track { background:transparent; }
     .nxc-messages::-webkit-scrollbar-thumb { background:#e11d48; border-radius:10px; }
@@ -738,5 +778,13 @@ function formatMessage(text){
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight; return id;
   }
   function removeTyping(id){ var el=document.getElementById(id); if(el) el.remove(); }
+
+  // Theme sync with website
+var themeObserver = new MutationObserver(function() {
+  var theme = document.documentElement.getAttribute('data-theme');
+});
+themeObserver.observe(document.documentElement, {
+  attributes: true, attributeFilter: ['data-theme']
+});
 
 })();
