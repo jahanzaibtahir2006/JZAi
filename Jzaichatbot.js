@@ -478,7 +478,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     <button id="nxc-bubble-close">✕</button>
     <div class="nxc-bubble-dot"></div>
     <div style="line-height:1.3;">
-      💬 Ask JZAI<br>
+      💬 Ask JZAI Assistant<br>
       <span style="font-size:10px;color:rgba(240,240,240,0.5);">AI Engineering & Web Dev</span>
     </div>`;
   bubble.onclick = function(e){ if(e.target.id==='nxc-bubble-close') return; openChat(); hideBubble(); };
