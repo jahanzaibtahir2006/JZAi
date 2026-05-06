@@ -1,4 +1,4 @@
-/**
+  /**
  * JZAI Chatbot
  * Powered by OpenAI API
  * Theme: Dark Black & Red
@@ -338,8 +338,6 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     [data-theme="light"] .nxc-header {
       background:linear-gradient(135deg,#f0f0f5 0%,#e8e8f0 60%,#dddde8 100%) !important;
       border-bottom-color:rgba(208,16,46,0.1) !important;
-      [data-theme="light"] #nxc-bubble div { color:#0f0f14 !important; }
-      [data-theme="light"] #nxc-bubble span { color:#5a5a6a !important; }
     }
     [data-theme="light"] .nxc-header-info h3 { color:#0f0f14 !important; }
     [data-theme="light"] .nxc-header-info .nxc-tagline { color:rgba(15,15,20,0.5) !important; }
@@ -353,6 +351,11 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
     [data-theme="light"] #nxc-chat .nxc-bubble-msg img[src*="github"] {
       filter:invert(1) !important;
     }
+    [data-theme="light"] .nxc-hist-text span { color:#5a5a6a !important; }
+    [data-theme="light"] #nxc-hist-no { background:rgba(208,16,46,0.1) !important; color:#0f0f14 !important; }
+    [data-theme="light"] #nxc-hint-btn { color:#0f0f14 !important; font-weight:500 !important; }
+    [data-theme="light"] #nxc-bubble div { color:#0f0f14 !important; }
+    [data-theme="light"] #nxc-bubble span { color:#5a5a6a !important; }
     [data-theme="light"] .nxc-input-area { background:#f0f0f5 !important; }
     [data-theme="light"] .nxc-input-row {
       background:#ffffff !important;
