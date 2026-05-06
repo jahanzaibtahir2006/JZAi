@@ -975,7 +975,7 @@ function applyTheme(theme, animate) {
 }
 
 function updateFavicon(theme) {
-  const jColor = theme === 'light' ? '#050507' : 'white';
+  const jColor = theme === 'dark' ? '#ffffff' : '#050507';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     <text y="87" font-size="75" font-family="Palatino, serif" font-weight="900">
       <tspan fill="${jColor}">J</tspan><tspan fill="#E8001E">Z</tspan>
@@ -984,7 +984,6 @@ function updateFavicon(theme) {
   const favicon = document.querySelector("link[rel='icon']");
   if (favicon) favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
-
 /* ══════════════════════════════════════
    NAVBAR SCROLL
 ══════════════════════════════════════ */
