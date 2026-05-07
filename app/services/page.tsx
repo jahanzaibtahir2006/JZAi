@@ -88,7 +88,7 @@ export default function ServicesPage() {
 
   // Sync theme across tabs
   useEffect(() => {
-    const handler = (e) => {
+    const handler = (e: StorageEvent) => {
       if (e.key === "theme") setTheme(e.newValue || "dark");
     };
     window.addEventListener("storage", handler);
