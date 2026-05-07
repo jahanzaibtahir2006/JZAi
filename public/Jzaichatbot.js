@@ -216,7 +216,68 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
   function getRandomQuestions(n) {
     return ALL_QUESTIONS.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, n);
   }
+/* ══════════════════════════════════════════
+   LEAD COLLECTION
+══════════════════════════════════════════ */
+var LEAD_URL = 'https://script.google.com/macros/s/AKfycbxZktVRggm11ipqZeFNJtO_p0jCAlLlzHq6rxm6WPKo0FMLE-BuC35Qk8lnOMdiQafW/exec';
+var leadData = {};
+var leadStep = null; // null = not collecting
 
+var LEAD_STEPS = ['name', 'email', 'service', 'budget', 'message'];
+var LEAD_PROMPTS = {
+  name:    "Great! Let's get you connected with Jahanzaib. 😊\n\nFirst, **what's your name?**",
+  email:   "Nice to meet you, {name}! 📧\n\n**What's your email address?**",
+  service: "Perfect! **Which service are you interested in?**\n\n- AI / Machine Learning\n- Web Development\n- AI Chatbot\n- Cloud / DevOps\n- Data Engineering\n- UI/UX Design",
+  budget:  "Got it! **What's your approximate budget?**\n\n- Under $500\n- $500 – $2,000\n- $2,000 – $5,000\n- $5,000+",
+  message: "Almost done! 🚀\n\n**Briefly describe your project or requirements:**"
+};
+var LEAD_TRIGGER_KEYWORDS = [
+  'hire', 'contact', 'get started', 'work with', 'project',
+  'quote', 'price', 'cost', 'discuss', 'consult', 'interested',
+  'build', 'create', 'develop', 'help me', 'need'
+];
+
+function isLeadTrigger(text) {
+  var lower = text.toLowerCase();
+  return LEAD_TRIGGER_KEYWORDS.some(function(k){ return lower.includes(k); });
+}
+
+function startLeadCollection() {
+  leadData = {}; leadStep = 0;
+  addMsg('bot', LEAD_PROMPTS['name']);
+}
+
+function handleLeadStep(userInput) {
+  var field = LEAD_STEPS[leadStep];
+  
+  // Email validation
+  if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
+    addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
+    return;
+  }
+  
+  leadData[field] = userInput;
+  var nextStep = leadStep + 1;
+  
+  if (nextStep >= LEAD_STEPS.length) {
+    leadStep = null;
+    addMsg('bot', "✅ **Thank you, " + leadData.name + "!**\n\nYour details have been sent to Jahanzaib. He'll reach out to you at **" + leadData.email + "** very soon! 🚀");
+    submitLead(leadData);
+  } else {
+    leadStep = nextStep;
+    var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+    prompt = prompt.replace('{name}', leadData.name || 'there');
+    addMsg('bot', prompt);
+  }
+}
+
+function submitLead(data) {
+  fetch(LEAD_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(function(e){ console.error('Lead submit error:', e); });
+}
   var TYPING_STATUSES = [
     'Thinking...', 'Processing your request...', 'Analyzing...', 'Generating response...', 'Almost ready...'
   ];
