@@ -219,7 +219,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 /* ══════════════════════════════════════════
    LEAD COLLECTION
 ══════════════════════════════════════════ */
-var LEAD_URL = 'https://script.google.com/macros/s/AKfycbxZktVRggm11ipqZeFNJtO_p0jCAlLlzHq6rxm6WPKo0FMLE-BuC35Qk8lnOMdiQafW/exec';
+var LEAD_URL = 'https://script.google.com/macros/s/AKfycbww4pz7wzAl_5uGaacDCFllNJpHU7upu9BaRd4rElA7-b59O1G1iyaHWZ12xISO1pBN/exec';
 var leadData = {};
 var leadStep = null; // null = not collecting
 
