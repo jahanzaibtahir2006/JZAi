@@ -233,35 +233,85 @@ var LEAD_PROMPTS = {
 };
 
 function startLeadCollection(service) {
-  leadData = {}; 
-  if(service) leadData.service = service; // pre-fill service
+  leadData = {};
+
+  // ✅ Service AI se already mili — pre-fill
+  if (service && service !== 'General') {
+    leadData.service = service;
+  }
+
+  // ✅ Chat history se name aur email dhundo
+  var detectedName = null;
+  var detectedEmail = null;
+  for (var i = 0; i < chatHistory.length; i++) {
+    var m = chatHistory[i];
+    if (m.role === 'user') {
+      // Email check
+      if (!detectedEmail && /\S+@\S+\.\S+/.test(m.text)) {
+        detectedEmail = m.text.trim();
+      }
+      // Name check — short, no special chars, not a question
+      if (!detectedName && m.text.length < 25 && m.text.split(' ').length <= 3 
+          && !m.text.includes('?') && !m.text.includes('@')
+          && !/\b(buy|want|need|hire|chatbot|service|website|help|interested)\b/i.test(m.text)) {
+        detectedName = m.text.trim();
+      }
+    }
+  }
+
+  if (detectedName) leadData.name = detectedName;
+  if (detectedEmail) leadData.email = detectedEmail;
+
+  // ✅ Pehla unknown step pe jump karo
   leadStep = 0;
-  addMsg('bot', LEAD_PROMPTS['name']);
+  while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
+    leadStep++;
+  }
+
+  // Sab pata hai — directly submit
+  if (leadStep >= LEAD_STEPS.length) {
+    addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you at **" + leadData.email + "** very soon! 🚀");
+    submitLead(leadData);
+    return;
+  }
+
+  // Pehla unknown step ka prompt
+  var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+  prompt = prompt.replace('{name}', leadData.name || 'there');
+  addMsg('bot', prompt);
 }
 
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
-  // ✅ Name validation — pehla step
+
+  // Name validation
   if (field === 'name') {
     var lower = userInput.toLowerCase();
-    if (userInput.split(' ').length > 3 || lower.includes('buy') || lower.includes('want') || lower.includes('need') || lower.includes('?') || lower.includes('chatbot') || lower.includes('service')) {
+    if (userInput.split(' ').length > 3 || lower.includes('buy') || lower.includes('want') 
+        || lower.includes('need') || lower.includes('?') || lower.includes('chatbot') 
+        || lower.includes('service')) {
       addMsg('bot', "I just need your name to get started 😊 What should I call you?");
       return;
     }
   }
-  
+
   // Email validation
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
     addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
     return;
   }
-  
+
   leadData[field] = userInput;
   var nextStep = leadStep + 1;
-  
+
+  // Skip already filled steps
+  while (nextStep < LEAD_STEPS.length && leadData[LEAD_STEPS[nextStep]]) {
+    nextStep++;
+  }
+
   if (nextStep >= LEAD_STEPS.length) {
     leadStep = null;
-    addMsg('bot', "✅ **Thank you, " + leadData.name + "!**\n\nYour details have been sent to Jahanzaib. He'll reach out to you at **" + leadData.email + "** very soon! 🚀");
+    addMsg('bot', "✅ **Thank you, " + (leadData.name || 'there') + "!**\n\nYour details have been sent to Jahanzaib. He'll reach out to you at **" + leadData.email + "** very soon! 🚀");
     submitLead(leadData);
   } else {
     leadStep = nextStep;
@@ -272,15 +322,15 @@ function handleLeadStep(userInput) {
 }
 
 function submitLead(data) {
-  var url = LEAD_URL;
-  fetch(url, {
+  fetch(LEAD_URL, {
     method: 'POST',
-    mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).catch(function(e){ console.error('Lead submit error:', e); });
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){ console.log('Lead saved:', result); })
+  .catch(function(e){ console.error('Lead submit error:', e); });
 }
-
   /* ══════════════════════════════════════════
      INJECT STYLES
   ══════════════════════════════════════════ */
