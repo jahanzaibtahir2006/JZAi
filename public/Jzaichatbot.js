@@ -232,8 +232,10 @@ var LEAD_PROMPTS = {
   message: "Almost done! 🚀\n\n**Briefly describe your project or requirements:**"
 };
 
-function startLeadCollection() {
-  leadData = {}; leadStep = 0;
+function startLeadCollection(service) {
+  leadData = {}; 
+  if(service) leadData.service = service; // pre-fill service
+  leadStep = 0;
   addMsg('bot', LEAD_PROMPTS['name']);
 }
 
