@@ -219,7 +219,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 /* ══════════════════════════════════════════
    LEAD COLLECTION
 ══════════════════════════════════════════ */
-var LEAD_URL = 'https://script.google.com/macros/s/AKfycbww4pz7wzAl_5uGaacDCFllNJpHU7upu9BaRd4rElA7-b59O1G1iyaHWZ12xISO1pBN/exec';
+var LEAD_URL = 'https://script.google.com/macros/s/AKfycbxZktVRggm11ipqZeFNJtO_p0jCAlLlzHq6rxm6WPKo0FMLE-BuC35Qk8lnOMdiQafW/exec';
 var leadData = {};
 var leadStep = null; // null = not collecting
 
@@ -755,6 +755,17 @@ function submitLead(data) {
     closeQuickPanel();
     addMsg('user', text);
     input.value=''; input.style.height='auto'; sendBtn.disabled=true;
+     // ✅ LEAD COLLECTION INTERCEPT
+  if (leadStep !== null) {
+    handleLeadStep(text);
+    sendBtn.disabled=false;
+    return;
+  }
+  if (isLeadTrigger(text)) {
+    startLeadCollection();
+    sendBtn.disabled=false;
+    return;
+  }
     var status = TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
     var tid = addTyping(status);
 
