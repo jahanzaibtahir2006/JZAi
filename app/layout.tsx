@@ -34,7 +34,10 @@ export default function RootLayout({
       </head>
       <body className={`${syne.variable} ${dmSans.variable}`}>
         {children}
-        <Script src="/Jzaichatbot.js" strategy="afterInteractive" />
+        <Script id="chatbot-config" strategy="afterInteractive">
+  {`var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';`}
+</Script>
+<Script src="/Jzaichatbot.js" strategy="afterInteractive" />
       </body>
     </html>
   )
