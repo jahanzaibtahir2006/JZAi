@@ -194,20 +194,18 @@ export default function ServicesPage() {
           max-width: 1200px; margin: 0 auto;
           position: relative;
         }
-        .hero-badge {
+        .hero-eyebrow {
           display: inline-flex; align-items: center; gap: 10px;
-          background: var(--red-glow); border: 1px solid rgba(225,29,72,0.3);
+          background: var(--red-glow); border: 1px solid rgba(225,29,72,0.25);
           border-radius: 40px; padding: 7px 18px;
-          font-size: 12px; font-weight: 600; color: var(--red);
-          letter-spacing: 1.5px; text-transform: uppercase;
-          margin-bottom: 32px;
+          font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
+          text-transform: uppercase; color: var(--red); margin-bottom: 32px;
+          opacity: 0; transform: translateY(20px);
           animation: fadeUp 0.8s ease 0.2s forwards;
-          opacity: 0;
         }
-        .hero-badge::before {
-          content:''; width:6px; height:6px; border-radius:50%;
-          background:var(--red); animation: blink 2s infinite;
-          flex-shrink: 0;
+        .hero-eyebrow::before {
+          content:''; width:6px; height:6px; background:var(--red);
+          border-radius:50%; animation: blink 2s infinite; flex-shrink:0;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .hero h1 {
@@ -450,7 +448,7 @@ export default function ServicesPage() {
 
       {/* HERO */}
       <section className="hero">
-        <div className="hero-badge">Our Services</div>
+        <div className="hero-eyebrow">Our Services</div>
         <h1>
           What We <em>Build</em>
           <br />& Engineer
