@@ -272,15 +272,14 @@ function handleLeadStep(userInput) {
 }
 
 function submitLead(data) {
-  fetch(LEAD_URL, {
+  var url = LEAD_URL;
+  fetch(url, {
     method: 'POST',
+    mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   }).catch(function(e){ console.error('Lead submit error:', e); });
 }
-  var TYPING_STATUSES = [
-    'Thinking...', 'Processing your request...', 'Analyzing...', 'Generating response...', 'Almost ready...'
-  ];
 
   /* ══════════════════════════════════════════
      INJECT STYLES
