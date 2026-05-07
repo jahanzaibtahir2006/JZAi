@@ -52,7 +52,7 @@ export default function ServicesPage() {
 
   return (
     <>
-      <Navbar activePage="services" />
+      <Navbar />
 
       {/* ── HERO ── */}
       <section className="hero" id="home">
