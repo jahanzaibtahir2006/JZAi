@@ -8,7 +8,7 @@
   'use strict';
   // ✅ Cloudflare Worker URL
   var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';
-
+  const TYPING_STATUSES = ['Typing...', 'Thinking...', 'Processing...'];
   /* ══════════════════════════════════════════
      JZAI SYSTEM PROMPT
   ══════════════════════════════════════════ */
