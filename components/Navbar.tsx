@@ -27,19 +27,19 @@ export default function Navbar() {
 
   return (
     <>
-      <nav id="navbar" className={scrolled ? 'scrolled' : ''}>
-        <Link href="/" className="nav-logo">JZ<span>AI</span></Link>
-        <div className="nav-links">
-          <Link href="/services">Services</Link>
-          <a href="#process">Process</a>
-          <a href="#tech">Tech Stack</a>
-          <a href="#about">About</a>
-          <a href="#contact" className="nav-cta">Get in Touch</a>
-        </div>
-        <div className="nav-right">
-          <ThemeToggle />
-          <button
-            className="hamburger"
+  <nav id="navbar" className={scrolled ? 'scrolled' : ''}>
+    <Link href="/" className="nav-logo">JZ<span>AI</span></Link>
+    <div className="nav-links">
+      <Link href="/services">Services</Link>
+      <a href="#process">Process</a>
+      <a href="#tech">Tech Stack</a>
+      <a href="#about">About</a>
+      <a href="#contact" className="nav-cta">Get in Touch</a>
+    </div>
+    <div className="nav-right">
+      <ThemeToggle />
+      <button
+        className="hamburger"
             id="hamburger"
             aria-label="Toggle mobile menu"
             onClick={() => setMobileOpen(v => !v)}
