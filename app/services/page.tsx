@@ -169,7 +169,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <footer>
+<footer>
         <Link href="/" className="footer-logo">JZ<span>AI</span></Link>
         <div className="footer-text">© 2026 JZAI. Engineering Intelligence.</div>
       </footer>
