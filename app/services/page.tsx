@@ -32,14 +32,6 @@ export default function ServicesPage() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === "theme") setTheme(e.newValue || "dark");
-    };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
-
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   return (
