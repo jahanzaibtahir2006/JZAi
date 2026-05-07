@@ -231,16 +231,6 @@ var LEAD_PROMPTS = {
   budget:  "Got it! **What's your approximate budget?**\n\n- Under $500\n- $500 – $2,000\n- $2,000 – $5,000\n- $5,000+",
   message: "Almost done! 🚀\n\n**Briefly describe your project or requirements:**"
 };
-var LEAD_TRIGGER_KEYWORDS = [
-  'hire', 'contact', 'get started', 'work with', 'project',
-  'quote', 'price', 'cost', 'discuss', 'consult', 'interested',
-  'build', 'create', 'develop', 'help me', 'need'
-];
-
-function isLeadTrigger(text) {
-  var lower = text.toLowerCase();
-  return LEAD_TRIGGER_KEYWORDS.some(function(k){ return lower.includes(k); });
-}
 
 function startLeadCollection() {
   leadData = {}; leadStep = 0;
@@ -754,20 +744,16 @@ function submitLead(data) {
     closeQuickPanel();
     addMsg('user', text);
     input.value=''; input.style.height='auto'; sendBtn.disabled=true;
-     // ✅ LEAD COLLECTION INTERCEPT
-  if (leadStep !== null) {
-    handleLeadStep(text);
-    sendBtn.disabled=false;
-    return;
-  }
-  if (isLeadTrigger(text)) {
-    startLeadCollection();
-    sendBtn.disabled=false;
-    return;
-  }
+
+    // ✅ LEAD COLLECTION INTERCEPT
+    if (leadStep !== null) {
+        handleLeadStep(text);
+        sendBtn.disabled=false;
+        return;
+    }
+
     var status = TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
     var tid = addTyping(status);
-
     var apiMessages = chatHistory
       .filter(function(m){ return m.role !== 'bot' || m.text !== chatHistory[0].text; })
       .map(function(m){
@@ -784,8 +770,22 @@ function submitLead(data) {
       removeTyping(tid);
       if(!response.ok) throw new Error('API Error: ' + response.status);
       var data = await response.json();
-      var reply = data.reply ? data.reply : "I'm having trouble connecting. Please try again!";
-      addMsg('bot', reply);
+var reply = data.reply ? data.reply.trim() : "I'm having trouble connecting. Please try again!";
+
+// AI lead intent detect kiya?
+if (reply.startsWith('{"action":"open_lead_form"')) {
+  try {
+    var parsed = JSON.parse(reply);
+    startLeadCollection(parsed.service);
+  } catch(e) {
+    startLeadCollection('General');
+  }
+  sendBtn.disabled=false;
+  input.focus();
+  return;
+}
+
+addMsg('bot', reply);
       if(!isOpen){
         unreadCount++;
         badge.textContent = unreadCount>9?'9+':String(unreadCount);
