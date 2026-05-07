@@ -195,16 +195,19 @@ export default function ServicesPage() {
           position: relative;
         }
         .hero-badge {
-          display: inline-flex; align-items: center; gap: 8px;
+          display: inline-flex; align-items: center; gap: 10px;
           background: var(--red-glow); border: 1px solid rgba(225,29,72,0.3);
-          border-radius: 20px; padding: 6px 16px;
+          border-radius: 40px; padding: 7px 18px;
           font-size: 12px; font-weight: 600; color: var(--red);
-          letter-spacing: 0.5px; margin-bottom: 28px;
-          animation: fadeUp 0.6s ease both;
+          letter-spacing: 1.5px; text-transform: uppercase;
+          margin-bottom: 32px;
+          animation: fadeUp 0.8s ease 0.2s forwards;
+          opacity: 0;
         }
         .hero-badge::before {
           content:''; width:6px; height:6px; border-radius:50%;
           background:var(--red); animation: blink 2s infinite;
+          flex-shrink: 0;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .hero h1 {
