@@ -241,6 +241,14 @@ function startLeadCollection(service) {
 
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
+  // ✅ Name validation — pehla step
+  if (field === 'name') {
+    var lower = userInput.toLowerCase();
+    if (userInput.split(' ').length > 3 || lower.includes('buy') || lower.includes('want') || lower.includes('need') || lower.includes('?') || lower.includes('chatbot') || lower.includes('service')) {
+      addMsg('bot', "I just need your name to get started 😊 What should I call you?");
+      return;
+    }
+  }
   
   // Email validation
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
