@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services — JZAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --red: #e11d48;
+      --red-dark: #9f1239;
+      --red-glow: rgba(225,29,72,0.15);
+      --bg: #060606;
+      --bg2: #0d0d0d;
+      --bg3: #111;
+      --border: rgba(225,29,72,0.12);
+      --text: #f0f0f0;
+      --text-muted: rgba(240,240,240,0.45);
+      --card-bg: #0f0f0f;
+      --nav-bg: rgba(6,6,6,0.92);
+    }
+    [data-theme="light"] {
+      --bg: #f8f8f8;
+      --bg2: #ffffff;
+      --bg3: #f0f0f0;
+      --border: rgba(225,29,72,0.15);
+      --text: #0a0a0a;
+      --text-muted: rgba(10,10,10,0.5);
+      --card-bg: #ffffff;
+      --nav-bg: rgba(248,248,248,0.92);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      transition: background 0.3s;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 800;
+      color: var(--text); text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a {
+      font-size: 13.5px; font-weight: 500;
+      color: var(--text-muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--red); }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--bg3); border: 1px solid var(--border);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.2s; color: var(--text);
+    }
+    .theme-btn:hover { border-color: var(--red); transform: scale(1.08); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--red-dark), var(--red));
+      color: #fff; border: none; border-radius: 8px;
+      padding: 9px 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(225,29,72,0.35); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 140px 40px 80px;
+      max-width: 1200px; margin: 0 auto;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--red-glow); border: 1px solid rgba(225,29,72,0.3);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 12px; font-weight: 600; color: var(--red);
+      letter-spacing: 0.5px; margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--red); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 6vw, 76px);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -2px; margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 em { font-style: normal; color: var(--red); }
+    .hero p {
+      font-size: 17px; color: var(--text-muted); max-width: 560px;
+      line-height: 1.7; margin-bottom: 40px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── RED LINE ── */
+    .red-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 0 40px 70px;
+      opacity: 0.4;
+    }
+
+    /* ── SERVICES GRID ── */
+    .services-section {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 40px 100px;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      color: var(--red); text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800; letter-spacing: -1.5px;
+      margin-bottom: 60px; line-height: 1.1;
+    }
+    .section-title em { font-style: normal; color: var(--red); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .service-card {
+      background: var(--card-bg);
+      padding: 36px 32px;
+      position: relative;
+      transition: background 0.3s;
+      cursor: default;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(225,29,72,0.04), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .service-card:hover::before { opacity: 1; }
+    .service-card:hover { background: var(--bg3); }
+
+    .service-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px; font-weight: 700;
+      color: var(--red); letter-spacing: 2px;
+      margin-bottom: 16px; opacity: 0.7;
+    }
+    .service-icon {
+      font-size: 32px; margin-bottom: 16px;
+      display: block;
+    }
+    .service-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px; font-weight: 700;
+      margin-bottom: 12px; letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    .service-desc {
+      font-size: 13.5px; line-height: 1.65;
+      color: var(--text-muted); margin-bottom: 20px;
+    }
+    .service-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+    .tag {
+      font-size: 11px; font-weight: 600;
+      background: var(--red-glow); border: 1px solid rgba(225,29,72,0.2);
+      color: var(--red); border-radius: 6px;
+      padding: 3px 10px; letter-spacing: 0.2px;
+    }
+    .service-arrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--red);
+      text-decoration: none; opacity: 0.7;
+      transition: opacity 0.2s, gap 0.2s;
+    }
+    .service-card:hover .service-arrow { opacity: 1; gap: 10px; }
+
+    /* ── PROCESS ── */
+    .process-section {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 40px;
+      margin-bottom: 80px;
+    }
+    .process-inner { max-width: 1200px; margin: 0 auto; }
+    .process-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+      margin-top: 50px;
+    }
+    .process-step {
+      padding: 32px 28px;
+      position: relative;
+    }
+    .process-step::after {
+      content: '→';
+      position: absolute; right: -8px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--red); opacity: 0.3; font-size: 20px;
+    }
+    .process-step:last-child::after { display: none; }
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px; font-weight: 800;
+      color: var(--red); opacity: 0.12;
+      line-height: 1; margin-bottom: 12px;
+    }
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 700;
+      margin-bottom: 10px; color: var(--text);
+    }
+    .step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 40px 100px;
+      text-align: center;
+    }
+    .cta-box {
+      background: linear-gradient(135deg, #0d0205, #150308, #0d0205);
+      border: 1px solid rgba(225,29,72,0.2);
+      border-radius: 20px; padding: 70px 40px;
+      position: relative; overflow: hidden;
+    }
+    [data-theme="light"] .cta-box {
+      background: linear-gradient(135deg, #fff0f2, #fff5f7, #fff0f2);
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 300px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(225,29,72,0.1), transparent 70%);
+    }
+    .cta-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 48px); font-weight: 800;
+      letter-spacing: -1.5px; margin-bottom: 16px;
+      position: relative;
+    }
+    .cta-box h2 em { font-style: normal; color: var(--red); }
+    .cta-box p {
+      font-size: 16px; color: var(--text-muted);
+      margin-bottom: 36px; position: relative;
+    }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red-dark), var(--red));
+      color: #fff; border: none; border-radius: 10px;
+      padding: 14px 32px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(225,29,72,0.35); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 14px 32px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-secondary:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 30px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 100%; background: var(--bg2);
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+      color: var(--text); text-decoration: none;
+    }
+    .footer-logo span { color: var(--red); }
+    .footer-text { font-size: 12px; color: var(--text-muted); }
+
+    /* ── MOBILE ── */
+    @media(max-width: 900px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .process-grid { grid-template-columns: repeat(2, 1fr); }
+      .process-step::after { display: none; }
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero, .services-section, .cta-section { padding-left: 20px; padding-right: 20px; }
+      .red-line { margin: 0 20px 50px; }
+    }
+    @media(max-width: 600px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .process-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 110px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">JZ<span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/services.html" class="active">Services</a>
+      <a href="/#process">Process</a>
+      <a href="/#tech">Tech Stack</a>
+      <a href="/#about">About</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+      <a href="/#contact" class="nav-cta">Get in Touch</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Our Services</div>
+    <h1>What We <em>Build</em><br>& Engineer</h1>
+    <p>From intelligent AI systems to high-performance web platforms — every solution is engineered with precision, built to scale, and designed to deliver real results.</p>
+  </section>
+
+  <div class="red-line"></div>
+
+  <!-- SERVICES -->
+  <section class="services-section">
+    <div class="section-label">Core Services</div>
+    <div class="section-title">Everything You Need to<br><em>Dominate Digitally</em></div>
+
+    <div class="services-grid">
+
+      <div class="service-card">
+        <div class="service-num">01</div>
+        <span class="service-icon">🧠</span>
+        <div class="service-name">AI & Machine Learning</div>
+        <div class="service-desc">Custom AI models, LLM integrations, computer vision, and intelligent automation pipelines built for production at scale.</div>
+        <div class="service-tags">
+          <span class="tag">LLMs</span>
+          <span class="tag">PyTorch</span>
+          <span class="tag">TensorFlow</span>
+          <span class="tag">Computer Vision</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-num">02</div>
+        <span class="service-icon">🌐</span>
+        <div class="service-name">Web Development</div>
+        <div class="service-desc">High-performance web applications using modern stacks — from landing pages to complex SaaS platforms that scale effortlessly.</div>
+        <div class="service-tags">
+          <span class="tag">React</span>
+          <span class="tag">Next.js</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">Tailwind</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-num">03</div>
+        <span class="service-icon">☁️</span>
+        <div class="service-name">Cloud & DevOps</div>
+        <div class="service-desc">Resilient cloud infrastructure, CI/CD pipelines, containerization, and microservices architecture for enterprise-grade reliability.</div>
+        <div class="service-tags">
+          <span class="tag">AWS</span>
+          <span class="tag">Docker</span>
+          <span class="tag">Kubernetes</span>
+          <span class="tag">GitHub Actions</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-num">04</div>
+        <span class="service-icon">💬</span>
+        <div class="service-name">AI Chatbots & NLP</div>
+        <div class="service-desc">Intelligent conversational agents, RAG systems, and NLP solutions that understand context and deliver human-like interactions.</div>
+        <div class="service-tags">
+          <span class="tag">Claude API</span>
+          <span class="tag">OpenAI</span>
+          <span class="tag">RAG</span>
+          <span class="tag">LangChain</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-num">05</div>
+        <span class="service-icon">📊</span>
+        <div class="service-name">Data Engineering</div>
+        <div class="service-desc">End-to-end data pipelines, real-time analytics dashboards, and data warehousing solutions that turn raw data into competitive advantage.</div>
+        <div class="service-tags">
+          <span class="tag">Python</span>
+          <span class="tag">Spark</span>
+          <span class="tag">SQL</span>
+          <span class="tag">Tableau</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-num">06</div>
+        <span class="service-icon">🎨</span>
+        <div class="service-name">UI/UX Design</div>
+        <div class="service-desc">User-centric design systems, interactive prototypes, and brand identities that captivate users and drive conversion.</div>
+        <div class="service-tags">
+          <span class="tag">Figma</span>
+          <span class="tag">Framer</span>
+          <span class="tag">Design Systems</span>
+          <span class="tag">Adobe XD</span>
+        </div>
+        <a href="/#contact" class="service-arrow">Start a Project →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process-section">
+    <div class="process-inner">
+      <div class="section-label">How We Work</div>
+      <div class="section-title">Our <em>Process</em></div>
+      <div class="process-grid">
+        <div class="process-step">
+          <div class="step-num">01</div>
+          <div class="step-title">Discovery</div>
+          <div class="step-desc">Deep dive into your goals, challenges, and technical requirements to craft the perfect strategy.</div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">02</div>
+          <div class="step-title">Architecture</div>
+          <div class="step-desc">Design scalable system architecture, tech stack selection, and detailed project roadmap.</div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">03</div>
+          <div class="step-title">Build & Iterate</div>
+          <div class="step-desc">Agile development sprints with continuous delivery, testing, and feedback loops.</div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">04</div>
+          <div class="step-title">Launch & Scale</div>
+          <div class="step-desc">Seamless deployment, monitoring, performance optimization, and ongoing support.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <h2>Ready to Build Something <em>Extraordinary?</em></h2>
+      <p>Have a project in mind? Let's turn your vision into a high-performing AI-powered reality.</p>
+      <div class="cta-btns">
+        <a href="mailto:jahanzaibtahir2006@gmail.com" class="btn-primary">Start a Project →</a>
+        <a href="/" class="btn-secondary">Back to Home</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="/" class="footer-logo">JZ<span>AI</span></a>
+    <div class="footer-text">© 2026 JZAI. Engineering Intelligence.</div>
+  </footer>
+
+  <script>
+    // ── Theme sync with main website ──
+    const html = document.documentElement;
+    const toggleBtn = document.getElementById('theme-toggle');
+
+    // Read saved theme from localStorage (same key as main site)
+    function getTheme() {
+      return localStorage.getItem('theme') || 'dark';
+    }
+    function applyTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+
+    // Init
+    applyTheme(getTheme());
+
+    // Toggle
+    toggleBtn.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // Sync across tabs (if user switches on main site)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'theme') applyTheme(e.newValue || 'dark');
+    });
+  </script>
+
+</body>
+</html>
