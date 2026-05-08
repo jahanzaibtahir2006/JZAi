@@ -1064,15 +1064,14 @@ function formatMessage(text){
   
   // Buttons container
   var btnWrap = document.createElement('div'); 
-  btnWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:10px;';
-  
+  btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
   buttons.forEach(function(btn) {
     var b = document.createElement('button');
     b.textContent = btn;
     b.style.cssText = `
   background: rgba(225,29,72,0.08);
   border: 1.5px solid rgba(225,29,72,0.25);
-  color: inherit;
+  color: #e11d48;
   padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
@@ -1083,24 +1082,38 @@ function formatMessage(text){
   white-space: nowrap;
   letter-spacing: 0.2px;
 `;
-b.onmouseover = function(){ 
-  b.style.background='rgba(225,29,72,0.2)'; 
-  b.style.borderColor='#e11d48';
-  b.style.transform='translateY(-1px)';
-};
-b.onmouseout = function(){ 
-  b.style.background='rgba(225,29,72,0.08)'; 
-  b.style.borderColor='rgba(225,29,72,0.25)';
-  b.style.transform='translateY(0)';
-};
+    b.onmouseover = function() {
+      if (!b.dataset.selected) {
+        b.style.background = 'rgba(225,29,72,0.15)';
+        b.style.borderColor = '#e11d48';
+        b.style.transform = 'translateY(-1px)';
+      }
+    };
+    b.onmouseout = function() {
+      if (!b.dataset.selected) {
+        b.style.background = 'rgba(225,29,72,0.08)';
+        b.style.borderColor = 'rgba(225,29,72,0.25)';
+        b.style.transform = 'translateY(0)';
+      }
+    };
     b.onclick = function() {
-      // Buttons disable karo
-      btnWrap.querySelectorAll('button').forEach(function(x){ x.disabled=true; x.style.opacity='0.5'; });
+      b.dataset.selected = 'true';
+      b.style.background = '#e11d48';
+      b.style.borderColor = '#e11d48';
+      b.style.color = '#fff';
+      b.style.transform = 'scale(0.97)';
+      btnWrap.querySelectorAll('button').forEach(function(x) {
+        if (x !== b) {
+          x.style.opacity = '0.4';
+          x.style.cursor = 'default';
+          x.style.pointerEvents = 'none';
+        }
+      });
       onSelect(btn);
     };
     btnWrap.appendChild(b);
   });
-
+    
   var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
   var time = document.createElement('div'); time.className = 'nxc-msg-time';
   time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
