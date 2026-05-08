@@ -240,42 +240,49 @@ function startLeadCollection(service) {
     leadData.service = service;
   }
 
-  // ✅ Chat history se name aur email dhundo
-  var detectedName = null;
-  var detectedEmail = null;
+  function capitalizeName(name) {
+  return name.trim().split(' ')
+    .filter(Boolean)
+    .map(function(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
+function startLeadCollection(service) {
+  leadData = {};
+
+  // Service AI se mili
+  if (service && service !== 'General') {
+    leadData.service = service;
+  }
+
+  // Sirf "my name is X" pattern check karo
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
-      // Email check
-      if (!detectedEmail && /\S+@\S+\.\S+/.test(m.text)) {
-        detectedEmail = m.text.trim();
+      var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i);
+      if (nameMatch && !leadData.name) {
+        leadData.name = capitalizeName(nameMatch[1]);
       }
-      // Name check — short, no special chars, not a question
-      if (!detectedName && m.text.length < 25 && m.text.split(' ').length <= 3 
-          && !m.text.includes('?') && !m.text.includes('@')
-          && !/\b(buy|want|need|hire|chatbot|service|website|help|interested)\b/i.test(m.text)) {
-        detectedName = m.text.trim();
+      if (!leadData.email && /\S+@\S+\.\S+/.test(m.text)) {
+        leadData.email = m.text.trim();
       }
     }
   }
 
-  if (detectedName) leadData.name = detectedName;
-  if (detectedEmail) leadData.email = detectedEmail;
-
-  // ✅ Pehla unknown step pe jump karo
+  // Pehle unknown step pe jump karo
   leadStep = 0;
   while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
     leadStep++;
   }
 
-  // Sab pata hai — directly submit
   if (leadStep >= LEAD_STEPS.length) {
     addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you at **" + leadData.email + "** very soon! 🚀");
     submitLead(leadData);
     return;
   }
 
-  // Pehla unknown step ka prompt
   var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
   prompt = prompt.replace('{name}', leadData.name || 'there');
   addMsg('bot', prompt);
@@ -284,34 +291,27 @@ function startLeadCollection(service) {
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
 
-  // Name validation
-  if (field === 'name') {
-    var lower = userInput.toLowerCase();
-    if (userInput.split(' ').length > 3 || lower.includes('buy') || lower.includes('want') 
-        || lower.includes('need') || lower.includes('?') || lower.includes('chatbot') 
-        || lower.includes('service')) {
-      addMsg('bot', "I just need your name to get started 😊 What should I call you?");
-      return;
-    }
-  }
-
   // Email validation
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
     addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
     return;
   }
 
-  leadData[field] = userInput;
-  var nextStep = leadStep + 1;
+  // Name capitalize — no validation
+  if (field === 'name') {
+    leadData[field] = capitalizeName(userInput);
+  } else {
+    leadData[field] = userInput;
+  }
 
-  // Skip already filled steps
+  var nextStep = leadStep + 1;
   while (nextStep < LEAD_STEPS.length && leadData[LEAD_STEPS[nextStep]]) {
     nextStep++;
   }
 
   if (nextStep >= LEAD_STEPS.length) {
     leadStep = null;
-    addMsg('bot', "✅ **Thank you, " + (leadData.name || 'there') + "!**\n\nYour details have been sent to Jahanzaib. He'll reach out to you at **" + leadData.email + "** very soon! 🚀");
+    addMsg('bot', "✅ **Thank you, " + leadData.name + "!**\n\nYour details have been sent to Jahanzaib. He'll reach out to you at **" + leadData.email + "** very soon! 🚀");
     submitLead(leadData);
   } else {
     leadStep = nextStep;
@@ -320,7 +320,6 @@ function handleLeadStep(userInput) {
     addMsg('bot', prompt);
   }
 }
-
 function submitLead(data) {
   fetch(LEAD_URL, {
     method: 'POST',
