@@ -259,9 +259,9 @@ function capitalizeName(name) {
 }
 
 function isUserCancelling(text) {
-  var lower = text.toLowerCase();
+  var lower = text.toLowerCase().trim();
   var negativePatterns = [
-    /\b(no|nahi|nope|nai)\b/,
+    /^(no|nahi|nope|nai)$/,          // exact match only — "no" alone
     /don'?t\s+want/,
     /not\s+(interested|comfortable|sure)/,
     /why\s+(should|do|am|i)/,
@@ -276,10 +276,20 @@ function isUserCancelling(text) {
 function showBudgetButtons() {
   addBotButtons("Got it! **What's your approximate budget?**", BUDGET_BUTTONS, function(selected) {
     addMsg('user', selected);
-    (selected);
+    leadData.budget = selected;
+    leadStep++;
+    // Next step check karo
+    if (leadStep >= LEAD_STEPS.length) {
+      submitLead(leadData);
+      return;
+    }
+    var nextField = LEAD_STEPS[leadStep];
+    var prompt = LEAD_PROMPTS[nextField];
+    prompt = prompt.replace('{name}', leadData.name || 'there');
+    addMsg('bot', prompt);
   });
 }
-
+  
 function startLeadCollection(service, budget) {
   leadData = {};
 
@@ -352,12 +362,45 @@ function handleLeadStep(userInput) {
     return;
   }
 
-  // Email validation
-  if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
-    addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
+  // Name step — sirf short simple input accept karo
+  if (field === 'name') {
+    // Agar sentence lagta hai (4+ words) toh name nahi hai
+    var words = userInput.trim().split(/\s+/);
+    if (words.length > 3) {
+      addMsg('bot', "😊 Please enter just your name:");
+      return;
+    }
+    // Agar "my name is X" pattern hai toh extract karo
+    var nameMatch = userInput.match(/my name is ([a-zA-Z\s]{2,20})/i)
+                 || userInput.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i);
+    if (nameMatch) {
+      leadData.name = capitalizeName(nameMatch[1].trim());
+    } else {
+      leadData.name = capitalizeName(userInput.trim());
+    }
+    leadStep++;
+    var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+    prompt = prompt.replace('{name}', leadData.name);
+    addMsg('bot', prompt);
     return;
   }
 
+  // Email validation
+  if (field === 'email') {
+    // Email step par cancel bhi check karo — sentence hai toh cancel treat karo
+    var words = userInput.trim().split(/\s+/);
+    if (words.length > 2 && !/\S+@\S+\.\S+/.test(userInput)) {
+      leadStep = null;
+      leadData = {};
+      addMsg('bot', "No problem! Feel free to ask me anything about JZAI. 😊");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(userInput)) {
+      addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
+      return;
+    }
+  }
+  
   // ✅ Budget handling
   if (field === 'budget') {
     var budgetLower = userInput.toLowerCase();
