@@ -957,9 +957,30 @@ function formatMessage(text){
   buttons.forEach(function(btn) {
     var b = document.createElement('button');
     b.textContent = btn;
-    b.style.cssText = 'background:transparent;border:1px solid rgba(225,29,72,0.4);color:inherit;padding:7px 12px;border-radius:8px;cursor:pointer;text-align:left;font-size:13px;transition:all 0.2s;';
-    b.onmouseover = function(){ b.style.background='rgba(225,29,72,0.1)'; b.style.borderColor='#e11d48'; };
-    b.onmouseout = function(){ b.style.background='transparent'; b.style.borderColor='rgba(225,29,72,0.4)'; };
+    b.style.cssText = `
+  background: rgba(225,29,72,0.08);
+  border: 1.5px solid rgba(225,29,72,0.25);
+  color: inherit;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+`;
+b.onmouseover = function(){ 
+  b.style.background='rgba(225,29,72,0.2)'; 
+  b.style.borderColor='#e11d48';
+  b.style.transform='translateY(-1px)';
+};
+b.onmouseout = function(){ 
+  b.style.background='rgba(225,29,72,0.08)'; 
+  b.style.borderColor='rgba(225,29,72,0.25)';
+  b.style.transform='translateY(0)';
+};
     b.onclick = function() {
       // Buttons disable karo
       btnWrap.querySelectorAll('button').forEach(function(x){ x.disabled=true; x.style.opacity='0.5'; });
