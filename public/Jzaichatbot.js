@@ -232,14 +232,6 @@ var LEAD_PROMPTS = {
   message: "Almost done! 🚀\n\n**Briefly describe your project or requirements:**"
 };
 
-function startLeadCollection(service) {
-  leadData = {};
-
-  // ✅ Service AI se already mili — pre-fill
-  if (service && service !== 'General') {
-    leadData.service = service;
-  }
-
   function capitalizeName(name) {
   return name.trim().split(' ')
     .filter(Boolean)
