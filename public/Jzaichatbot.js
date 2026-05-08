@@ -241,6 +241,24 @@ var LEAD_PROMPTS = {
     .join(' ');
 }
 
+  function isUserCancelling(text) {
+  var lower = text.toLowerCase();
+  
+  // Negative sentiment patterns
+  var negativePatterns = [
+    /\b(no|nahi|nope|nai)\b/,           // direct no
+    /don'?t\s+want/,                      // don't want
+    /not\s+(interested|comfortable|sure)/, // not interested/comfortable
+    /why\s+(should|do|am|i)/,            // why should i, why am i
+    /\b(skip|cancel|stop|exit|quit)\b/,  // action words
+    /not\s+share/,                        // not share
+    /privacy/,                            // privacy concern
+    /\b(leave|bye|goodbye)\b/            // leaving
+  ];
+  
+  return negativePatterns.some(function(p){ return p.test(lower); });
+}
+
 function startLeadCollection(service) {
   leadData = {};
 
@@ -282,13 +300,20 @@ function startLeadCollection(service) {
 
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
-
+  
+ // ✅ Smart cancel detection
+  if (isUserCancelling(userInput)) {
+    leadStep = null;
+    leadData = {};
+    addMsg('bot', "No problem at all! 😊 Feel free to ask me anything about JZAI.");
+    return;
+  }
   // Email validation
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
     addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
     return;
   }
-
+ 
   // Name capitalize — no validation
   if (field === 'name') {
     leadData[field] = capitalizeName(userInput);
