@@ -8,6 +8,16 @@
   'use strict';
   // ✅ Cloudflare Worker URL
   var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';
+  //fetching real time currency rate for sevices pricing/budget
+  var exchangeRates = { PKR: 280, INR: 83, GBP: 0.79, EUR: 0.92, JPY: 150 };
+
+fetch(BACKEND_URL + '/exchange')
+  .then(function(r){ return r.json(); })
+  .then(function(rates){ 
+    exchangeRates = rates;
+  })
+  .catch(function(){ console.log('Using fallback rates'); });
+  //type status 
   const TYPING_STATUSES = ['Typing...', 'Thinking...', 'Processing...'];
   /* ══════════════════════════════════════════
      JZAI SYSTEM PROMPT
@@ -266,7 +276,7 @@ function isUserCancelling(text) {
 function showBudgetButtons() {
   addBotButtons("Got it! **What's your approximate budget?**", BUDGET_BUTTONS, function(selected) {
     addMsg('user', selected);
-    handleLeadStep(selected);
+    (selected);
   });
 }
 
@@ -312,6 +322,25 @@ function startLeadCollection(service, budget) {
   }
 }
 
+// ✅ Service price map — BUDGET_BUTTONS ke saath upar add karo
+var SERVICE_PRICES = [
+  { label: 'Simple FAQ Chatbot — $100–$300', emoji: '💬', min: 100, max: 300 },
+  { label: 'Custom AI Chatbot — $300–$800', emoji: '🤖', min: 300, max: 800 },
+  { label: 'RAG Based Chatbot — $500–$1,500', emoji: '📚', min: 500, max: 1500 },
+  { label: 'Full NLP + Multi-language — $1,000–$3,000', emoji: '🌐', min: 1000, max: 3000 },
+  { label: 'Enterprise Level — $3,000+', emoji: '🏢', min: 3000, max: Infinity }
+];
+
+function detectServiceFromText(text) {
+  var lower = text.toLowerCase();
+  if (lower.includes('faq') || lower.includes('simple')) return SERVICE_PRICES[0];
+  if (lower.includes('custom') || lower.includes('ai chatbot')) return SERVICE_PRICES[1];
+  if (lower.includes('rag')) return SERVICE_PRICES[2];
+  if (lower.includes('nlp') || lower.includes('multi')) return SERVICE_PRICES[3];
+  if (lower.includes('enterprise')) return SERVICE_PRICES[4];
+  return null;
+}
+
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
 
@@ -327,6 +356,89 @@ function handleLeadStep(userInput) {
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
     addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
     return;
+  }
+
+  // ✅ Budget handling
+  if (field === 'budget') {
+    var budgetLower = userInput.toLowerCase();
+    var amountMatch = userInput.match(/[$£€₹¥₨Rs]?\s*(\d+[\d,]*)\s*[$£€₹¥₨]?/i);
+
+    if (amountMatch) {
+      var rawAmount = amountMatch[1].replace(',', '');
+      var amount = parseInt(rawAmount);
+      var currency = '';
+      if (userInput.includes('$')) currency = '$';
+      else if (userInput.includes('£')) currency = '£';
+      else if (userInput.includes('€')) currency = '€';
+      else if (userInput.includes('₹')) currency = '₹';
+      else if (/rs|pkr|₨/i.test(userInput)) currency = 'PKR';
+
+      var usdAmount = amount;
+      if (currency === 'PKR') usdAmount = Math.round(amount / exchangeRates.PKR);
+      else if (currency === '₹') usdAmount = Math.round(amount / exchangeRates.INR);
+      else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
+      else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
+      else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
+
+      var budgetLabel = '', botReply = '';
+      var detectedService = detectServiceFromText(userInput);
+
+      if (usdAmount < 100) {
+        budgetLabel = (currency || '') + rawAmount + ' (discussed with Jahanzaib)';
+        botReply = "I understand! 😊 Our minimum starts at **$100**. Jahanzaib can discuss a **custom arrangement** for your budget. Let's move forward!";
+      } else if (detectedService && usdAmount < detectedService.min) {
+        budgetLabel = detectedService.label + ' (budget to be discussed)';
+        botReply = detectedService.emoji + " **" + detectedService.label.split('—')[0].trim() + "** starts at **$" + detectedService.min + "** — your budget is a little short. But Jahanzaib can discuss a **custom arrangement**! 😊 Let's move forward!";
+      } else {
+        var matched = null;
+        for (var i = 0; i < SERVICE_PRICES.length; i++) {
+          if (usdAmount >= SERVICE_PRICES[i].min && usdAmount <= SERVICE_PRICES[i].max) {
+            matched = SERVICE_PRICES[i];
+            break;
+          }
+        }
+        if (matched) {
+          budgetLabel = matched.label;
+          botReply = "Perfect! " + matched.emoji + " **" + matched.label.split('—')[0].trim() + "** fits your budget!";
+        } else {
+          budgetLabel = userInput;
+          botReply = "Got it! I've noted your budget. 📝 Let's move forward!";
+        }
+      }
+
+      leadData['budget'] = budgetLabel;
+      addMsg('bot', botReply);
+      leadStep++;
+      var p1 = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      p1 = p1.replace('{name}', leadData.name || 'there');
+      setTimeout(function(){ addMsg('bot', p1); }, 1200);
+      return;
+    }
+
+    // Low budget words
+    if (budgetLower.includes('low') || budgetLower.includes('cheap') ||
+        budgetLower.includes('afford') || budgetLower.includes('less') ||
+        budgetLower.includes('kam') || budgetLower.includes('thora') ||
+        budgetLower.includes('sasta') || budgetLower.includes('limited')) {
+      addMsg('bot', "No worries! 😊 Our most affordable option starts at just **$100**. Jahanzaib can also discuss **flexible arrangements**. Let's proceed!");
+      leadData['budget'] = 'Low budget (to be discussed)';
+      leadStep++;
+      var p2 = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      p2 = p2.replace('{name}', leadData.name || 'there');
+      setTimeout(function(){ addMsg('bot', p2); }, 1200);
+      return;
+    }
+
+    // Koi bhi aur text
+    if (!BUDGET_BUTTONS.some(function(b){ return userInput === b; })) {
+      addMsg('bot', "Got it! I've noted your budget. 📝 Let's move forward!");
+      leadData['budget'] = userInput;
+      leadStep++;
+      var p3 = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      p3 = p3.replace('{name}', leadData.name || 'there');
+      setTimeout(function(){ addMsg('bot', p3); }, 800);
+      return;
+    }
   }
 
   // Name capitalize
@@ -348,7 +460,6 @@ function handleLeadStep(userInput) {
   } else {
     leadStep = nextStep;
     var currentField = LEAD_STEPS[leadStep];
-
     if (currentField === 'budget') {
       showBudgetButtons();
     } else {
@@ -369,6 +480,7 @@ function submitLead(data) {
   .then(function(result){ console.log('Lead saved:', result); })
   .catch(function(e){ console.error('Lead submit error:', e); });
 }
+  
   /* ══════════════════════════════════════════
      INJECT STYLES
   ══════════════════════════════════════════ */
