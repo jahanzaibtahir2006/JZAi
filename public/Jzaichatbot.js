@@ -229,7 +229,7 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 /* ══════════════════════════════════════════
    LEAD COLLECTION
 ══════════════════════════════════════════ */
-var LEAD_URL = 'https://script.google.com/macros/s/AKfycbxZktVRggm11ipqZeFNJtO_p0jCAlLlzHq6rxm6WPKo0FMLE-BuC35Qk8lnOMdiQafW/exec';
+var LEAD_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev/lead';
 var leadData = {};
 var leadStep = null;
 
