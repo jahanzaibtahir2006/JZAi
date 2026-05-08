@@ -852,15 +852,15 @@ var reply = data.reply ? data.reply.trim() : "I'm having trouble connecting. Ple
 if (reply.startsWith('{"action":"open_lead_form"')) {
   try {
     var parsed = JSON.parse(reply);
-    startLeadCollection(parsed.service);
+    startLeadCollection(parsed.service, parsed.budget); // ← budget add
   } catch(e) {
-    startLeadCollection('General');
+    startLeadCollection();
   }
   sendBtn.disabled=false;
   input.focus();
   return;
 }
-
+      
 addMsg('bot', reply);
       if(!isOpen){
         unreadCount++;
