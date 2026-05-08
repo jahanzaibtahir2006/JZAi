@@ -292,20 +292,37 @@ function showBudgetButtons() {
   
 function startLeadCollection(service, budget) {
   leadData = {};
-
   if (service && service !== 'General') leadData.service = service;
   if (budget && budget !== '') leadData.budget = budget;
 
-  // "my name is X" pattern check
+  // Chat history se detect karo
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
+      // Name detect
       var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i);
       if (nameMatch && !leadData.name) {
         leadData.name = capitalizeName(nameMatch[1]);
       }
+      // Email detect
       if (!leadData.email && /\S+@\S+\.\S+/.test(m.text)) {
         leadData.email = m.text.trim();
+      }
+      // Message detect — 15+ words aur descriptive
+      if (!leadData.message) {
+        var txt = m.text.trim();
+        var wordCount = txt.split(/\s+/).length;
+        var hasDescriptiveWords = /need|want|require|build|create|make|for my|that can|which will/i.test(txt);
+        if (wordCount >= 15 && hasDescriptiveWords) {
+          leadData.message = txt;
+        }
+      }
+    }
+    // Bot ne budget recommend kiya — detect karo
+    if (m.role === 'bot' && !leadData.budget) {
+      var budgetMatch = m.text.match(/(Simple FAQ Chatbot|Custom AI Chatbot|RAG Based Chatbot|Full NLP \+ Multi-language|Enterprise Level)[^\$]*(\$[\d,]+\s*[–-]\s*\$[\d,]+|\$[\d,]+\+?)/i);
+      if (budgetMatch) {
+        leadData.budget = budgetMatch[1] + ' — ' + budgetMatch[2];
       }
     }
   }
@@ -315,13 +332,11 @@ function startLeadCollection(service, budget) {
   while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
     leadStep++;
   }
-
   if (leadStep >= LEAD_STEPS.length) {
     addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
     submitLead(leadData);
     return;
   }
-
   var currentField = LEAD_STEPS[leadStep];
   if (currentField === 'budget') {
     showBudgetButtons();
