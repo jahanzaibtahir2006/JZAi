@@ -221,18 +221,25 @@ Python, TensorFlow, PyTorch, scikit-learn, React, Next.js, Node.js, JavaScript, 
 ══════════════════════════════════════════ */
 var LEAD_URL = 'https://script.google.com/macros/s/AKfycbxZktVRggm11ipqZeFNJtO_p0jCAlLlzHq6rxm6WPKo0FMLE-BuC35Qk8lnOMdiQafW/exec';
 var leadData = {};
-var leadStep = null; // null = not collecting
+var leadStep = null;
 
 var LEAD_STEPS = ['name', 'email', 'service', 'budget', 'message'];
 var LEAD_PROMPTS = {
   name:    "Great! Let's get you connected with Jahanzaib. 😊\n\nFirst, **what's your name?**",
   email:   "Nice to meet you, {name}! 📧\n\n**What's your email address?**",
   service: "Perfect! **Which service are you interested in?**\n\n- AI / Machine Learning\n- Web Development\n- AI Chatbot\n- Cloud / DevOps\n- Data Engineering\n- UI/UX Design",
-  budget:  "Got it! **What's your approximate budget?**\n\n- Under $500\n- $500 – $2,000\n- $2,000 – $5,000\n- $5,000+",
   message: "Almost done! 🚀\n\n**Briefly describe your project or requirements:**"
 };
 
-  function capitalizeName(name) {
+var BUDGET_BUTTONS = [
+  '💬 Simple FAQ Chatbot — $100–$300',
+  '🤖 Custom AI Chatbot — $300–$800',
+  '📚 RAG Based Chatbot — $500–$1,500',
+  '🌐 Full NLP + Multi-language — $1,000–$3,000',
+  '🏢 Enterprise Level — $3,000+'
+];
+
+function capitalizeName(name) {
   return name.trim().split(' ')
     .filter(Boolean)
     .map(function(word) {
@@ -241,33 +248,35 @@ var LEAD_PROMPTS = {
     .join(' ');
 }
 
-  function isUserCancelling(text) {
+function isUserCancelling(text) {
   var lower = text.toLowerCase();
-  
-  // Negative sentiment patterns
   var negativePatterns = [
-    /\b(no|nahi|nope|nai)\b/,           // direct no
-    /don'?t\s+want/,                      // don't want
-    /not\s+(interested|comfortable|sure)/, // not interested/comfortable
-    /why\s+(should|do|am|i)/,            // why should i, why am i
-    /\b(skip|cancel|stop|exit|quit)\b/,  // action words
-    /not\s+share/,                        // not share
-    /privacy/,                            // privacy concern
-    /\b(leave|bye|goodbye)\b/            // leaving
+    /\b(no|nahi|nope|nai)\b/,
+    /don'?t\s+want/,
+    /not\s+(interested|comfortable|sure)/,
+    /why\s+(should|do|am|i)/,
+    /\b(skip|cancel|stop|exit|quit)\b/,
+    /not\s+share/,
+    /privacy/,
+    /\b(leave|bye|goodbye)\b/
   ];
-  
   return negativePatterns.some(function(p){ return p.test(lower); });
 }
 
-function startLeadCollection(service) {
+function showBudgetButtons() {
+  addBotButtons("Got it! **What's your approximate budget?**", BUDGET_BUTTONS, function(selected) {
+    addMsg('user', selected);
+    handleLeadStep(selected);
+  });
+}
+
+function startLeadCollection(service, budget) {
   leadData = {};
 
-  // Service AI se mili
-  if (service && service !== 'General') {
-    leadData.service = service;
-  }
+  if (service && service !== 'General') leadData.service = service;
+  if (budget && budget !== '') leadData.budget = budget;
 
-  // Sirf "my name is X" pattern check karo
+  // "my name is X" pattern check
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
@@ -288,33 +297,39 @@ function startLeadCollection(service) {
   }
 
   if (leadStep >= LEAD_STEPS.length) {
-    addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you at **" + leadData.email + "** very soon! 🚀");
+    addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
     submitLead(leadData);
     return;
   }
 
-  var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-  prompt = prompt.replace('{name}', leadData.name || 'there');
-  addMsg('bot', prompt);
+  var currentField = LEAD_STEPS[leadStep];
+  if (currentField === 'budget') {
+    showBudgetButtons();
+  } else {
+    var prompt = LEAD_PROMPTS[currentField];
+    prompt = prompt.replace('{name}', leadData.name || 'there');
+    addMsg('bot', prompt);
+  }
 }
 
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
-  
- // ✅ Smart cancel detection
+
+  // Cancel detection
   if (isUserCancelling(userInput)) {
     leadStep = null;
     leadData = {};
     addMsg('bot', "No problem at all! 😊 Feel free to ask me anything about JZAI.");
     return;
   }
+
   // Email validation
   if (field === 'email' && !/\S+@\S+\.\S+/.test(userInput)) {
     addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
     return;
   }
- 
-  // Name capitalize — no validation
+
+  // Name capitalize
   if (field === 'name') {
     leadData[field] = capitalizeName(userInput);
   } else {
@@ -332,11 +347,18 @@ function handleLeadStep(userInput) {
     submitLead(leadData);
   } else {
     leadStep = nextStep;
-    var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-    prompt = prompt.replace('{name}', leadData.name || 'there');
-    addMsg('bot', prompt);
+    var currentField = LEAD_STEPS[leadStep];
+
+    if (currentField === 'budget') {
+      showBudgetButtons();
+    } else {
+      var prompt = LEAD_PROMPTS[currentField];
+      prompt = prompt.replace('{name}', leadData.name || 'there');
+      addMsg('bot', prompt);
+    }
   }
 }
+
 function submitLead(data) {
   fetch(LEAD_URL, {
     method: 'POST',
@@ -920,6 +942,41 @@ function formatMessage(text){
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
+
+  function addBotButtons(promptText, buttons, onSelect) {
+  var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
+  var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
+  var col = document.createElement('div'); col.className = 'nxc-msg-col';
+  var bub = document.createElement('div'); bub.className = 'nxc-bubble-msg'; 
+  bub.innerHTML = formatMessage(promptText);
+  
+  // Buttons container
+  var btnWrap = document.createElement('div'); 
+  btnWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:10px;';
+  
+  buttons.forEach(function(btn) {
+    var b = document.createElement('button');
+    b.textContent = btn;
+    b.style.cssText = 'background:transparent;border:1px solid rgba(225,29,72,0.4);color:inherit;padding:7px 12px;border-radius:8px;cursor:pointer;text-align:left;font-size:13px;transition:all 0.2s;';
+    b.onmouseover = function(){ b.style.background='rgba(225,29,72,0.1)'; b.style.borderColor='#e11d48'; };
+    b.onmouseout = function(){ b.style.background='transparent'; b.style.borderColor='rgba(225,29,72,0.4)'; };
+    b.onclick = function() {
+      // Buttons disable karo
+      btnWrap.querySelectorAll('button').forEach(function(x){ x.disabled=true; x.style.opacity='0.5'; });
+      onSelect(btn);
+    };
+    btnWrap.appendChild(b);
+  });
+
+  var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
+  var time = document.createElement('div'); time.className = 'nxc-msg-time';
+  time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  footer.appendChild(time);
+
+  col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
+  wrap.appendChild(av); wrap.appendChild(col);
+  msgs.appendChild(wrap); msgs.scrollTop = msgs.scrollHeight;
+}
 
   function addMsg(role, text){
     renderMsg(role, text, true);
