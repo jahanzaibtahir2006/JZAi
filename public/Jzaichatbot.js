@@ -291,10 +291,14 @@ function showBudgetButtons() {
 }
   
 function startLeadCollection(service, budget) {
-  leadData = {};
+  // Name aur email preserve karo, sirf service/budget/message reset karo
+  leadData = {
+    name: leadData.name || null,
+    email: leadData.email || null
+  };
   if (service && service !== 'General') leadData.service = service;
   if (budget && budget !== '') leadData.budget = budget;
-
+  
   // Chat history se detect karo
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
@@ -328,26 +332,24 @@ function startLeadCollection(service, budget) {
   }
 
   // Pehle unknown step pe jump karo
-  leadStep = 0;
-  while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
-    leadStep++;
-  }
-  if (leadStep >= LEAD_STEPS.length) {
-    addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
-    submitLead(leadData);
-    return;
-  }
-  var currentField = LEAD_STEPS[leadStep];
-  if (currentField === 'budget') {
-    showBudgetButtons();
-  } else {
-    var prompt = LEAD_PROMPTS[currentField];
-    prompt = prompt.replace('{name}', leadData.name || 'there');
-    addMsg('bot', prompt);
-  }
+leadStep = 0;
+while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
+  leadStep++;
+}
+if (leadStep >= LEAD_STEPS.length) {
+  addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
+  submitLead(leadData);
+  return;
+}
+var currentField = LEAD_STEPS[leadStep];
+if (currentField === 'budget') {
+  showBudgetButtons();
+} else {
+  var prompt = LEAD_PROMPTS[currentField];
+  prompt = prompt.replace('{name}', leadData.name || 'there');
+  addMsg('bot', prompt);
 }
 
-// ✅ Service price map — BUDGET_BUTTONS ke saath upar add karo
 var SERVICE_PRICES = [
   { label: 'Simple FAQ Chatbot — $100–$300', emoji: '💬', min: 100, max: 300 },
   { label: 'Custom AI Chatbot — $300–$800', emoji: '🤖', min: 300, max: 800 },
@@ -369,6 +371,24 @@ function detectServiceFromText(text) {
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
 
+  // Name/Email update request — lead form ke bahar bhi kaam kare
+  var nameUpdate = userInput.match(/update my name to ([a-zA-Z\s]{2,20})/i)
+                || userInput.match(/change my name to ([a-zA-Z\s]{2,20})/i)
+                || userInput.match(/mera naam ([a-zA-Z\s]{2,20}) hai/i);
+  if (nameUpdate) {
+    leadData.name = capitalizeName(nameUpdate[1].trim());
+    addMsg('bot', "✅ Name updated to **" + leadData.name + "**!");
+    return;
+  }
+
+  var emailUpdate = userInput.match(/update my email to (\S+@\S+\.\S+)/i)
+                 || userInput.match(/change my email to (\S+@\S+\.\S+)/i);
+  if (emailUpdate) {
+    leadData.email = emailUpdate[1].trim();
+    addMsg('bot', "✅ Email updated to **" + leadData.email + "**!");
+    return;
+  }
+
   // Cancel detection
   if (isUserCancelling(userInput)) {
     leadStep = null;
@@ -377,15 +397,13 @@ function handleLeadStep(userInput) {
     return;
   }
 
-  // Name step — sirf short simple input accept karo
+  // Name step
   if (field === 'name') {
-    // Agar sentence lagta hai (4+ words) toh name nahi hai
     var words = userInput.trim().split(/\s+/);
     if (words.length > 3) {
       addMsg('bot', "😊 Please enter just your name:");
       return;
     }
-    // Agar "my name is X" pattern hai toh extract karo
     var nameMatch = userInput.match(/my name is ([a-zA-Z\s]{2,20})/i)
                  || userInput.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i);
     if (nameMatch) {
@@ -399,19 +417,12 @@ function handleLeadStep(userInput) {
     addMsg('bot', prompt);
     return;
   }
-
-  // Email validation
-  if (field === 'email') {
-    // Email step par cancel bhi check karo — sentence hai toh cancel treat karo
-    var words = userInput.trim().split(/\s+/);
-    if (words.length > 2 && !/\S+@\S+\.\S+/.test(userInput)) {
-      leadStep = null;
-      leadData = {};
-      addMsg('bot', "No problem! Feel free to ask me anything about JZAI. 😊");
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(userInput)) {
-      addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address:");
+  
+  
+    // Strict email validation — no spaces allowed
+    var cleanEmail = userInput.trim();
+    if (/\s/.test(cleanEmail) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address (no spaces):");
       return;
     }
   }
