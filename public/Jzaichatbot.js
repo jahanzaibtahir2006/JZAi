@@ -1,4 +1,4 @@
-  /**
+/**
  * JZAI Chatbot
  * Powered by OpenAI API
  * Theme: Dark Black & Red
@@ -879,6 +879,37 @@ function submitLead(data) {
       #nxc-toggle { right:16px; bottom:16px; width:52px; height:52px; }
       #nxc-bubble { bottom:78px; right:76px; max-width:190px; font-size:12px; padding:10px 13px; }
     }
+    /* ── Header Close Button ── */
+    #nxc-header-close {
+      width:26px; height:26px; border-radius:50%;
+      background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.2);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all 0.2s; margin-left:auto; flex-shrink:0;
+    }
+    #nxc-header-close:hover { background:#e11d48; border-color:#e11d48; }
+    #nxc-header-close:hover svg { stroke:#fff; }
+    #nxc-header-close svg { stroke:rgba(240,240,240,0.55); transition:stroke 0.2s; }
+    [data-theme="light"] #nxc-header-close { background:rgba(208,16,46,0.08) !important; border-color:rgba(208,16,46,0.2) !important; }
+    [data-theme="light"] #nxc-header-close svg { stroke:rgba(15,15,20,0.5) !important; }
+    /* ── Sound Toggle Button ── */
+    #nxc-sound-btn {
+      width:30px; height:30px; border-radius:50%;
+      background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.25);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all 0.2s; flex-shrink:0;
+    }
+    #nxc-sound-btn:hover { background:rgba(225,29,72,0.18); border-color:#e11d48; }
+    #nxc-sound-btn.muted { opacity:0.4; }
+    #nxc-sound-btn svg { transition:opacity 0.2s; }
+    [data-theme="light"] #nxc-sound-btn { background:rgba(208,16,46,0.08) !important; border-color:rgba(208,16,46,0.25) !important; }
+    /* ── Char Counter ── */
+    #nxc-char-count {
+      font-size:10px; color:#555; font-family:'DM Sans',sans-serif;
+      flex-shrink:0; min-width:36px; text-align:right; align-self:center;
+      transition:color 0.2s; user-select:none;
+    }
+    #nxc-char-count.warn { color:#e11d48; font-weight:600; }
+    [data-theme="light"] #nxc-char-count { color:#9a9aaa !important; }
   `;
   document.head.appendChild(style);
 
@@ -930,10 +961,21 @@ function submitLead(data) {
           <h3>JZAI Assistant</h3>
           <div class="nxc-tagline">JZAI — Engineering Intelligence</div>
         </div>
+        <div id="nxc-header-close" title="Close chat">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
       </div>
       <div class="nxc-header-bottom">
         <div class="nxc-status-pill"><div class="nxc-status-dot"></div><span>Online · Ready to help</span></div>
         <button id="nxc-hint-btn"><div class="nxc-hint-dot"></div>💡 Quick Questions</button>
+        <div id="nxc-sound-btn" title="Sound on/off">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </div>
       </div>
       <div class="nxc-red-bar"></div>
     </div>
@@ -947,6 +989,7 @@ function submitLead(data) {
     <div class="nxc-input-area">
       <div class="nxc-input-row">
         <textarea id="nxc-input" placeholder="Ask about JZAI services..." rows="1"></textarea>
+        <span id="nxc-char-count">0/500</span>
         <button id="nxc-send" aria-label="Send">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -1045,6 +1088,41 @@ function submitLead(data) {
   });
   sendBtn.addEventListener('click', sendMessage);
 
+  // ── CHAR COUNTER ──
+  var charCountEl = document.getElementById('nxc-char-count');
+  input.setAttribute('maxlength', '500');
+  input.addEventListener('input', function(){
+    var len = input.value.length;
+    charCountEl.textContent = len + '/500';
+    charCountEl.classList.toggle('warn', len >= 400);
+  });
+
+  // ── SOUND TOGGLE ──
+  var soundEnabled = true;
+  var soundBtn = document.getElementById('nxc-sound-btn');
+  soundBtn.addEventListener('click', function(){
+    soundEnabled = !soundEnabled;
+    soundBtn.classList.toggle('muted', !soundEnabled);
+    soundBtn.title = soundEnabled ? 'Sound on/off' : 'Sound muted';
+  });
+  function playNotifSound(){
+    if(!soundEnabled) return;
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.setValueAtTime(880, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3);
+    } catch(e){}
+  }
+
+  // ── HEADER CLOSE BUTTON ──
+  document.getElementById('nxc-header-close').addEventListener('click', closeChat);
+
   async function sendMessage(){
     var text = input.value.trim();
     if(!text || sendBtn.disabled) return;
@@ -1093,6 +1171,7 @@ if (reply.startsWith('{"action":"open_lead_form"')) {
 }
       
 addMsg('bot', reply);
+      playNotifSound();
       if(!isOpen){
         unreadCount++;
         badge.textContent = unreadCount>9?'9+':String(unreadCount);
