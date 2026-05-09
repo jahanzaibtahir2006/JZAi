@@ -322,8 +322,11 @@ function startLeadCollection(service, budget) {
     // Bot response se name detect karo
     if (m.role === 'bot' && !leadData.name) {
       var botNameMatch = m.text.match(/(?:hi|hey|hello|nice to meet you)[,\s]+([A-Z][a-z]{1,15})/i)
-                      || m.text.match(/([A-Z][a-z]{1,15})[,\s]+(?:how can|what can|glad|great to meet)/i)
-                      || m.text.match(/your name is ([A-Z][a-z]{1,15})/i);
+                || m.text.match(/([A-Z][a-z]{1,15})[,\s]+(?:how can|what can|glad)/i)
+                || m.text.match(/great to meet you[,\s]+([A-Z][a-z]{1,15})/i)
+                || m.text.match(/your name is ([A-Z][a-z]{1,15})/i)
+                || m.text.match(/meet you,?\s+([A-Z][a-z]{1,15})/i);
+      
       if (botNameMatch) {
         leadData.name = capitalizeName(botNameMatch[1]);
       }
@@ -382,23 +385,6 @@ function detectServiceFromText(text) {
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
 
-  // Name/Email update request
-  var nameUpdate = userInput.match(/update my name to ([a-zA-Z\s]{2,20})/i)
-                || userInput.match(/change my name to ([a-zA-Z\s]{2,20})/i)
-                || userInput.match(/mera naam ([a-zA-Z\s]{2,20}) hai/i);
-  if (nameUpdate) {
-    leadData.name = capitalizeName(nameUpdate[1].trim());
-    addMsg('bot', "✅ Name updated to **" + leadData.name + "**!");
-    return;
-  }
-
-  var emailUpdate = userInput.match(/update my email to (\S+@\S+\.\S+)/i)
-                 || userInput.match(/change my email to (\S+@\S+\.\S+)/i);
-  if (emailUpdate) {
-    leadData.email = emailUpdate[1].trim();
-    addMsg('bot', "✅ Email updated to **" + leadData.email + "**!");
-    return;
-  }
 
   // Cancel detection
   if (isUserCancelling(userInput)) {
