@@ -351,14 +351,16 @@ function startLeadCollection(service, budget) {
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
-      var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i)
-                   || m.text.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i);
-      if (nameMatch && !leadData.name) {
-        leadData.name = capitalizeName(nameMatch[1]);
+      // Name detect
+      if (!leadData.name) {
+        var detected = extractName(m.text);
+        if (detected) leadData.name = detected;
       }
+      // Email detect
       if (!leadData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.text.trim())) {
         leadData.email = m.text.trim();
       }
+      // Message detect
       if (!leadData.message) {
         var txt = m.text.trim();
         var wordCount = txt.split(/\s+/).length;
@@ -368,6 +370,7 @@ function startLeadCollection(service, budget) {
         }
       }
     }
+    
     // Bot response se name detect karo
     if (m.role === 'bot' && !leadData.name) {
       var botNameMatch = m.text.match(/(?:hi|hey|hello|nice to meet you)[,\s]+([A-Z][a-z]{1,15})/i)
