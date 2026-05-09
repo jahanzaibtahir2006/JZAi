@@ -286,27 +286,6 @@ function capitalizeName(name) {
     .join(' ');
 }
 
-  var nameMatch = m.text.match(/my name is ([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+and\b|\s+i\s|\s+i'm|\s*$)/i)
-             || m.text.match(/call me ([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+and\b|\s*$)/i)
-             || m.text.match(/mera\s+n(?:a|aa)m\s+([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+aur\b|\s+and\b|\s+ha\b|\s+hai\b|\s+he\b|\s+h\b|\s*$)/i)
-             || m.text.match(/naam?\s+(?:mera|hamara)\s+([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+ha\b|\s+hai\b|\s*$)/i)
-             || m.text.match(/(?:apna\s+naam?|mujhe)\s+([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)\s+(?:kehte|bolte|bulate)\s+hain?/i)
-             || m.text.match(/name\s*[=:]\s*([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+and\b|\s*$)/i)
-             || m.text.match(/(?:myself|this is)\s+([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+and\b|\s+i\s|\s*$)/i)
-             || m.text.match(/([a-zA-Z\u0600-\u06FF'\-]{2,20}(?:\s+[a-zA-Z\u0600-\u06FF'\-]{2,20}){0,3})\s+(?:ha\b|hai\b|he\b|hun\b|hoon\b)\s*$/i)
-             || (function() {
-               var m2 = m.text.match(/i(?:'?m| am) ([a-zA-Z\u0600-\u06FF'\-\s]{2,40}?)(?:\s+and\b|\s*$)/i);
-               if (m2 && !isBlacklistedName(m2[1].trim())) return m2;
-               return null;
-             })();
-
-if (nameMatch && !leadData.name) {
-  var extractedName = nameMatch[1].trim();
-  if (!isBlacklistedName(extractedName)) {
-    leadData.name = capitalizeName(extractedName);
-  }
-}
-  
 function isUserCancelling(text) {
   var lower = text.toLowerCase().trim();
   var negativePatterns = [
