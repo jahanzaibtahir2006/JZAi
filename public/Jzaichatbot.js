@@ -291,28 +291,24 @@ function showBudgetButtons() {
 }
   
 function startLeadCollection(service, budget) {
-  // Name aur email preserve karo, sirf service/budget/message reset karo
   leadData = {
     name: leadData.name || null,
     email: leadData.email || null
   };
   if (service && service !== 'General') leadData.service = service;
   if (budget && budget !== '') leadData.budget = budget;
-  
+
   // Chat history se detect karo
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
-      // Name detect
       var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i);
       if (nameMatch && !leadData.name) {
         leadData.name = capitalizeName(nameMatch[1]);
       }
-      // Email detect
-      if (!leadData.email && /\S+@\S+\.\S+/.test(m.text)) {
+      if (!leadData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.text.trim())) {
         leadData.email = m.text.trim();
       }
-      // Message detect — 15+ words aur descriptive
       if (!leadData.message) {
         var txt = m.text.trim();
         var wordCount = txt.split(/\s+/).length;
@@ -322,7 +318,6 @@ function startLeadCollection(service, budget) {
         }
       }
     }
-    // Bot ne budget recommend kiya — detect karo
     if (m.role === 'bot' && !leadData.budget) {
       var budgetMatch = m.text.match(/(Simple FAQ Chatbot|Custom AI Chatbot|RAG Based Chatbot|Full NLP \+ Multi-language|Enterprise Level)[^\$]*(\$[\d,]+\s*[–-]\s*\$[\d,]+|\$[\d,]+\+?)/i);
       if (budgetMatch) {
@@ -331,32 +326,28 @@ function startLeadCollection(service, budget) {
     }
   }
 
-  // Pehle unknown step pe jump karo
-leadStep = 0;
-while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
-  leadStep++;
-}
-if (leadStep >= LEAD_STEPS.length) {
-  addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
-  submitLead(leadData);
-  return;
-}
-  
-var currentField = LEAD_STEPS[leadStep];
-if (leadStep >= LEAD_STEPS.length) {
-  submitLead(leadData);
-} else if (currentField === 'budget') {
-  showBudgetButtons();
-} else if (currentField === 'name' && leadData.name) {
-  // name pehle se hai — skip, handleLeadStep khud aage le jayega
-  return;
-} else if (currentField === 'email' && leadData.email) {
-  // email pehle se hai — skip
-  return;
-} else {
-  var prompt = LEAD_PROMPTS[currentField];
-  prompt = prompt.replace('{name}', leadData.name || 'there');
-  addMsg('bot', prompt);
+  // Pehle bhare fields skip karo
+  leadStep = 0;
+  while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
+    leadStep++;
+  }
+
+  // Sab already hai — seedha submit karo
+  if (leadStep >= LEAD_STEPS.length) {
+    addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
+    submitLead(leadData);
+    return;
+  }
+
+  // Sirf ek jagah prompt show karo
+  var currentField = LEAD_STEPS[leadStep];
+  if (currentField === 'budget') {
+    showBudgetButtons();
+  } else {
+    var prompt = LEAD_PROMPTS[currentField];
+    prompt = prompt.replace('{name}', leadData.name || 'there');
+    addMsg('bot', prompt);
+  }
 }
 
 var SERVICE_PRICES = [
@@ -380,7 +371,7 @@ function detectServiceFromText(text) {
 function handleLeadStep(userInput) {
   var field = LEAD_STEPS[leadStep];
 
-  // Name/Email update request — lead form ke bahar bhi kaam kare
+  // Name/Email update request
   var nameUpdate = userInput.match(/update my name to ([a-zA-Z\s]{2,20})/i)
                 || userInput.match(/change my name to ([a-zA-Z\s]{2,20})/i)
                 || userInput.match(/mera naam ([a-zA-Z\s]{2,20}) hai/i);
@@ -426,21 +417,27 @@ function handleLeadStep(userInput) {
     addMsg('bot', prompt);
     return;
   }
-  
-  
-    // Strict email validation — no spaces allowed
+
+  // Email step
+  if (field === 'email') {
+    var words = userInput.trim().split(/\s+/);
+    if (words.length > 2 && !/\S+@\S+\.\S+/.test(userInput)) {
+      leadStep = null;
+      leadData = {};
+      addMsg('bot', "No problem! Feel free to ask me anything about JZAI. 😊");
+      return;
+    }
     var cleanEmail = userInput.trim();
     if (/\s/.test(cleanEmail) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       addMsg('bot', "⚠️ That doesn't look like a valid email. Please enter a valid email address (no spaces):");
       return;
     }
   }
-  
-  // ✅ Budget handling
+
+  // Budget handling
   if (field === 'budget') {
     var budgetLower = userInput.toLowerCase();
     var amountMatch = userInput.match(/[$£€₹¥₨Rs]?\s*(\d+[\d,]*)\s*[$£€₹¥₨]?/i);
-
     if (amountMatch) {
       var rawAmount = amountMatch[1].replace(',', '');
       var amount = parseInt(rawAmount);
@@ -450,17 +447,14 @@ function handleLeadStep(userInput) {
       else if (userInput.includes('€')) currency = '€';
       else if (userInput.includes('₹')) currency = '₹';
       else if (/rs|pkr|₨/i.test(userInput)) currency = 'PKR';
-
       var usdAmount = amount;
       if (currency === 'PKR') usdAmount = Math.round(amount / exchangeRates.PKR);
       else if (currency === '₹') usdAmount = Math.round(amount / exchangeRates.INR);
       else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
       else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
       else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
-
       var budgetLabel = '', botReply = '';
       var detectedService = detectServiceFromText(userInput);
-
       if (usdAmount < 100) {
         budgetLabel = (currency || '') + rawAmount + ' (discussed with Jahanzaib)';
         botReply = "I understand! 😊 Our minimum starts at **$100**. Jahanzaib can discuss a **custom arrangement** for your budget. Let's move forward!";
@@ -483,7 +477,6 @@ function handleLeadStep(userInput) {
           botReply = "Got it! I've noted your budget. 📝 Let's move forward!";
         }
       }
-
       leadData['budget'] = budgetLabel;
       addMsg('bot', botReply);
       leadStep++;
@@ -492,8 +485,6 @@ function handleLeadStep(userInput) {
       setTimeout(function(){ addMsg('bot', p1); }, 1200);
       return;
     }
-
-    // Low budget words
     if (budgetLower.includes('low') || budgetLower.includes('cheap') ||
         budgetLower.includes('afford') || budgetLower.includes('less') ||
         budgetLower.includes('kam') || budgetLower.includes('thora') ||
@@ -506,8 +497,6 @@ function handleLeadStep(userInput) {
       setTimeout(function(){ addMsg('bot', p2); }, 1200);
       return;
     }
-
-    // Koi bhi aur text
     if (!BUDGET_BUTTONS.some(function(b){ return userInput === b; })) {
       addMsg('bot', "Got it! I've noted your budget. 📝 Let's move forward!");
       leadData['budget'] = userInput;
@@ -519,7 +508,7 @@ function handleLeadStep(userInput) {
     }
   }
 
-  // Name capitalize
+  // Field save karo
   if (field === 'name') {
     leadData[field] = capitalizeName(userInput);
   } else {
