@@ -341,9 +341,18 @@ if (leadStep >= LEAD_STEPS.length) {
   submitLead(leadData);
   return;
 }
+  
 var currentField = LEAD_STEPS[leadStep];
-if (currentField === 'budget') {
+if (leadStep >= LEAD_STEPS.length) {
+  submitLead(leadData);
+} else if (currentField === 'budget') {
   showBudgetButtons();
+} else if (currentField === 'name' && leadData.name) {
+  // name pehle se hai — skip, handleLeadStep khud aage le jayega
+  return;
+} else if (currentField === 'email' && leadData.email) {
+  // email pehle se hai — skip
+  return;
 } else {
   var prompt = LEAD_PROMPTS[currentField];
   prompt = prompt.replace('{name}', leadData.name || 'there');
