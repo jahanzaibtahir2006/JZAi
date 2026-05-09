@@ -302,7 +302,8 @@ function startLeadCollection(service, budget) {
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
-      var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i);
+      var nameMatch = m.text.match(/my name is ([a-zA-Z\s]{2,20})/i)
+                   || m.text.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i);
       if (nameMatch && !leadData.name) {
         leadData.name = capitalizeName(nameMatch[1]);
       }
@@ -318,6 +319,15 @@ function startLeadCollection(service, budget) {
         }
       }
     }
+    // Bot response se name detect karo
+    if (m.role === 'bot' && !leadData.name) {
+      var botNameMatch = m.text.match(/(?:hi|hey|hello|nice to meet you)[,\s]+([A-Z][a-z]{1,15})/i)
+                      || m.text.match(/([A-Z][a-z]{1,15})[,\s]+(?:how can|what can|glad|great to meet)/i)
+                      || m.text.match(/your name is ([A-Z][a-z]{1,15})/i);
+      if (botNameMatch) {
+        leadData.name = capitalizeName(botNameMatch[1]);
+      }
+    }
     if (m.role === 'bot' && !leadData.budget) {
       var budgetMatch = m.text.match(/(Simple FAQ Chatbot|Custom AI Chatbot|RAG Based Chatbot|Full NLP \+ Multi-language|Enterprise Level)[^\$]*(\$[\d,]+\s*[–-]\s*\$[\d,]+|\$[\d,]+\+?)/i);
       if (budgetMatch) {
@@ -326,6 +336,7 @@ function startLeadCollection(service, budget) {
     }
   }
 
+  
   // Pehle bhare fields skip karo
   leadStep = 0;
   while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
