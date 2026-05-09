@@ -1076,7 +1076,7 @@ function formatMessage(text){
     lines.forEach(function(line){
       var ul=line.match(/^[\-\•]\s+(.+)/), ol=line.match(/^\d+[\.\)]\s+(.+)/);
       if(ul){ if(inOL){html.push('</ol>');inOL=false;} if(!inUL){html.push('<ul>');inUL=true;} html.push('<li>'+ul[1]+'</li>'); }
-      else if(ol){ if(inUL){html.push('</ul>');inUL=false;} if(!inOL){html.push('<ol>');inOL=true;} html.push('<li>'+ol[1]+'</li>'); }
+      else if(ol){ if(inUL){html.push('</ul>');inUL=false;} if(!inOL){html.push('<ol style="list-style-type:decimal;padding-left:20px;">');inOL=true;} html.push('<li>'+ol[1]+'</li>'); }
       else{ if(inUL){html.push('</ul>');inUL=false;} if(inOL){html.push('</ol>');inOL=false;} html.push(line.trim()===''?'<br>':line+'<br>'); }
     });
     if(inUL)html.push('</ul>'); if(inOL)html.push('</ol>');
