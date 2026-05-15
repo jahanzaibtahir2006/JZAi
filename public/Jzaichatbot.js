@@ -1105,7 +1105,7 @@ async function sendMessage(){
     // Scroll button ko hamesha end par rakho
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
-    msgs.scrollTop = msgs.scrollHeight;
+    // Auto scroll nahi — sirf button dikhao
     updateScrollBtn();
   }
 
@@ -1175,7 +1175,8 @@ async function sendMessage(){
     col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    msgs.scrollTop = msgs.scrollHeight;
+    var sBtn2 = document.getElementById('nxc-scroll-btn');
+    if(sBtn2) msgs.appendChild(sBtn2);
     updateScrollBtn();
   }
 
