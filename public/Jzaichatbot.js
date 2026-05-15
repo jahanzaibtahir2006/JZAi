@@ -1102,7 +1102,9 @@ async function sendMessage(){
     col.appendChild(bub); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    // ✅ FIX: Hamesha neeche scroll karo naye message par
+    // Scroll button ko hamesha end par rakho
+    var sBtn = document.getElementById('nxc-scroll-btn');
+    if(sBtn) msgs.appendChild(sBtn);
     msgs.scrollTop = msgs.scrollHeight;
     updateScrollBtn();
   }
