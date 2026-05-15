@@ -761,14 +761,15 @@ function submitLead(data) {
     /* ── Scroll to Bottom Button ── */
     #nxc-scroll-btn {
   position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
-  background:#e11d48; color:#fff; border:none; border-radius:20px;
-  padding:6px 14px; font-size:16px; cursor:pointer; z-index:9999;
+  background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:20px;
+  padding:5px 14px; font-size:15px; cursor:pointer; z-index:9999;
   display:none; align-items:center; justify-content:center;
-  box-shadow:0 4px 12px rgba(225,29,72,0.4);
-  font-family:'DM Sans',sans-serif; font-weight:600;
-  transition:opacity 0.2s, transform 0.2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  font-family:'DM Sans',sans-serif; font-weight:500;
+  transition:background 0.2s;
+  backdrop-filter:blur(4px);
 }
-#nxc-scroll-btn:hover { background:#9f1239; transform:translateX(-50%) translateY(-2px); }
+#nxc-scroll-btn:hover { background:rgba(80,80,80,0.9); }
   `;
   document.head.appendChild(style);
 
@@ -873,7 +874,7 @@ function submitLead(data) {
   scrollBtn.id = 'nxc-scroll-btn';
   scrollBtn.innerHTML = '↓';
   scrollBtn.onclick = function(){ msgs.scrollTop = msgs.scrollHeight; updateScrollBtn(); };
-  msgs.appendChild(scrollBtn);
+  win.appendChild(scrollBtn);
   msgs.addEventListener('scroll', updateScrollBtn);
 
   var saved = loadHistory();
@@ -1180,13 +1181,8 @@ async function sendMessage(){
     if(!btn) return;
     var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 60;
     btn.style.display = atBottom ? 'none' : 'flex';
-    btn.style.position = 'sticky';
-    btn.style.bottom = '10px';
-    btn.style.left = '50%';
-    btn.style.transform = 'translateX(-50%)';
-    btn.style.zIndex = '999';
   }
-
+  
   function addTyping(statusText){
     var id='nxc-typing-'+Date.now();
     var wrap=document.createElement('div'); wrap.className='nxc-msg nxc-bot'; wrap.id=id;
