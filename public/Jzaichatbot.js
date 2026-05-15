@@ -849,17 +849,25 @@ function submitLead(data) {
       background:#111; border:1.5px solid rgba(225,29,72,0.15);
       border-radius:12px; padding:8px 8px 8px 14px;
       transition:border-color .2s, box-shadow .2s;
+      flex-wrap:wrap;
     }
     .nxc-input-row:focus-within {
       border-color:#e11d48; box-shadow:0 0 0 3px rgba(225,29,72,0.1);
     }
+    .nxc-input-right {
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:flex-end; gap:4px; flex-shrink:0;
+    }
+    .nxc-input-right.multiline { justify-content:flex-end; }
     #nxc-input {
       flex:1; border:none; background:transparent;
       font-family:'DM Sans',sans-serif; font-size:13.5px; color:#f0f0f0;
       resize:none; outline:none; max-height:88px; min-height:22px; line-height:1.5;
-      overflow-y:hidden; scrollbar-width:none;
+      overflow-y:auto; scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
     }
-    #nxc-input::-webkit-scrollbar { display:none; }
+    #nxc-input::-webkit-scrollbar { width:3px; }
+    #nxc-input::-webkit-scrollbar-thumb { background:#e11d48; border-radius:10px; }
+    #nxc-input::-webkit-scrollbar-track { background:transparent; }
     #nxc-input::placeholder { color:#444; }
     #nxc-send {
       width:36px; height:36px; border-radius:9px;
@@ -884,7 +892,8 @@ function submitLead(data) {
       width:26px; height:26px; border-radius:50%;
       background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.2);
       display:flex; align-items:center; justify-content:center;
-      cursor:pointer; transition:all 0.2s; margin-left:auto; flex-shrink:0;
+      cursor:pointer; transition:all 0.2s;
+      position:absolute; top:8px; right:10px; z-index:10;
     }
     #nxc-header-close:hover { background:#e11d48; border-color:#e11d48; }
     #nxc-header-close:hover svg { stroke:#fff; }
@@ -905,8 +914,8 @@ function submitLead(data) {
     /* ── Char Counter ── */
     #nxc-char-count {
       font-size:10px; color:#555; font-family:'DM Sans',sans-serif;
-      flex-shrink:0; min-width:36px; text-align:right; align-self:center;
-      transition:color 0.2s; user-select:none;
+      flex-shrink:0; min-width:36px; text-align:center;
+      transition:color 0.2s; user-select:none; display:none;
     }
     #nxc-char-count.warn { color:#e11d48; font-weight:600; }
     [data-theme="light"] #nxc-char-count { color:#9a9aaa !important; }
@@ -970,12 +979,7 @@ function submitLead(data) {
       <div class="nxc-header-bottom">
         <div class="nxc-status-pill"><div class="nxc-status-dot"></div><span>Online · Ready to help</span></div>
         <button id="nxc-hint-btn"><div class="nxc-hint-dot"></div>💡 Quick Questions</button>
-        <div id="nxc-sound-btn" title="Sound on/off">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
-          </svg>
-        </div>
+        <div id="nxc-sound-btn" title="Sound on"></div>
       </div>
       <div class="nxc-red-bar"></div>
     </div>
@@ -989,12 +993,14 @@ function submitLead(data) {
     <div class="nxc-input-area">
       <div class="nxc-input-row">
         <textarea id="nxc-input" placeholder="Ask about JZAI services..." rows="1"></textarea>
-        <span id="nxc-char-count">0/500</span>
-        <button id="nxc-send" aria-label="Send">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
+        <div class="nxc-input-right" id="nxc-input-right">
+          <span id="nxc-char-count">0/500</span>
+          <button id="nxc-send" aria-label="Send">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="nxc-footer-bar">
         <span class="nxc-powered">Powered by OpenAI</span>
@@ -1081,7 +1087,11 @@ function submitLead(data) {
   });
   input.addEventListener('input', function(){
     input.style.height='auto';
-    input.style.height = Math.min(input.scrollHeight, 88)+'px';
+    var lineHeight = 22; // matches line-height
+    var newHeight = Math.min(input.scrollHeight, 88);
+    input.style.height = newHeight+'px';
+    var isMultiline = newHeight > lineHeight * 2.5;
+    charCountEl.style.display = isMultiline ? 'block' : 'none';
   });
   input.addEventListener('keydown', function(e){
     if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
@@ -1100,10 +1110,14 @@ function submitLead(data) {
   // ── SOUND TOGGLE ──
   var soundEnabled = true;
   var soundBtn = document.getElementById('nxc-sound-btn');
+  var soundOnSVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+  var soundOffSVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+  soundBtn.innerHTML = soundOnSVG;
   soundBtn.addEventListener('click', function(){
     soundEnabled = !soundEnabled;
     soundBtn.classList.toggle('muted', !soundEnabled);
-    soundBtn.title = soundEnabled ? 'Sound on/off' : 'Sound muted';
+    soundBtn.innerHTML = soundEnabled ? soundOnSVG : soundOffSVG;
+    soundBtn.title = soundEnabled ? 'Sound on' : 'Sound muted';
   });
   function playNotifSound(){
     if(!soundEnabled) return;
@@ -1129,6 +1143,8 @@ function submitLead(data) {
     closeQuickPanel();
     addMsg('user', text);
     input.value=''; input.style.height='auto'; sendBtn.disabled=true;
+    charCountEl.textContent = '0/500';
+    charCountEl.style.display = 'none';
 
     // ✅ LEAD COLLECTION INTERCEPT
     if (leadStep !== null) {
