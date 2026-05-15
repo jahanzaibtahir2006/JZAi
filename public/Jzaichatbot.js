@@ -849,7 +849,6 @@ function submitLead(data) {
       background:#111; border:1.5px solid rgba(225,29,72,0.15);
       border-radius:12px; padding:8px 8px 8px 14px;
       transition:border-color .2s, box-shadow .2s;
-      flex-wrap:wrap;
     }
     .nxc-input-row:focus-within {
       border-color:#e11d48; box-shadow:0 0 0 3px rgba(225,29,72,0.1);
@@ -858,16 +857,13 @@ function submitLead(data) {
       display:flex; flex-direction:column; align-items:center;
       justify-content:flex-end; gap:4px; flex-shrink:0;
     }
-    .nxc-input-right.multiline { justify-content:flex-end; }
     #nxc-input {
       flex:1; border:none; background:transparent;
       font-family:'DM Sans',sans-serif; font-size:13.5px; color:#f0f0f0;
       resize:none; outline:none; max-height:88px; min-height:22px; line-height:1.5;
-      overflow-y:auto; scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
+      overflow-y:auto; scrollbar-width:none;
     }
-    #nxc-input::-webkit-scrollbar { width:3px; }
-    #nxc-input::-webkit-scrollbar-thumb { background:#e11d48; border-radius:10px; }
-    #nxc-input::-webkit-scrollbar-track { background:transparent; }
+    #nxc-input::-webkit-scrollbar { display:none; }
     #nxc-input::placeholder { color:#444; }
     #nxc-send {
       width:36px; height:36px; border-radius:9px;
@@ -1087,10 +1083,9 @@ function submitLead(data) {
   });
   input.addEventListener('input', function(){
     input.style.height='auto';
-    var lineHeight = 22; // matches line-height
     var newHeight = Math.min(input.scrollHeight, 88);
     input.style.height = newHeight+'px';
-    var isMultiline = newHeight > lineHeight * 2.5;
+    var isMultiline = newHeight > 55;
     charCountEl.style.display = isMultiline ? 'block' : 'none';
   });
   input.addEventListener('keydown', function(e){
