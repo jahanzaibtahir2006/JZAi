@@ -816,6 +816,9 @@ function submitLead(data) {
         <div id="nxc-sound-btn" title="Sound on"></div>
       </div>
       <div class="nxc-red-bar"></div>
+      <button id="nxc-header-close">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div id="nxc-hist-banner">
       <div class="nxc-hist-text">👋 Welcome back!<span>Continue where you left off?</span></div>
@@ -843,9 +846,16 @@ function submitLead(data) {
       </div>
     </div>`;
   document.body.appendChild(win);
-
   var msgs      = document.getElementById('nxc-msgs');
   var input     = document.getElementById('nxc-input');
+  var scrollBtn = document.createElement('button');
+  scrollBtn.id = 'nxc-scroll-btn';
+  scrollBtn.innerHTML = '↓ Latest';
+  scrollBtn.style.cssText = 'position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:#e11d48;color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:12px;cursor:pointer;z-index:9999;display:none;align-items:center;box-shadow:0 4px 12px rgba(225,29,72,0.4);font-family:DM Sans,sans-serif;font-weight:600;';
+  scrollBtn.onclick = function(){ msgs.scrollTop = msgs.scrollHeight; updateScrollBtn(); };
+  win.style.position = 'relative';
+  win.appendChild(scrollBtn);
+  msgs.addEventListener('scroll', updateScrollBtn);
   var sendBtn   = document.getElementById('nxc-send');
   var quickDiv  = document.getElementById('nxc-quick');
   var hintBtn   = document.getElementById('nxc-hint-btn');
@@ -1071,7 +1081,8 @@ function formatMessage(text){
     if(isBot && withCopy!==false){ footer.appendChild(makeCopyBtn(bub)); }
     col.appendChild(bub); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
-    msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
+    msgs.appendChild(wrap);
+    scrollToBottomIfNeeded();
   }
 
   function addBotButtons(promptText, buttons, onSelect) {
@@ -1147,6 +1158,19 @@ function formatMessage(text){
     renderMsg(role, text, true);
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
   }
+
+  function scrollToBottomIfNeeded(){
+  var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80;
+  if(atBottom) msgs.scrollTop = msgs.scrollHeight;
+  updateScrollBtn();
+}
+
+function updateScrollBtn(){
+  var btn = document.getElementById('nxc-scroll-btn');
+  if(!btn) return;
+  var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 40;
+  btn.style.display = atBottom ? 'none' : 'flex';
+}
 
   function addTyping(statusText){
     var id='nxc-typing-'+Date.now();
