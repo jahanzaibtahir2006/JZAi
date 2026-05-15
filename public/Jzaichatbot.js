@@ -765,8 +765,9 @@ function submitLead(data) {
     #nxc-scroll-btn {
   position:sticky; bottom:10px; left:50%; transform:translateX(-50%);
   margin-left:auto; margin-right:auto;
-  background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:20px;
-  padding:5px 14px; font-size:15px; cursor:pointer; z-index:999;
+  background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:50%;
+  width:36px; height:36px;
+  font-size:16px; cursor:pointer; z-index:999;
   display:none; align-items:center; justify-content:center;
   box-shadow:0 2px 8px rgba(0,0,0,0.3);
   font-family:'DM Sans',sans-serif; font-weight:500;
