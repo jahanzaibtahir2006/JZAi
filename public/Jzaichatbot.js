@@ -963,70 +963,23 @@ function submitLead(data) {
   // ── HEADER CLOSE BUTTON ──
   document.getElementById('nxc-header-close').addEventListener('click', closeChat);
 
-  async function sendMessage(){
-    var text = input.value.trim();
-    if(!text || sendBtn.disabled) return;
-    closeQuickPanel();
-    addMsg('user', text);
-    input.value=''; input.style.height='auto'; sendBtn.disabled=true;
-    charCountEl.textContent = '0/500';
-    charCountEl.style.display = 'none';
-
-    // ✅ LEAD COLLECTION INTERCEPT
-    if (leadStep !== null) {
-        handleLeadStep(text);
-        sendBtn.disabled=false;
-        return;
-    }
-
-    var status = TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
-    var tid = addTyping(status);
-    var apiMessages = chatHistory
-      .filter(function(m){ return m.role !== 'bot' || m.text !== chatHistory[0].text; })
-      .map(function(m){
-        return { role: m.role==='bot'?'assistant':'user', content: m.text };
-      });
-    var contextMessages = apiMessages.slice(-20);
-
-    try {
-      var response = await fetch(BACKEND_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: contextMessages })
-      });
-      removeTyping(tid);
-      if(!response.ok) throw new Error('API Error: ' + response.status);
-      var data = await response.json();
-var reply = data.reply ? data.reply.trim() : "I'm having trouble connecting. Please try again!";
-
-// AI lead intent detect kiya?
-if (reply.startsWith('{"action":"open_lead_form"')) {
-  try {
-    var parsed = JSON.parse(reply);
-    startLeadCollection(parsed.service, parsed.budget); // ← budget add
-  } catch(e) {
-    startLeadCollection();
+  var reply = data.reply ? data.reply.trim() : "I'm having trouble connecting. Please try again! You can also reach us at jahanzaibtahir2006@gmail.com";
+var leadAction = null;
+try {
+  var jsonMatch = reply.match(/\{[\s\S]*"action"\s*:\s*"open_lead_form"[\s\S]*\}/);
+  if (jsonMatch) {
+    leadAction = JSON.parse(jsonMatch[0]);
   }
+} catch(e) {
+  leadAction = null;
+}
+if (leadAction) {
+  startLeadCollection(leadAction.service || '', leadAction.budget || '');
   sendBtn.disabled=false;
   input.focus();
   return;
 }
-      
-addMsg('bot', reply);
-      playNotifSound();
-      if(!isOpen){
-        unreadCount++;
-        badge.textContent = unreadCount>9?'9+':String(unreadCount);
-        badge.classList.add('show');
-      }
-    } catch(err){
-      removeTyping(tid);
-      addMsg('bot', '⚠️ Connection issue. Please try again in a moment.');
-      console.error('JZAI Chatbot Error:', err);
-    }
-    sendBtn.disabled=false; input.focus();
-  }
-
+  
 function formatMessage(text){
     if(/<[a-z][\s\S]*>/i.test(text)){
       return text.replace(/\n/g,'<br>');
