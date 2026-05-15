@@ -1183,7 +1183,9 @@ async function sendMessage(){
     if(sBtn) msgs.appendChild(sBtn);
     // Sirf user message par scroll karo
     if(!isBot){
-      msgs.scrollTop = msgs.scrollHeight;
+      requestAnimationFrame(function(){
+        msgs.scrollTop = wrap.offsetTop;
+      });
     }
     updateScrollBtn();
   }
