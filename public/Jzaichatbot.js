@@ -529,7 +529,9 @@ function submitLead(data) {
       flex:1; min-height:0; overflow-y:auto; padding:16px 14px;
       display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth;
       scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
+      justify-content:flex-start;
     }
+    
 /* LIGHT THEME SYNC */
     [data-theme="light"] #nxc-chat {
       background:#fafafa !important;
