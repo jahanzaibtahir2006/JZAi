@@ -639,7 +639,7 @@ function submitLead(data) {
     @keyframes nxc-slide-in { from{opacity:0;transform:translateY(20px) scale(0.95);} to{opacity:1;transform:translateY(0) scale(1);} }
     .nxc-header {
       background:linear-gradient(135deg,#080808 0%,#150308 60%,#1f0510 100%);
-      padding:16px 18px 0; flex-shrink:0; position:relative; overflow:hidden;
+      padding:16px 18px 0; flex-shrink:0; position:relative;
       border-bottom:1px solid rgba(225,29,72,0.1);
     }
     .nxc-header::before {
@@ -647,7 +647,7 @@ function submitLead(data) {
       width:120px; height:120px; border-radius:50%;
       background:rgba(225,29,72,0.06);
     }
-    .nxc-header-top { display:flex; align-items:center; gap:12px; position:relative; z-index:1; }
+    .nxc-header-top { display:flex; align-items:center; gap:12px; position:relative; z-index:1; padding-right:36px; }
     .nxc-logo-wrap {
       width:42px; height:42px; border-radius:10px;
       background:rgba(225,29,72,0.1); border:1.5px solid rgba(225,29,72,0.4);
@@ -889,7 +889,7 @@ function submitLead(data) {
       background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.2);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; transition:all 0.2s;
-      position:absolute; top:8px; right:10px; z-index:10;
+      position:absolute; top:9px; right:9px; z-index:100;
     }
     #nxc-header-close:hover { background:#e11d48; border-color:#e11d48; }
     #nxc-header-close:hover svg { stroke:#fff; }
