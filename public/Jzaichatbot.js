@@ -153,6 +153,13 @@ function showBudgetButtons() {
     addMsg('bot', prompt);
   });
 }
+
+  function extractName(text) {
+  var match = text.match(/my name is ([a-zA-Z\s]{2,20})/i)
+           || text.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i)
+           || text.match(/call me ([a-zA-Z]{2,20})/i);
+  return match ? capitalizeName(match[1].trim()) : null;
+}
   
 function startLeadCollection(service, budget) {
   leadData = {
