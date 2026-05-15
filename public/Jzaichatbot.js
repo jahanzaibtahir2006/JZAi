@@ -743,7 +743,7 @@ function submitLead(data) {
     [data-theme="light"] #nxc-header-close svg { stroke:rgba(15,15,20,0.5) !important; }
     /* ── Sound Toggle Button ── */
     #nxc-sound-btn {
-      width:30px; height:30px; border-radius:50%;
+      width:30px; height:30px; border-radius:20px;
       background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.25);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; transition:all 0.2s; flex-shrink:0;
