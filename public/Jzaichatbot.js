@@ -758,11 +758,13 @@ function submitLead(data) {
     }
     #nxc-char-count.warn { color:#e11d48; font-weight:600; }
     [data-theme="light"] #nxc-char-count { color:#9a9aaa !important; }
+    
     /* ── Scroll to Bottom Button ── */
     #nxc-scroll-btn {
-  position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+  position:sticky; bottom:10px; left:50%; transform:translateX(-50%);
+  margin-left:auto; margin-right:auto;
   background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:20px;
-  padding:5px 14px; font-size:15px; cursor:pointer; z-index:9999;
+  padding:5px 14px; font-size:15px; cursor:pointer; z-index:999;
   display:none; align-items:center; justify-content:center;
   box-shadow:0 2px 8px rgba(0,0,0,0.3);
   font-family:'DM Sans',sans-serif; font-weight:500;
@@ -874,7 +876,7 @@ function submitLead(data) {
   scrollBtn.id = 'nxc-scroll-btn';
   scrollBtn.innerHTML = '↓';
   scrollBtn.onclick = function(){ msgs.scrollTop = msgs.scrollHeight; updateScrollBtn(); };
-  win.appendChild(scrollBtn);
+  msgs.appendChild(scrollBtn);
   msgs.addEventListener('scroll', updateScrollBtn);
 
   var saved = loadHistory();
@@ -933,8 +935,13 @@ function submitLead(data) {
     toggleBtn.querySelector('.nxc-chat-icon').style.display='none';
     toggleBtn.querySelector('.nxc-close-icon').style.display='block';
     unreadCount=0; badge.classList.remove('show');
-    setTimeout(function(){ input.focus(); }, 300);
+    setTimeout(function(){ 
+      msgs.scrollTop = msgs.scrollHeight;
+      input.focus(); 
+    }, 350);
   }
+
+  
   function closeChat(){
     isOpen = false; win.classList.remove('open'); toggleBtn.classList.remove('open');
     toggleBtn.querySelector('.nxc-chat-icon').style.display='block';
