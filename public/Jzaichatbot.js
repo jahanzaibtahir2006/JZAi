@@ -889,7 +889,7 @@ function submitLead(data) {
       background:rgba(225,29,72,0.08); border:1.5px solid rgba(225,29,72,0.2);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; transition:all 0.2s;
-      position:absolute; top:9px; right:9px; z-index:100;
+      position:absolute; top:2px; right:2px; z-index:100;
     }
     #nxc-header-close:hover { background:#e11d48; border-color:#e11d48; }
     #nxc-header-close:hover svg { stroke:#fff; }
