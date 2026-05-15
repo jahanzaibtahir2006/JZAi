@@ -758,6 +758,17 @@ function submitLead(data) {
     }
     #nxc-char-count.warn { color:#e11d48; font-weight:600; }
     [data-theme="light"] #nxc-char-count { color:#9a9aaa !important; }
+    /* ── Scroll to Bottom Button ── */
+    #nxc-scroll-btn {
+      position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+      background:#e11d48; color:#fff; border:none; border-radius:20px;
+      padding:6px 14px; font-size:16px; cursor:pointer; z-index:9999;
+      display:none; align-items:center; justify-content:center;
+      box-shadow:0 4px 12px rgba(225,29,72,0.4);
+      font-family:'DM Sans',sans-serif; font-weight:600;
+      transition:opacity 0.2s, transform 0.2s;
+    }
+    #nxc-scroll-btn:hover { background:#9f1239; transform:translateX(-50%) translateY(-2px); }
   `;
   document.head.appendChild(style);
 
@@ -846,21 +857,24 @@ function submitLead(data) {
       </div>
     </div>`;
   document.body.appendChild(win);
+
+  // ── Core elements ──
   var msgs      = document.getElementById('nxc-msgs');
   var input     = document.getElementById('nxc-input');
-  var scrollBtn = document.createElement('button');
-  scrollBtn.id = 'nxc-scroll-btn';
-  scrollBtn.innerHTML = '↓ Latest';
-  scrollBtn.style.cssText = 'position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:#e11d48;color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:12px;cursor:pointer;z-index:9999;display:none;align-items:center;box-shadow:0 4px 12px rgba(225,29,72,0.4);font-family:DM Sans,sans-serif;font-weight:600;';
-  scrollBtn.onclick = function(){ msgs.scrollTop = msgs.scrollHeight; updateScrollBtn(); };
-  win.style.position = 'relative';
-  win.appendChild(scrollBtn);
-  msgs.addEventListener('scroll', updateScrollBtn);
   var sendBtn   = document.getElementById('nxc-send');
   var quickDiv  = document.getElementById('nxc-quick');
   var hintBtn   = document.getElementById('nxc-hint-btn');
   var histBanner= document.getElementById('nxc-hist-banner');
   var isOpen=false, hintOpen=false;
+
+  // ── Scroll to bottom button ──
+  win.style.position = 'relative';
+  var scrollBtn = document.createElement('button');
+  scrollBtn.id = 'nxc-scroll-btn';
+  scrollBtn.innerHTML = '↓';
+  scrollBtn.onclick = function(){ msgs.scrollTop = msgs.scrollHeight; updateScrollBtn(); };
+  win.appendChild(scrollBtn);
+  msgs.addEventListener('scroll', updateScrollBtn);
 
   var saved = loadHistory();
   if (saved.length > 1) {
@@ -1036,9 +1050,7 @@ async function sendMessage(){
   // ── HEADER CLOSE BUTTON ──
   document.getElementById('nxc-header-close').addEventListener('click', closeChat);
 
- 
-  
-function formatMessage(text){
+  function formatMessage(text){
     if(/<[a-z][\s\S]*>/i.test(text)){
       return text.replace(/\n/g,'<br>');
     }
@@ -1082,95 +1094,93 @@ function formatMessage(text){
     col.appendChild(bub); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    scrollToBottomIfNeeded();
+    // ✅ FIX: Hamesha neeche scroll karo naye message par
+    msgs.scrollTop = msgs.scrollHeight;
+    updateScrollBtn();
   }
 
   function addBotButtons(promptText, buttons, onSelect) {
-  var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
-  var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
-  var col = document.createElement('div'); col.className = 'nxc-msg-col';
-  var bub = document.createElement('div'); bub.className = 'nxc-bubble-msg'; 
-  bub.innerHTML = formatMessage(promptText);
-  
-  // Buttons container
-  var btnWrap = document.createElement('div'); 
-  btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
-  buttons.forEach(function(btn) {
-    var b = document.createElement('button');
-    b.textContent = btn;
-    b.style.cssText = `
-  background: rgba(225,29,72,0.08);
-  border: 1.5px solid rgba(225,29,72,0.25);
-  color: #e11d48;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  text-align: center;
-  font-size: 12.5px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-`;
-    b.onmouseover = function() {
-      if (!b.dataset.selected) {
-        b.style.background = 'rgba(225,29,72,0.15)';
-        b.style.borderColor = '#e11d48';
-        b.style.transform = 'translateY(-1px)';
-      }
-    };
-    b.onmouseout = function() {
-      if (!b.dataset.selected) {
-        b.style.background = 'rgba(225,29,72,0.08)';
-        b.style.borderColor = 'rgba(225,29,72,0.25)';
-        b.style.transform = 'translateY(0)';
-      }
-    };
-    b.onclick = function() {
-      b.dataset.selected = 'true';
-      b.style.background = '#e11d48';
-      b.style.borderColor = '#e11d48';
-      b.style.color = '#fff';
-      b.style.transform = 'scale(0.97)';
-      btnWrap.querySelectorAll('button').forEach(function(x) {
-        if (x !== b) {
-          x.style.opacity = '0.4';
-          x.style.cursor = 'default';
-          x.style.pointerEvents = 'none';
-        }
-      });
-      onSelect(btn);
-    };
-    btnWrap.appendChild(b);
-  });
+    var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
+    var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
+    var col = document.createElement('div'); col.className = 'nxc-msg-col';
+    var bub = document.createElement('div'); bub.className = 'nxc-bubble-msg'; 
+    bub.innerHTML = formatMessage(promptText);
     
-  var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
-  var time = document.createElement('div'); time.className = 'nxc-msg-time';
-  time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  footer.appendChild(time);
+    var btnWrap = document.createElement('div'); 
+    btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
+    buttons.forEach(function(btn) {
+      var b = document.createElement('button');
+      b.textContent = btn;
+      b.style.cssText = `
+    background: rgba(225,29,72,0.08);
+    border: 1.5px solid rgba(225,29,72,0.25);
+    color: #e11d48;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  `;
+      b.onmouseover = function() {
+        if (!b.dataset.selected) {
+          b.style.background = 'rgba(225,29,72,0.15)';
+          b.style.borderColor = '#e11d48';
+          b.style.transform = 'translateY(-1px)';
+        }
+      };
+      b.onmouseout = function() {
+        if (!b.dataset.selected) {
+          b.style.background = 'rgba(225,29,72,0.08)';
+          b.style.borderColor = 'rgba(225,29,72,0.25)';
+          b.style.transform = 'translateY(0)';
+        }
+      };
+      b.onclick = function() {
+        b.dataset.selected = 'true';
+        b.style.background = '#e11d48';
+        b.style.borderColor = '#e11d48';
+        b.style.color = '#fff';
+        b.style.transform = 'scale(0.97)';
+        btnWrap.querySelectorAll('button').forEach(function(x) {
+          if (x !== b) {
+            x.style.opacity = '0.4';
+            x.style.cursor = 'default';
+            x.style.pointerEvents = 'none';
+          }
+        });
+        onSelect(btn);
+      };
+      btnWrap.appendChild(b);
+    });
+      
+    var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
+    var time = document.createElement('div'); time.className = 'nxc-msg-time';
+    time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    footer.appendChild(time);
 
-  col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
-  wrap.appendChild(av); wrap.appendChild(col);
-  msgs.appendChild(wrap); msgs.scrollTop = msgs.scrollHeight;
-}
+    col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
+    wrap.appendChild(av); wrap.appendChild(col);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+    updateScrollBtn();
+  }
 
   function addMsg(role, text){
     renderMsg(role, text, true);
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
   }
 
-  function scrollToBottomIfNeeded(){
-  var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80;
-  if(atBottom) msgs.scrollTop = msgs.scrollHeight;
-  updateScrollBtn();
-}
-
-function updateScrollBtn(){
-  var btn = document.getElementById('nxc-scroll-btn');
-  if(!btn) return;
-  var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 40;
-  btn.style.display = atBottom ? 'none' : 'flex';
-}
+  // ✅ FIX: Scroll button update only — scroll happen renderMsg mein hota hai
+  function updateScrollBtn(){
+    var btn = document.getElementById('nxc-scroll-btn');
+    if(!btn) return;
+    var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 40;
+    btn.style.display = atBottom ? 'none' : 'flex';
+  }
 
   function addTyping(statusText){
     var id='nxc-typing-'+Date.now();
@@ -1188,11 +1198,11 @@ function updateScrollBtn(){
   function removeTyping(id){ var el=document.getElementById(id); if(el) el.remove(); }
 
   // Theme sync with website
-var themeObserver = new MutationObserver(function() {
-  var theme = document.documentElement.getAttribute('data-theme');
-});
-themeObserver.observe(document.documentElement, {
-  attributes: true, attributeFilter: ['data-theme']
-});
+  var themeObserver = new MutationObserver(function() {
+    var theme = document.documentElement.getAttribute('data-theme');
+  });
+  themeObserver.observe(document.documentElement, {
+    attributes: true, attributeFilter: ['data-theme']
+  });
 
 })();
