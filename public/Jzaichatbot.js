@@ -1175,13 +1175,22 @@ async function sendMessage(){
     col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    var sBtn2 = document.getElementById('nxc-scroll-btn');
-    if(sBtn2) msgs.appendChild(sBtn2);
+    // Scroll button ko hamesha end par rakho
+    var sBtn = document.getElementById('nxc-scroll-btn');
+    if(sBtn) msgs.appendChild(sBtn);
+    // Sirf user message par scroll karo
+    if(!isBot){
+      msgs.scrollTop = msgs.scrollHeight;
+    }
     updateScrollBtn();
   }
 
   function addMsg(role, text){
     renderMsg(role, text, true);
+    // User message par scroll karo, bot message par nahi
+    if(role === 'user'){
+      msgs.scrollTop = msgs.scrollHeight;
+    }
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
   }
 
