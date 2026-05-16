@@ -249,9 +249,12 @@ if (!leadData.service) {
 }
   
   leadStep = 0;
-  while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
-    leadStep++;
-  }
+while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
+  leadStep++;
+}
+if (!leadData.name || !leadData.email) {
+  leadStep = !leadData.name ? 0 : 1;
+}
 
   if (leadStep >= LEAD_STEPS.length) {
     addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
@@ -366,20 +369,31 @@ if (field === 'budget') {
     else if (userInput.includes('€')) currency = '€';
     else if (userInput.includes('₹')) currency = '₹';
     else if (/rs|pkr|₨|rupee|روپے/i.test(userInput)) currency = 'PKR';
+    else if (/rm|myr|ringgit/i.test(userInput)) currency = 'MYR';
+    else if (/irr|rial|toman/i.test(userInput)) currency = 'IRR';
+    else if (/aed|dirham/i.test(userInput)) currency = 'AED';
+    else if (/sar|riyal/i.test(userInput)) currency = 'SAR';
+    else if (/try|lira/i.test(userInput)) currency = 'TRY';
+    else if (/cny|yuan|rmb/i.test(userInput)) currency = 'CNY';
     var usdAmount = amount;
-    if (currency === 'PKR') usdAmount = Math.round(amount / exchangeRates.PKR);
-    else if (currency === '₹') usdAmount = Math.round(amount / exchangeRates.INR);
-    else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
-    else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
-    else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
+if (currency === 'PKR') usdAmount = Math.round(amount / exchangeRates.PKR);
+else if (currency === '₹') usdAmount = Math.round(amount / exchangeRates.INR);
+else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
+else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
+else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
+else if (currency !== '$' && currency !== '') usdAmount = Math.round(amount / exchangeRates.OTHER || amount);
+
+var conversionNote = (currency !== '$' && currency !== '' && usdAmount !== amount)
+  ? '\n\n💱 That\'s approximately **$' + usdAmount.toLocaleString() + ' USD**.' : '';
+    
     var budgetLabel = '', botReply = '';
     var detectedService = detectServiceFromText(userInput);
     if (usdAmount < 100) {
       budgetLabel = (currency || '') + rawAmount + ' (discussed with Jahanzaib)';
-      botReply = "I understand! 😊 Our minimum starts at **$100**. Jahanzaib can discuss a **custom arrangement** for your budget. Let's move forward!";
+      botReply = "I understand! 😊 Our minimum starts at **$100**. Jahanzaib can discuss a **custom arrangement** for your budget. Let's move forward!" + conversionNote;
     } else if (detectedService && usdAmount < detectedService.min) {
       budgetLabel = detectedService.label + ' (budget to be discussed)';
-      botReply = detectedService.emoji + " **" + detectedService.label.split('—')[0].trim() + "** starts at **$" + detectedService.min + "** — your budget is a little short. But Jahanzaib can discuss a **custom arrangement**! 😊 Let's move forward!";
+      botReply = detectedService.emoji + " **" + detectedService.label.split('—')[0].trim() + "** starts at **$" + detectedService.min + "** — your budget is a little short. But Jahanzaib can discuss a **custom arrangement**! 😊 Let's move forward!" + conversionNote;
     } else {
       var matched = null;
       for (var i = 0; i < SERVICE_PRICES.length; i++) {
@@ -390,7 +404,7 @@ if (field === 'budget') {
       }
       if (matched) {
         budgetLabel = matched.label;
-        botReply = "Perfect! " + matched.emoji + " **" + matched.label.split('—')[0].trim() + "** fits your budget!";
+        botReply = "Perfect! " + matched.emoji + " **" + matched.label.split('—')[0].trim() + "** fits your budget!" + conversionNote;
       } else {
         budgetLabel = userInput;
         botReply = "Got it! I've noted your budget. 📝 Let's move forward!";
