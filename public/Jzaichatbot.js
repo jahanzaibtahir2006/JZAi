@@ -1111,15 +1111,18 @@ async function sendMessage(){
     if(!isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
-    // User message ko top pe lao, minus header padding
     msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - 14;
     updateScrollBtn();
   }, 150);
 }
-    if(isBot){
+if(isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
-    msgs.scrollTop = msgs.scrollHeight;
+    // Sirf tab scroll karo jab user bottom ke qareeb ho
+    var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 150;
+    if(atBottom){
+      msgs.scrollTop = msgs.scrollHeight;
+    }
     updateScrollBtn();
   }, 150);
 }
