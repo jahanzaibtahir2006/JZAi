@@ -1109,13 +1109,14 @@ async function sendMessage(){
     if(sBtn) msgs.appendChild(sBtn);
     // User message top par aaye
     if(!isBot){
-      requestAnimationFrame(function(){
-        msgs.scrollTop = wrap.offsetTop - 6;
-      });
+      setTimeout(function(){
+        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - 10;
+        updateScrollBtn();
+      }, 100);
+    } else {
+      updateScrollBtn();
     }
-    updateScrollBtn();
   }
-
   function addBotButtons(promptText, buttons, onSelect) {
     var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
     var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
