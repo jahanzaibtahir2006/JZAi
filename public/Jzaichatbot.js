@@ -104,7 +104,19 @@ var NAME_BLACKLIST = [
   'paint','door','tree','table','car','phone','computer','laptop','chair',
   'book','pen','water','food','house','room','city','country','world'
 ];
-
+function isValidName(input) {
+  var text = input.trim().toLowerCase();
+  if (!/^[a-zA-Z\s]+$/.test(text)) return false;
+  var words = text.split(/\s+/).filter(Boolean);
+  if (words.length > 3) return false;
+  if (text.replace(/\s/g,'').length < 2) return false;
+  if (words.some(function(w){ return w.length < 2; })) return false;
+  var nonNamePattern = /^(hi|ok|no|yes|hey|bye|the|and|for|are|but|not|you|all|can|chatbot|chahiye|service|website|system|help|need|want|buy|test|okay|sure|done|free|user|admin|bot|ai)$/i;
+  if (words.some(function(w){ return nonNamePattern.test(w); })) return false;
+  if (/^(.)\1+$/.test(text.replace(/\s/g,''))) return false;
+  return true;
+}
+  
 function isBlacklistedName(name) {
   var lower = name.toLowerCase().trim();
   return NAME_BLACKLIST.some(function(word) {
@@ -264,6 +276,10 @@ function handleLeadStep(userInput) {
       addMsg('bot', "😊 Please enter just your name:");
       return;
     }
+    if (!isValidName(userInput.trim())) {
+      addMsg('bot', "😊 That doesn't look like a real name. Please enter your name:");
+      return;
+    }
     var nameMatch = userInput.match(/my name is ([a-zA-Z\s]{2,20})/i)
                  || userInput.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i);
     if (nameMatch) {
@@ -277,7 +293,7 @@ function handleLeadStep(userInput) {
     addMsg('bot', prompt);
     return;
   }
-
+  
   // Email step
   if (field === 'email') {
     var words = userInput.trim().split(/\s+/);
