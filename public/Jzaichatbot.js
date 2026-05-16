@@ -1107,8 +1107,7 @@ async function sendMessage(){
     // Scroll button ko hamesha end par rakho
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
-    // User message top par aaye
-    if(!isBot){
+if(!isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
     msgs.scrollTop = wrap.offsetTop - msgs.offsetTop;
@@ -1118,14 +1117,11 @@ async function sendMessage(){
 if(isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
-    // Sirf tab scroll karo jab user bottom ke qareeb ho
-    var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 150;
-    if(atBottom){
-      msgs.scrollTop = msgs.scrollHeight;
-    }
+    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/2;
     updateScrollBtn();
   }, 150);
 }
+    
   }
   function addBotButtons(promptText, buttons, onSelect) {
     var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
