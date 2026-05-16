@@ -1197,10 +1197,6 @@ async function sendMessage(){
 
   function addMsg(role, text){
     renderMsg(role, text, true);
-    // User message par scroll karo, bot message par nahi
-    if(role === 'user'){
-      msgs.scrollTop = msgs.scrollHeight;
-    }
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
   }
 
@@ -1223,7 +1219,7 @@ async function sendMessage(){
           <span class="nxc-typing-status">${statusText||'Thinking...'}</span>
         </div>
       </div>`;
-    msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight; return id;
+  msgs.appendChild(wrap); return id;
   }
   function removeTyping(id){ var el=document.getElementById(id); if(el) el.remove(); }
 
