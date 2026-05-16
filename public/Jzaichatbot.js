@@ -196,6 +196,15 @@ function startLeadCollection(service, budget) {
     }
   }
 
+  // Agar service already set nahi aur email detect hua
+// toh pehle service poochho
+if (!leadData.service) {
+  leadStep = LEAD_STEPS.indexOf('service');
+  var prompt = LEAD_PROMPTS['service'];
+  addMsg('bot', prompt);
+  return;
+}
+  
   leadStep = 0;
   while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
     leadStep++;
