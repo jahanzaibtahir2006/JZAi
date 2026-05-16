@@ -527,7 +527,7 @@ function submitLead(data) {
     #nxc-hist-no:hover { background:rgba(225,29,72,0.15); }
     .nxc-messages {
       flex:1; min-height:0; overflow-y:auto; padding:16px 14px;
-      display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth;
+      display:flex; flex-direction:column; gap:11px; scroll-behavior:auto;
       scrollbar-width:thin; scrollbar-color:#e11d48 transparent;
       justify-content:flex-start;
     }
@@ -1110,11 +1110,10 @@ async function sendMessage(){
     // User message top par aaye
     if(!isBot){
       setTimeout(function(){
-        msgs.scrollTop = wrap.offsetTop;
+        msgs.style.scrollBehavior = 'auto';
+        msgs.scrollTop = wrap.offsetTop - 14;
         updateScrollBtn();
       }, 150);
-    } else {
-      updateScrollBtn();
     }
   }
   function addBotButtons(promptText, buttons, onSelect) {
