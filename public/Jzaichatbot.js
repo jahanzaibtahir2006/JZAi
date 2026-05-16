@@ -763,9 +763,9 @@ function submitLead(data) {
     
     /* ── Scroll to Bottom Button ── */
     #nxc-scroll-btn {
-  position:sticky; bottom:10px; left:50%; transform:translateX(-50%);
+  position:sticky; bottom:1px; left:50%; transform:translateX(-50%);
   margin-left:auto; margin-right:auto;
-  background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:50%;
+  background:rgba(60,60,60,0.75); color:#ccc; border:none; border-radius:20px;
   width:36px; height:36px;
   font-size:16px; cursor:pointer; z-index:999;
   display:none; align-items:center; justify-content:center;
