@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <>
       <nav id="navbar" className={scrolled ? 'scrolled' : ''}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
           <Link href="/" className="nav-logo">JZ<span>AI</span></Link>
           <ThemeToggle />
         </div>
