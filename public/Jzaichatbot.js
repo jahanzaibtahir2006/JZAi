@@ -1117,7 +1117,7 @@ if(!isBot){
 if(isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
-    msgs.scrollTop = lastBot.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
+    msgs.scrollTop = lastBot.offsetTop - msgs.offsetTop - msgs.clientHeight/3;
     updateScrollBtn();
   }, 150);
 }
