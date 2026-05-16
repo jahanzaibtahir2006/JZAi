@@ -1111,7 +1111,7 @@ async function sendMessage(){
     if(!isBot){
   setTimeout(function(){
     msgs.style.scrollBehavior = 'smooth';
-    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - 10;
+    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop;
     updateScrollBtn();
   }, 150);
 }
