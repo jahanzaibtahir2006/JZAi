@@ -169,20 +169,16 @@ function startLeadCollection(service, budget) {
   if (service && service !== 'General') leadData.service = service;
   if (budget && budget !== '') leadData.budget = budget;
 
-  // Chat history se detect karo
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
-      // Name detect
       if (!leadData.name) {
         var detected = extractName(m.text);
         if (detected) leadData.name = detected;
       }
-      // Email detect
       if (!leadData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.text.trim())) {
         leadData.email = m.text.trim();
       }
-      // Message detect
       if (!leadData.message) {
         var txt = m.text.trim();
         var wordCount = txt.split(/\s+/).length;
@@ -190,19 +186,6 @@ function startLeadCollection(service, budget) {
         if (wordCount >= 15 && hasDescriptiveWords) {
           leadData.message = txt;
         }
-      }
-    }
-    
-    // Bot response se name detect karo
-    if (m.role === 'bot' && !leadData.name) {
-      var botNameMatch = m.text.match(/(?:hi|hey|hello|nice to meet you)[,\s]+([A-Z][a-z]{1,15})/i)
-                || m.text.match(/([A-Z][a-z]{1,15})[,\s]+(?:how can|what can|glad)/i)
-                || m.text.match(/great to meet you[,\s]+([A-Z][a-z]{1,15})/i)
-                || m.text.match(/your name is ([A-Z][a-z]{1,15})/i)
-                || m.text.match(/meet you,?\s+([A-Z][a-z]{1,15})/i);
-      
-      if (botNameMatch) {
-        leadData.name = capitalizeName(botNameMatch[1]);
       }
     }
     if (m.role === 'bot' && !leadData.budget) {
@@ -213,21 +196,17 @@ function startLeadCollection(service, budget) {
     }
   }
 
-  
-  // Pehle bhare fields skip karo
   leadStep = 0;
   while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) {
     leadStep++;
   }
 
-  // Sab already hai — seedha submit karo
   if (leadStep >= LEAD_STEPS.length) {
     addMsg('bot', "✅ Got everything I need, " + (leadData.name || 'there') + "! Jahanzaib will reach out to you very soon! 🚀");
     submitLead(leadData);
     return;
   }
 
-  // Sirf ek jagah prompt show karo
   var currentField = LEAD_STEPS[leadStep];
   if (currentField === 'budget') {
     showBudgetButtons();
