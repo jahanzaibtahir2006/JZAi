@@ -894,10 +894,10 @@ function submitLead(data) {
     document.getElementById('nxc-hist-no').addEventListener('click', function(){
       histBanner.classList.remove('show');
       clearHistory(); chatHistory = [];
-      addMsg('bot', "Hey! 👋 Great to have you here!\n\nI'm **JZAI Assistant** — I'm here to help you discover what JZAI can do for you — AI solutions, web development, chatbots & more! 😊\n\nWhat can I help you with today? 💬");
+      addMsg('bot', "Hey! 👋 Great to have you here!\n\nI'm **JZAI Assistant** — I'm here to help you discover — AI solutions, web development, chatbots & more! 😊\n\nWhat can I help you with today? 💬");
     });
   } else {
-    addMsg('bot', "Hey! 👋 Great to have you here!\n\nI'm **JZAI Assistant** — I'm here to help you discover what JZAI can do for you — AI solutions, web development, chatbots & more! 😊\n\nWhat can I help you with today? 💬");
+    addMsg('bot', "Hey! 👋 Great to have you here!\n\nI'm **JZAI Assistant** — I'm here to help you discover — AI solutions, web development, chatbots & more! 😊\n\nWhat can I help you with today? 💬");
   }
 
   function loadQuickQuestions(){
