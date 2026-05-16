@@ -1108,7 +1108,12 @@ async function sendMessage(){
     // Scroll button ko hamesha end par rakho
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
-    // Auto scroll nahi — sirf button dikhao
+    // User message top par aaye
+    if(!isBot){
+      requestAnimationFrame(function(){
+        msgs.scrollTop = wrap.offsetTop - 16;
+      });
+    }
     updateScrollBtn();
   }
 
