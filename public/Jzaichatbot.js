@@ -115,15 +115,26 @@ var data = await response.json();
 var result = data;
 
     if (result.isName) {
-      leadData.name = leadData._pendingName;
-      leadStep++;
-      var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-      prompt = prompt.replace('{name}', leadData.name);
-      addMsg('bot', prompt);
-    } else {
-      leadData._pendingName = null;
-      addMsg('bot', "Hmm, **" + name + "**? That doesn't seem like a real name 😄 Please enter your actual name:");
-    }
+  leadData.name = leadData._pendingName;
+  leadStep++;
+  var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+  prompt = prompt.replace('{name}', leadData.name);
+  addMsg('bot', prompt);
+} else {
+  if (leadData._nameRejectedOnce) {
+    // Doosri baar — accept kar lo, irritate mat karo
+    leadData.name = leadData._pendingName;
+    leadData._nameRejectedOnce = false;
+    leadStep++;
+    var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+    prompt = prompt.replace('{name}', leadData.name);
+    addMsg('bot', prompt);
+  } else {
+    leadData._nameRejectedOnce = true;
+    addMsg('bot', "Hmm, **" + name + "**? That's an unusual one! 😄 Just confirming — is this your real name?");
+    leadData._awaitingNameConfirm = true;
+  }
+}
   } catch(e) {
     // Fallback — accept kar lo
     leadData.name = leadData._pendingName;
