@@ -181,6 +181,7 @@ function showBudgetButtons() {
   addBotButtons("Got it! **What's your approximate budget?**", BUDGET_BUTTONS, function(selected) {
     addMsg('user', selected);
     leadData.budget = selected;
+    leadData.userBudget = selected;
     leadStep++;
     // Next step check karo
     if (leadStep >= LEAD_STEPS.length) {
@@ -396,6 +397,7 @@ if (field === 'budget') {
       }
     }
     leadData['budget'] = budgetLabel;
+    leadData['userBudget'] = userInput;  // ← ADD
     // Agar service pehle se detect nahi hui toh matched service save karo
     if (!leadData.service && matched) leadData.service = matched.label.split('—')[0].trim();
     addMsg('bot', botReply);
@@ -411,6 +413,7 @@ if (field === 'budget') {
       budgetLower.includes('sasta') || budgetLower.includes('limited')) {
     addMsg('bot', "No worries! 😊 Our most affordable option starts at just **$100**. Jahanzaib can also discuss **flexible arrangements**. Let's proceed!");
     leadData['budget'] = 'Low budget (to be discussed)';
+    leadData['userBudget'] = userInput;
     leadStep++;
     var p2 = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
     p2 = p2.replace('{name}', leadData.name || 'there');
@@ -420,6 +423,7 @@ if (field === 'budget') {
   if (!BUDGET_BUTTONS.some(function(b){ return userInput === b; })) {
     addMsg('bot', "Got it! I've noted your budget. 📝 Let's move forward!");
     leadData['budget'] = userInput;
+    leadData['userBudget'] = userInput;
     leadStep++;
     var p3 = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
     p3 = p3.replace('{name}', leadData.name || 'there');
