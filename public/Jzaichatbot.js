@@ -1109,12 +1109,20 @@ async function sendMessage(){
     if(sBtn) msgs.appendChild(sBtn);
     // User message top par aaye
     if(!isBot){
-      setTimeout(function(){
-        msgs.style.scrollBehavior = 'auto';
-        msgs.scrollTop = wrap.offsetTop - 14;
-        updateScrollBtn();
-      }, 150);
-    }
+  setTimeout(function(){
+    msgs.style.scrollBehavior = 'smooth';
+    // User message ko top pe lao, minus header padding
+    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - 14;
+    updateScrollBtn();
+  }, 150);
+}
+    if(isBot){
+  setTimeout(function(){
+    msgs.style.scrollBehavior = 'smooth';
+    msgs.scrollTop = msgs.scrollHeight;
+    updateScrollBtn();
+  }, 150);
+}
   }
   function addBotButtons(promptText, buttons, onSelect) {
     var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
