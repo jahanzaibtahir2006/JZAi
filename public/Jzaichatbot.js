@@ -1111,7 +1111,7 @@ async function sendMessage(){
     // User message top par aaye
     if(!isBot){
       requestAnimationFrame(function(){
-        msgs.scrollTop = wrap.offsetTop - 16;
+        msgs.scrollTop = wrap.offsetTop - 6;
       });
     }
     updateScrollBtn();
