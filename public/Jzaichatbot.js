@@ -176,9 +176,10 @@ function startLeadCollection(service, budget) {
         var detected = extractName(m.text);
         if (detected) leadData.name = detected;
       }
-      if (!leadData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.text.trim())) {
-        leadData.email = m.text.trim();
-      }
+      if (!leadData.email) {
+  var emailMatch = m.text.match(/[^\s@]+@[^\s@]+\.[^\s@]+/);
+  if (emailMatch) leadData.email = emailMatch[0].trim();
+}
       if (!leadData.message) {
         var txt = m.text.trim();
         var wordCount = txt.split(/\s+/).length;
