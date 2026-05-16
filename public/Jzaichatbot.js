@@ -939,7 +939,6 @@ function submitLead(data) {
     toggleBtn.querySelector('.nxc-close-icon').style.display='block';
     unreadCount=0; badge.classList.remove('show');
     setTimeout(function(){ 
-      msgs.scrollTop = msgs.scrollHeight;
       input.focus(); 
     }, 350);
   }
@@ -1186,12 +1185,6 @@ async function sendMessage(){
     // Scroll button ko hamesha end par rakho
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
-    // Sirf user message par scroll karo
-    if(!isBot){
-      requestAnimationFrame(function(){
-        msgs.scrollTop = wrap.offsetTop;
-      });
-    }
     updateScrollBtn();
   }
 
