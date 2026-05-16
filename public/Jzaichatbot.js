@@ -1110,9 +1110,9 @@ async function sendMessage(){
     // User message top par aaye
     if(!isBot){
       setTimeout(function(){
-        wrap.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        msgs.scrollTop = wrap.offsetTop;
         updateScrollBtn();
-      }, 100);
+      }, 150);
     } else {
       updateScrollBtn();
     }
