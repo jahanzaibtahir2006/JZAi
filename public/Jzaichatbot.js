@@ -201,14 +201,15 @@ function showBudgetButtons() {
   return match ? capitalizeName(match[1].trim()) : null;
 }
   
-function startLeadCollection(service, budget) {
+function startLeadCollection(service, budget, userBudget) {
   leadData = {
     name: leadData.name || null,
     email: leadData.email || null
   };
   if (service && service !== 'General') leadData.service = service;
   if (budget && budget !== '') leadData.budget = budget;
-
+  if (userBudget && userBudget !== '') leadData.userBudget = userBudget;  // ← ADD THIS
+  
   for (var i = 0; i < chatHistory.length; i++) {
     var m = chatHistory[i];
     if (m.role === 'user') {
@@ -1047,7 +1048,7 @@ async function sendMessage(){
         if (jsonMatch) { leadAction = JSON.parse(jsonMatch[0]); }
       } catch(e) { leadAction = null; }
       if (leadAction) {
-        startLeadCollection(leadAction.service || '', leadAction.budget || '');
+        startLeadCollection(leadAction.service || '', leadAction.budget || '', leadAction.userBudget || '');
         sendBtn.disabled=false;
         input.focus();
         return;
