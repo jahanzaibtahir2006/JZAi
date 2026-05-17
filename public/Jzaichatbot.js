@@ -1247,14 +1247,13 @@ async function sendMessage(){
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
     // Scroll button ko hamesha end par rakho
-    var sBtn = document.getElementById('nxc-scroll-btn');
-    if(sBtn) msgs.appendChild(sBtn);
-if(!isBot){
-  setTimeout(function(){
-    msgs.style.scrollBehavior = 'smooth';
-    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop;
-    updateScrollBtn();
-  }, 150);
+    var sBtn2 = document.getElementById('nxc-scroll-btn');
+    if(sBtn2) msgs.appendChild(sBtn2);
+    setTimeout(function(){
+      msgs.style.scrollBehavior = 'smooth';
+      msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
+      updateScrollBtn();
+    }, 400);
 }
 if(isBot){
   setTimeout(function(){
