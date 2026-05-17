@@ -438,10 +438,10 @@ if (leadData._awaitingConfirm) {
     }
 
     var words = userInput.trim().split(/\s+/);
-    if (words.length > 3) {
-      addMsg('bot', "😊 Please enter just your name:");
-      return;
-    }
+if (words.length > 4) {
+  addMsg('bot', "😊 Please enter just your name:");
+  return;
+}
 
     // GPT se check karega
     leadData._pendingName = capitalizeName(userInput.trim());
