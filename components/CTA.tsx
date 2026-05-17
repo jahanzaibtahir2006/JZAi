@@ -14,13 +14,45 @@ const SERVICES = [
   'UI/UX Design',
 ]
 
-const BUDGETS = [
-  '💬 Simple FAQ Chatbot — $100–$300',
-  '🤖 Custom AI Chatbot — $300–$800',
-  '📚 RAG Based Chatbot — $500–$1,500',
-  '🌐 Full NLP + Multi-language — $1,000–$3,000',
-  '🏢 Enterprise Level — $3,000+',
-]
+// Har service ke liye alag budget options
+const SERVICE_BUDGETS: Record<string, string[]> = {
+  'AI Chatbot': [
+    '💬 Simple FAQ Chatbot — $100–$300',
+    '🤖 Custom AI Chatbot — $300–$800',
+    '📚 RAG Based Chatbot — $500–$1,500',
+    '🌐 Full NLP + Multi-language — $1,000–$3,000',
+    '🏢 Enterprise Level — $3,000+',
+  ],
+  'AI / Machine Learning': [
+    '🔬 Basic ML Model — $500–$1,500',
+    '🧠 Custom ML Pipeline — $1,500–$5,000',
+    '🏢 Enterprise AI System — $5,000+',
+  ],
+  'Web Development': [
+    '🌐 Landing Page — $100–$300',
+    '💼 Business Website — $300–$800',
+    '🛒 E-commerce / Web App — $800–$3,000',
+    '🏢 Enterprise Web Platform — $3,000+',
+  ],
+  'Cloud / DevOps': [
+    '⚙️ Basic Setup & Config — $200–$500',
+    '🚀 CI/CD Pipeline — $500–$1,500',
+    '☁️ Full Cloud Infrastructure — $1,500–$5,000',
+    '🏢 Enterprise DevOps — $5,000+',
+  ],
+  'Data Engineering': [
+    '📊 Data Dashboard — $300–$800',
+    '🔄 ETL Pipeline — $800–$2,500',
+    '🏗️ Data Warehouse Setup — $2,500–$6,000',
+    '🏢 Enterprise Data Platform — $6,000+',
+  ],
+  'UI/UX Design': [
+    '🎨 Landing Page Design — $100–$300',
+    '📱 App UI Design — $300–$800',
+    '🖥️ Full Product Design — $800–$2,500',
+    '🏢 Enterprise Design System — $2,500+',
+  ],
+}
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
@@ -28,7 +60,11 @@ export default function CTA() {
   const [formState, setFormState] = useState<FormState>('idle')
   const [focused, setFocused] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [selectedService, setSelectedService] = useState<string>('')
   const formRef = useRef<HTMLFormElement>(null)
+
+  // Selected service ke budget options
+  const budgetOptions = selectedService ? SERVICE_BUDGETS[selectedService] ?? [] : []
 
   function validate(data: Record<string, string>) {
     const e: Record<string, string> = {}
@@ -293,7 +329,7 @@ export default function CTA() {
                       <label className="form-label" htmlFor="cf-name">Your Name</label>
                       <input
                         id="cf-name" name="name" type="text"
-                        className="form-input" placeholder="Jahanzaib"
+                        className="form-input" placeholder="Your full name"
                         onFocus={() => setFocused('name')}
                         onBlur={() => setFocused(null)}
                       />
@@ -321,7 +357,8 @@ export default function CTA() {
                         <select
                           id="cf-service" name="service"
                           className="form-select"
-                          defaultValue=""
+                          value={selectedService}
+                          onChange={e => setSelectedService(e.target.value)}
                           onFocus={() => setFocused('service')}
                           onBlur={() => setFocused(null)}
                         >
@@ -332,7 +369,7 @@ export default function CTA() {
                       {errors.service && <span className="form-error">{errors.service}</span>}
                     </div>
 
-                    {/* Budget */}
+                    {/* Budget — service ke baad hi show hoga */}
                     <div className={`form-group${focused === 'budget' ? ' focused' : ''}`}>
                       <label className="form-label" htmlFor="cf-budget">Budget</label>
                       <div className="form-select-wrap">
@@ -340,11 +377,15 @@ export default function CTA() {
                           id="cf-budget" name="budget"
                           className="form-select"
                           defaultValue=""
+                          disabled={!selectedService}
                           onFocus={() => setFocused('budget')}
                           onBlur={() => setFocused(null)}
+                          style={{ opacity: selectedService ? 1 : 0.45, cursor: selectedService ? 'pointer' : 'not-allowed' }}
                         >
-                          <option value="" disabled>Select budget...</option>
-                          {BUDGETS.map(b => <option key={b} value={b}>{b}</option>)}
+                          <option value="" disabled>
+                            {selectedService ? 'Select budget...' : 'Select service first'}
+                          </option>
+                          {budgetOptions.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
                       </div>
                     </div>
