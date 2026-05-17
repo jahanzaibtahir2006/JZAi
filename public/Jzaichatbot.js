@@ -1286,18 +1286,24 @@ async function sendMessage(){
     col.appendChild(bub); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    // Scroll button ko hamesha end par rakho
-   msgs.appendChild(wrap);
     var sBtn2 = document.getElementById('nxc-scroll-btn');
     if(sBtn2) msgs.appendChild(sBtn2);
-    setTimeout(function(){
-      msgs.style.scrollBehavior = 'smooth';
-      msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
-      updateScrollBtn();
-    }, 400);
+    if(!isBot){
+      setTimeout(function(){
+        msgs.style.scrollBehavior = 'smooth';
+        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop;
+        updateScrollBtn();
+      }, 150);
+    }
+    if(isBot){
+      setTimeout(function(){
+        msgs.style.scrollBehavior = 'smooth';
+        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
+        updateScrollBtn();
+      }, 400);
+    }
   }
     
-  }
   function addBotButtons(promptText, buttons, onSelect) {
     var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
     var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
