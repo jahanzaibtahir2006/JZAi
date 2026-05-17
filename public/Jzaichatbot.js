@@ -1271,37 +1271,82 @@ async function sendMessage(){
     return btn;
   }
 
-  function renderMsg(role, text, withCopy){
-    var isBot = role==='bot';
-    var wrap=document.createElement('div'); wrap.className='nxc-msg '+(isBot?'nxc-bot':'nxc-user');
-    var av=document.createElement('div'); av.className='nxc-avatar';
-    av.textContent = isBot ? 'JZ' : 'You';
-    var col=document.createElement('div'); col.className='nxc-msg-col';
-    var bub=document.createElement('div'); bub.className='nxc-bubble-msg'; bub.innerHTML=formatMessage(text);
-    var footer=document.createElement('div'); footer.className='nxc-msg-footer';
-    var time=document.createElement('div'); time.className='nxc-msg-time';
-    time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  function addBotButtons(promptText, buttons, onSelect) {
+    var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
+    var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
+    var col = document.createElement('div'); col.className = 'nxc-msg-col';
+    var bub = document.createElement('div'); bub.className = 'nxc-bubble-msg'; 
+    bub.innerHTML = formatMessage(promptText);
+    
+    var btnWrap = document.createElement('div'); 
+    btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
+    buttons.forEach(function(btn) {
+      var b = document.createElement('button');
+      b.textContent = btn;
+      b.style.cssText = `
+    background: rgba(225,29,72,0.08);
+    border: 1.5px solid rgba(225,29,72,0.25);
+    color: #e11d48;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  `;
+      b.onmouseover = function() {
+        if (!b.dataset.selected) {
+          b.style.background = 'rgba(225,29,72,0.15)';
+          b.style.borderColor = '#e11d48';
+          b.style.transform = 'translateY(-1px)';
+        }
+      };
+      b.onmouseout = function() {
+        if (!b.dataset.selected) {
+          b.style.background = 'rgba(225,29,72,0.08)';
+          b.style.borderColor = 'rgba(225,29,72,0.25)';
+          b.style.transform = 'translateY(0)';
+        }
+      };
+      b.onclick = function() {
+        b.dataset.selected = 'true';
+        b.style.background = '#e11d48';
+        b.style.borderColor = '#e11d48';
+        b.style.color = '#fff';
+        b.style.transform = 'scale(0.97)';
+        btnWrap.querySelectorAll('button').forEach(function(x) {
+          if (x !== b) {
+            x.style.opacity = '0.4';
+            x.style.cursor = 'default';
+            x.style.pointerEvents = 'none';
+          }
+        });
+        onSelect(btn);
+      };
+      btnWrap.appendChild(b);
+    });
+      
+    var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
+    var time = document.createElement('div'); time.className = 'nxc-msg-time';
+    time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     footer.appendChild(time);
-    if(isBot && withCopy!==false){ footer.appendChild(makeCopyBtn(bub)); }
-    col.appendChild(bub); col.appendChild(footer);
+
+    col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
     wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap);
-    var sBtn2 = document.getElementById('nxc-scroll-btn');
-    if(sBtn2) msgs.appendChild(sBtn2);
-    if(!isBot){
-      setTimeout(function(){
-        msgs.style.scrollBehavior = 'smooth';
-        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop;
-        updateScrollBtn();
-      }, 150);
-    }
-    if(isBot){
-      setTimeout(function(){
-        msgs.style.scrollBehavior = 'smooth';
-        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
-        updateScrollBtn();
-      }, 400);
-    }
+
+    var sBtn = document.getElementById('nxc-scroll-btn');
+    if(sBtn) msgs.appendChild(sBtn);
+
+    // ✅ SCROLL FIX — renderMsg jaise same pattern
+    setTimeout(function(){
+      msgs.style.scrollBehavior = 'smooth';
+      msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
+      updateScrollBtn();
+    }, 400);
   }
     
   function addBotButtons(promptText, buttons, onSelect) {
