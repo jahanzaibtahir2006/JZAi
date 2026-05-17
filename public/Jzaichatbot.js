@@ -1144,6 +1144,7 @@ function submitLead(data) {
 async function sendMessage(){
     var text = input.value.trim();
     if(!text || sendBtn.disabled) return;
+    console.log('sendMessage called, leadStep:', leadStep, 'text:', text);
     closeQuickPanel();
     addMsg('user', text);
     input.value=''; input.style.height='auto'; sendBtn.disabled=true;
