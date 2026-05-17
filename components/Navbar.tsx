@@ -30,7 +30,6 @@ export default function Navbar() {
         <div className="nav-links">
           <Link href="/services">Services</Link>
           <a href="#process">Process</a>
-          <a href="#tech">Tech Stack</a>
           <a href="#about">About</a>
           <a href="#contact" className="nav-cta">Get in Touch</a>
         </div>
@@ -50,7 +49,6 @@ export default function Navbar() {
       <div className={`mobile-nav${mobileOpen ? ' open' : ''}`} id="mobileNav">
         <Link href="/services" onClick={() => setMobileOpen(false)}>Services</Link>
         <a href="#process" onClick={() => setMobileOpen(false)}>Process</a>
-        <a href="#tech" onClick={() => setMobileOpen(false)}>Tech Stack</a>
         <a href="#about" onClick={() => setMobileOpen(false)}>About</a>
         <a href="#contact" onClick={() => setMobileOpen(false)} style={{ color: 'var(--red)', fontWeight: 600 }}>
           Get in Touch
