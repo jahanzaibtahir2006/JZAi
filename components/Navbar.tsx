@@ -30,7 +30,7 @@ export default function Navbar() {
         <div className="nav-links">
           <Link href="/services">Services</Link>
           <a href="#process">Process</a>
-          <a href="#about">About</a>
+          <a href="/FAQ">FAQ</a>
           <a href="#contact" className="nav-cta">Get in Touch</a>
         </div>
         <div className="nav-right">
