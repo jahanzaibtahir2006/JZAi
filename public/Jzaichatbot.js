@@ -251,11 +251,30 @@ function showBudgetButtons() {
       leadData['userBudget'] = chosen.code + ' ' + amount;
       addMsg('bot', botReply);
 
-      leadStep++;
-      if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
-      var p = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-      p = p.replace('{name}', leadData.name || 'there');
-      setTimeout(function(){ addMsg('bot', p); }, 1200);
+      setTimeout(function(){
+        setTimeout(function(){
+        var service = leadData.service || 'chatbot';
+        var budget = leadData['userBudget'];
+        leadData._awaitingConfirm = true;
+        addBotButtons(
+          'Awesome! Just to confirm — you want **' + service + '** for around **' + budget + '**? Shall I connect you with Jahanzaib? 😊',
+          ['✅ Yes, connect me!', '❌ No, change something'],
+          function(selected) {
+            leadData._awaitingConfirm = false;
+            if (selected.includes('Yes')) {
+              leadStep++;
+              if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+              var p = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+              p = p.replace('{name}', leadData.name || 'there');
+              addMsg('bot', p);
+            } else {
+              addMsg('bot', "No worries! What would you like to change? 😊");
+              leadStep = null;
+              leadData = {};
+            }
+          }
+        );
+      }, 1000);
     }
   );
 }
@@ -356,9 +375,31 @@ function detectServiceFromText(text) {
 }
 
 function handleLeadStep(userInput) {
-  var field = LEAD_STEPS[leadStep];
+// Confirmation pending check
+if (leadData._awaitingConfirm) {
+  var lower = userInput.toLowerCase().trim();
+  var isYes = /^(yes|haan|ji|y|ok|okay|ha|han|sure|proceed|connect|bilkul|zaroor|go ahead|haan ji|ji haan|yep|yup)$/i.test(lower);
+  var isNo  = /^(no|nahi|nope|nai|na|change|back|cancel|nahi chahiye|no thanks|nope|band karo)$/i.test(lower);
 
-
+  if (isYes) {
+    leadData._awaitingConfirm = false;
+    leadStep++;
+    if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+    var p = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+    p = p.replace('{name}', leadData.name || 'there');
+    addMsg('bot', p);
+  } else if (isNo) {
+    leadData._awaitingConfirm = false;
+    addMsg('bot', "No worries! What would you like to change? 😊");
+    leadStep = null;
+    leadData = {};
+  } else {
+    // Unclear — poochho dobara
+    addMsg('bot', "Just a yes or no — shall I connect you with Jahanzaib? 😊");
+  }
+  return;
+}
+    var field = LEAD_STEPS[leadStep];
   // Cancel detection
   if (isUserCancelling(userInput)) {
     leadStep = null;
