@@ -1156,6 +1156,15 @@ async function sendMessage(){
       sendBtn.disabled=false;
       return;
     }
+    var amountDetect = text.match(/(?:budget|have|is|around|about|my)?\s*[\$Rs₹£€]?\s*(\d[\d,]+)\s*[\$Rs₹£€]?$/i);
+if (amountDetect && leadStep === null) {
+  var detectedAmt = parseInt(amountDetect[1].replace(/,/g, ''));
+  if (detectedAmt > 3000) {
+    sendBtn.disabled = false;
+    showCurrencyButtons(detectedAmt);
+    return;
+  }
+}
     var status = TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
     var tid = addTyping(status);
     var apiMessages = chatHistory
