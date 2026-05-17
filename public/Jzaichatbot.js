@@ -112,10 +112,11 @@ async function checkNameWithGPT(name) {
       body: JSON.stringify({ name: name })
     });
     var data = await response.json();
-    var result = data;
-
-    if (result.isName) {
-      leadData.name = leadData._pendingName;
+    
+    if (data.isName) {
+      leadData.name = data.extractedName ? capitalizeName(data.extractedName) : capitalizeName(leadData._pendingName);
+      leadData._awaitingNameConfirm = false;
+      leadData._pendingName = null;
       leadStep++;
       if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
       var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
@@ -123,7 +124,7 @@ async function checkNameWithGPT(name) {
       addMsg('bot', prompt);
     } else {
       if (leadData._nameRejectedOnce) {
-        leadData.name = leadData._pendingName;
+        leadData.name = data.extractedName ? capitalizeName(data.extractedName) : capitalizeName(leadData._pendingName);
         leadData._nameRejectedOnce = false;
         leadStep++;
         if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
@@ -132,12 +133,12 @@ async function checkNameWithGPT(name) {
         addMsg('bot', prompt);
       } else {
         leadData._nameRejectedOnce = true;
-        addMsg('bot', "Hmm, **" + name + "**? That's an unusual one! 😄 Just confirming — is this your real name?");
+        addMsg('bot', "Hmm, **" + (data.extractedName || name) + "**? That's an unusual one! 😄 Just confirming — is this your real name?");
         leadData._awaitingNameConfirm = true;
       }
     }
   } catch(e) {
-    leadData.name = leadData._pendingName;
+    leadData.name = capitalizeName(leadData._pendingName);
     leadStep++;
     if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
     var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
@@ -413,41 +414,27 @@ if (leadData._awaitingConfirm) {
 
   // Name step
   if (field === 'name') {
-
-    if (leadData._awaitingNameConfirm) {
-      var lower = userInput.toLowerCase().trim();
-      if (lower === 'yes' || lower === 'haan' || lower === 'y' || lower === 'ji') {
-        leadData.name = leadData._pendingName;
-        leadData._awaitingNameConfirm = false;
-        leadData._pendingName = null;
-        leadStep++;
-        var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-        prompt = prompt.replace('{name}', leadData.name);
-        addMsg('bot', prompt);
-      } else {
-        leadData._awaitingNameConfirm = false;
-        leadData._pendingName = null;
-        addMsg('bot', "No problem! 😊 Please enter your real name:");
-      }
-      return;
+  if (leadData._awaitingNameConfirm) {
+    var lower = userInput.toLowerCase().trim();
+    if (/^(yes|haan|y|ji|ha|han)$/i.test(lower)) {
+      leadData.name = leadData._pendingName;
+      leadData._awaitingNameConfirm = false;
+      leadData._pendingName = null;
+      leadStep++;
+      var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      prompt = prompt.replace('{name}', leadData.name);
+      addMsg('bot', prompt);
+    } else {
+      leadData._awaitingNameConfirm = false;
+      leadData._pendingName = null;
+      addMsg('bot', "No problem! 😊 Please enter your name:");
     }
-
-    if (!/^[a-zA-Z\s]+$/.test(userInput.trim())) {
-      addMsg('bot', "😊 Please enter your name using letters only:");
-      return;
-    }
-
-    var words = userInput.trim().split(/\s+/);
-if (words.length > 4) {
-  addMsg('bot', "😊 Please enter just your name:");
-  return;
-}
-
-    // GPT se check karega
-    leadData._pendingName = capitalizeName(userInput.trim());
-    checkNameWithGPT(userInput.trim());
     return;
   }
+  leadData._pendingName = userInput.trim();
+  checkNameWithGPT(userInput.trim());
+  return;
+}
   
   // Email step
   if (field === 'email') {
