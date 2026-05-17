@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
+import WhatsAppButton from '@/components/WhatsAppButton'  // ← sirf ek baar
 
 const syne = Syne({
   subsets: ['latin'],
@@ -9,7 +10,6 @@ const syne = Syne({
   variable: '--font-syne',
   display: 'swap',
 })
-
 const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
@@ -22,11 +22,7 @@ export const metadata: Metadata = {
   description: 'Cutting-edge AI solutions and high-performance web development — engineered to transform your business into a digital powerhouse.',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
@@ -34,10 +30,11 @@ export default function RootLayout({
       </head>
       <body className={`${syne.variable} ${dmSans.variable}`}>
         {children}
+        <WhatsAppButton />
         <Script id="chatbot-config" strategy="afterInteractive">
-  {`var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';`}
-</Script>
-<Script src="/Jzaichatbot.js" strategy="afterInteractive" />
+          {`var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';`}
+        </Script>
+        <Script src="/Jzaichatbot.js" strategy="afterInteractive" />
       </body>
     </html>
   )
