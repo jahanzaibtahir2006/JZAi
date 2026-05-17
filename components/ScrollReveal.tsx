@@ -15,7 +15,7 @@ export default function ScrollReveal({ children }: { children: ReactNode }) {
           }
         })
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     )
     observer.observe(ref.current)
     return () => observer.disconnect()
