@@ -375,6 +375,7 @@ function detectServiceFromText(text) {
 }
 
 function handleLeadStep(userInput) {
+  console.log('leadStep:', leadStep, 'field:', LEAD_STEPS[leadStep]);
 // Confirmation pending check
 if (leadData._awaitingConfirm) {
   var lower = userInput.toLowerCase().trim();
