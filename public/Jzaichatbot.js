@@ -488,6 +488,10 @@ else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
 else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
 else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
 else if (currency !== '$' && currency !== '') usdAmount = amount;
+    if (!currency && amount > 3000) {
+  showCurrencyButtons(amount);
+  return;
+}
     
 var conversionNote = (currency !== '$' && currency !== '' && usdAmount !== amount)
   ? '\n\n💱 That\'s approximately **$' + usdAmount.toLocaleString() + ' USD**.' : '';
