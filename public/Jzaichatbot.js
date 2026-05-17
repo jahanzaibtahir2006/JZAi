@@ -107,38 +107,39 @@ var NAME_BLACKLIST = [
 async function checkNameWithGPT(name) {
   try {
     var response = await fetch(BACKEND_URL + '/check-name', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name: name })
-});
-var data = await response.json();
-var result = data;
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name })
+    });
+    var data = await response.json();
+    var result = data;
 
     if (result.isName) {
-  leadData.name = leadData._pendingName;
-  leadStep++;
-  var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-  prompt = prompt.replace('{name}', leadData.name);
-  addMsg('bot', prompt);
-} else {
-  if (leadData._nameRejectedOnce) {
-    // Doosri baar — accept kar lo, irritate mat karo
-    leadData.name = leadData._pendingName;
-    leadData._nameRejectedOnce = false;
-    leadStep++;
-    var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-    prompt = prompt.replace('{name}', leadData.name);
-    addMsg('bot', prompt);
-  } else {
-    leadData._nameRejectedOnce = true;
-    addMsg('bot', "Hmm, **" + name + "**? That's an unusual one! 😄 Just confirming — is this your real name?");
-    leadData._awaitingNameConfirm = true;
-  }
-}
+      leadData.name = leadData._pendingName;
+      leadStep++;
+      if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+      var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      prompt = prompt.replace('{name}', leadData.name);
+      addMsg('bot', prompt);
+    } else {
+      if (leadData._nameRejectedOnce) {
+        leadData.name = leadData._pendingName;
+        leadData._nameRejectedOnce = false;
+        leadStep++;
+        if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+        var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+        prompt = prompt.replace('{name}', leadData.name);
+        addMsg('bot', prompt);
+      } else {
+        leadData._nameRejectedOnce = true;
+        addMsg('bot', "Hmm, **" + name + "**? That's an unusual one! 😄 Just confirming — is this your real name?");
+        leadData._awaitingNameConfirm = true;
+      }
+    }
   } catch(e) {
-    // Fallback — accept kar lo
     leadData.name = leadData._pendingName;
     leadStep++;
+    if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
     var prompt = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
     prompt = prompt.replace('{name}', leadData.name);
     addMsg('bot', prompt);
@@ -486,8 +487,8 @@ else if (currency === '₹') usdAmount = Math.round(amount / exchangeRates.INR);
 else if (currency === '£') usdAmount = Math.round(amount / exchangeRates.GBP);
 else if (currency === '€') usdAmount = Math.round(amount / exchangeRates.EUR);
 else if (currency === '¥') usdAmount = Math.round(amount / exchangeRates.JPY);
-else if (currency !== '$' && currency !== '') usdAmount = Math.round(amount / exchangeRates.OTHER || amount);
-
+else if (currency !== '$' && currency !== '') usdAmount = amount;
+    
 var conversionNote = (currency !== '$' && currency !== '' && usdAmount !== amount)
   ? '\n\n💱 That\'s approximately **$' + usdAmount.toLocaleString() + ' USD**.' : '';
     
@@ -552,11 +553,11 @@ var conversionNote = (currency !== '$' && currency !== '' && usdAmount !== amoun
 }
   
   // Field save karo
-  if (field === 'name') {
-    leadData[field] = capitalizeName(userInput);
-  } else {
-    leadData[field] = userInput;
-  }
+  if (field !== 'name') {
+  leadData[field] = userInput;
+} else {
+  leadData[field] = capitalizeName(userInput);
+}
 
   var nextStep = leadStep + 1;
   while (nextStep < LEAD_STEPS.length && leadData[LEAD_STEPS[nextStep]]) {
@@ -1053,7 +1054,7 @@ function submitLead(data) {
   msgs.addEventListener('scroll', updateScrollBtn);
 
   var saved = loadHistory();
-  if (saved.length > 1) {
+  if (saved.length > 3) {
     histBanner.classList.add('show');
     document.getElementById('nxc-hist-yes').addEventListener('click', function(){
       histBanner.classList.remove('show');
@@ -1348,79 +1349,41 @@ async function sendMessage(){
       updateScrollBtn();
     }, 400);
   }
-    
-  function addBotButtons(promptText, buttons, onSelect) {
-    var wrap = document.createElement('div'); wrap.className = 'nxc-msg nxc-bot';
-    var av = document.createElement('div'); av.className = 'nxc-avatar'; av.textContent = 'JZ';
-    var col = document.createElement('div'); col.className = 'nxc-msg-col';
-    var bub = document.createElement('div'); bub.className = 'nxc-bubble-msg'; 
-    bub.innerHTML = formatMessage(promptText);
-    
-    var btnWrap = document.createElement('div'); 
-    btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
-    buttons.forEach(function(btn) {
-      var b = document.createElement('button');
-      b.textContent = btn;
-      b.style.cssText = `
-    background: rgba(225,29,72,0.08);
-    border: 1.5px solid rgba(225,29,72,0.25);
-    color: #e11d48;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 12.5px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    letter-spacing: 0.2px;
-  `;
-      b.onmouseover = function() {
-        if (!b.dataset.selected) {
-          b.style.background = 'rgba(225,29,72,0.15)';
-          b.style.borderColor = '#e11d48';
-          b.style.transform = 'translateY(-1px)';
-        }
-      };
-      b.onmouseout = function() {
-        if (!b.dataset.selected) {
-          b.style.background = 'rgba(225,29,72,0.08)';
-          b.style.borderColor = 'rgba(225,29,72,0.25)';
-          b.style.transform = 'translateY(0)';
-        }
-      };
-      b.onclick = function() {
-        b.dataset.selected = 'true';
-        b.style.background = '#e11d48';
-        b.style.borderColor = '#e11d48';
-        b.style.color = '#fff';
-        b.style.transform = 'scale(0.97)';
-        btnWrap.querySelectorAll('button').forEach(function(x) {
-          if (x !== b) {
-            x.style.opacity = '0.4';
-            x.style.cursor = 'default';
-            x.style.pointerEvents = 'none';
-          }
-        });
-        onSelect(btn);
-      };
-      btnWrap.appendChild(b);
-    });
-      
-    var footer = document.createElement('div'); footer.className = 'nxc-msg-footer';
-    var time = document.createElement('div'); time.className = 'nxc-msg-time';
-    time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    footer.appendChild(time);
 
-    col.appendChild(bub); col.appendChild(btnWrap); col.appendChild(footer);
-    wrap.appendChild(av); wrap.appendChild(col);
-    msgs.appendChild(wrap);
-    // Scroll button ko hamesha end par rakho
-    var sBtn = document.getElementById('nxc-scroll-btn');
-    if(sBtn) msgs.appendChild(sBtn);
-    updateScrollBtn();
+  function renderMsg(role, text, doScroll) {
+  var wrap = document.createElement('div');
+  wrap.className = 'nxc-msg nxc-' + role;
+  var av = document.createElement('div');
+  av.className = 'nxc-avatar';
+  av.textContent = role === 'bot' ? 'JZ' : 'U';
+  var col = document.createElement('div');
+  col.className = 'nxc-msg-col';
+  var bub = document.createElement('div');
+  bub.className = 'nxc-bubble-msg';
+  bub.innerHTML = formatMessage(text);
+  var footer = document.createElement('div');
+  footer.className = 'nxc-msg-footer';
+  var time = document.createElement('div');
+  time.className = 'nxc-msg-time';
+  time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  footer.appendChild(time);
+  if (role === 'bot') footer.appendChild(makeCopyBtn(bub));
+  col.appendChild(bub);
+  col.appendChild(footer);
+  wrap.appendChild(av);
+  wrap.appendChild(col);
+  msgs.appendChild(wrap);
+  var sBtn = document.getElementById('nxc-scroll-btn');
+  if (sBtn) msgs.appendChild(sBtn);
+  if (doScroll) {
+    setTimeout(function(){
+      msgs.style.scrollBehavior = 'smooth';
+      msgs.scrollTop = msgs.scrollHeight;
+      updateScrollBtn();
+    }, 50);
   }
-
+}
+  
   function addMsg(role, text){
     renderMsg(role, text, true);
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
