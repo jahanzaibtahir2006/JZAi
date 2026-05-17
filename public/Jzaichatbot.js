@@ -253,7 +253,7 @@ function showBudgetButtons() {
       addMsg('bot', botReply);
 
         setTimeout(function(){
-        var service = leadData.service || 'chatbot';
+        var service = leadData._pendingService || leadData.service || 'chatbot';
         var budget = leadData['userBudget'];
         leadData._awaitingConfirm = true;
         addBotButtons(
@@ -262,12 +262,14 @@ function showBudgetButtons() {
           function(selected) {
             leadData._awaitingConfirm = false;
             if (selected.includes('Yes')) {
-              leadStep++;
-              if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
-              var p = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
-              p = p.replace('{name}', leadData.name || 'there');
-              addMsg('bot', p);
-            } else {
+                    leadData._awaitingConfirm = false;
+                    leadStep = 0;
+                    while (leadStep < LEAD_STEPS.length && leadData[LEAD_STEPS[leadStep]]) { leadStep++; }
+                    if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+                    var currentField = LEAD_STEPS[leadStep];
+                    if (currentField === 'budget') { showBudgetButtons(); } else { var p = LEAD_PROMPTS[currentField]; p = p.replace('{name}', leadData.name || 'there'); addMsg('bot', p); }
+                  }
+            else {
               addMsg('bot', "No worries! What would you like to change? 😊");
               leadStep = null;
               leadData = {};
@@ -291,7 +293,7 @@ function startLeadCollection(service, budget, userBudget) {
     name: leadData.name || null,
     email: leadData.email || null
   };
-  if (service && service !== 'General') leadData.service = service;
+  if (service && service !== 'General') { leadData.service = service; leadData._pendingService = service; }
   if (budget && budget !== '') leadData.budget = budget;
   if (userBudget && userBudget !== '') leadData.userBudget = userBudget;  // ← ADD THIS
   
