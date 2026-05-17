@@ -13,7 +13,7 @@ export default function WhatsAppButton() {
       <style>{`
         .wa-wrap {
           position: fixed;
-          bottom: 96px;
+          bottom: 28px;
           left: 24px;
           z-index: 2147483640;
           display: flex;
@@ -88,7 +88,7 @@ export default function WhatsAppButton() {
         [data-theme="light"] .wa-tooltip-title { color: #0f0f14; }
 
         @media (max-width: 480px) {
-          .wa-wrap { bottom: 80px; left: 16px; }
+          .wa-wrap { bottom: 16px; left: 16px; }
           .wa-btn  { width: 46px; height: 46px; }
           .wa-btn::before { width: 46px; height: 46px; }
         }
