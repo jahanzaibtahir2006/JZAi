@@ -195,6 +195,71 @@ function showBudgetButtons() {
   });
 }
 
+  function showCurrencyButtons(pendingAmount) {
+  var CURRENCY_OPTIONS = [
+    { label: '🇺🇸 USD $',   code: 'USD', rateKey: null },
+    { label: '🇵🇰 PKR ₨',   code: 'PKR', rateKey: 'PKR' },
+    { label: '🇮🇳 INR ₹',   code: 'INR', rateKey: 'INR' },
+    { label: '🇸🇦 SAR ﷼',   code: 'SAR', rateKey: 'SAR' },
+    { label: '🇦🇪 AED د.إ', code: 'AED', rateKey: 'AED' },
+    { label: '🇬🇧 GBP £',   code: 'GBP', rateKey: 'GBP' },
+    { label: '🇪🇺 EUR €',   code: 'EUR', rateKey: 'EUR' },
+    { label: '🌍 Other',     code: 'OTHER', rateKey: null }
+  ];
+
+  var labels = CURRENCY_OPTIONS.map(function(c){ return c.label; });
+
+  addBotButtons(
+    'Got it! Which currency is **' + pendingAmount + '** in? 😊',
+    labels,
+    function(selected) {
+      var chosen = CURRENCY_OPTIONS.find(function(c){ return c.label === selected; });
+
+      if (!chosen || chosen.code === 'OTHER') {
+        addMsg('bot', "No worries! Could you tell me the currency name? (e.g. Turkish Lira, Brazilian Real) 😊");
+        return;
+      }
+
+      var amount = parseInt(pendingAmount);
+      var rate = chosen.rateKey && exchangeRates[chosen.rateKey] ? exchangeRates[chosen.rateKey] : 1;
+      var usdAmount = chosen.code === 'USD' ? amount : Math.round(amount / rate);
+
+      var conversionNote = chosen.code !== 'USD'
+        ? '\n\n💱 That\'s approximately **$' + usdAmount.toLocaleString() + ' USD**.'
+        : '';
+
+      var matched = null;
+      for (var i = 0; i < SERVICE_PRICES.length; i++) {
+        if (usdAmount >= SERVICE_PRICES[i].min && usdAmount <= SERVICE_PRICES[i].max) {
+          matched = SERVICE_PRICES[i]; break;
+        }
+      }
+
+      var botReply = '';
+      if (usdAmount < 100) {
+        botReply = "Our minimum starts at **$100** — but Jahanzaib's flexible, he might work something out! 😊" + conversionNote;
+        leadData['budget'] = 'Under $100 (to be discussed)';
+      } else if (matched) {
+        botReply = matched.emoji + ' **' + matched.label.split('—')[0].trim() + '** fits your budget!' + conversionNote;
+        leadData['budget'] = matched.label;
+        if (!leadData.service) leadData.service = matched.label.split('—')[0].trim();
+      } else {
+        botReply = "Got it! Budget noted 📝 Let's move forward!" + conversionNote;
+        leadData['budget'] = chosen.code + ' ' + amount;
+      }
+
+      leadData['userBudget'] = chosen.code + ' ' + amount;
+      addMsg('bot', botReply);
+
+      leadStep++;
+      if (leadStep >= LEAD_STEPS.length) { submitLead(leadData); return; }
+      var p = LEAD_PROMPTS[LEAD_STEPS[leadStep]];
+      p = p.replace('{name}', leadData.name || 'there');
+      setTimeout(function(){ addMsg('bot', p); }, 1200);
+    }
+  );
+}
+  
   function extractName(text) {
   var match = text.match(/my name is ([a-zA-Z\s]{2,20})/i)
            || text.match(/i(?:'?m| am) ([a-zA-Z]{2,20})/i)
@@ -1067,6 +1132,18 @@ async function sendMessage(){
       } catch(e) { leadAction = null; }
       if (leadAction) {
         startLeadCollection(leadAction.service || '', leadAction.budget || '', leadAction.userBudget || '');
+        sendBtn.disabled=false;
+        input.focus();
+        return;
+      }
+
+      var currencyAction = null;
+      try {
+        var cMatch = reply.match(/\{[\s\S]*"action"\s*:\s*"show_currency_buttons"[\s\S]*\}/);
+        if (cMatch) { currencyAction = JSON.parse(cMatch[0]); }
+      } catch(e) { currencyAction = null; }
+      if (currencyAction) {
+        showCurrencyButtons(currencyAction.amount);
         sendBtn.disabled=false;
         input.focus();
         return;
