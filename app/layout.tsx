@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
-import WhatsAppButton from '@/components/WhatsAppButton'  // ← sirf ek baar
 
 const syne = Syne({
   subsets: ['latin'],
@@ -16,12 +15,10 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   display: 'swap',
 })
-
 export const metadata: Metadata = {
   title: 'JZAI — Engineering Intelligence',
   description: 'Cutting-edge AI solutions and high-performance web development — engineered to transform your business into a digital powerhouse.',
 }
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
@@ -30,7 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${syne.variable} ${dmSans.variable}`}>
         {children}
-        <WhatsAppButton />
         <Script id="chatbot-config" strategy="afterInteractive">
           {`var BACKEND_URL = 'https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev';`}
         </Script>
