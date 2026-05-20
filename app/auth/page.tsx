@@ -100,12 +100,18 @@ export default function AuthPage() {
     if (!loginPass) { setLoginPassErr("Password is required."); valid = false; }
     if (!valid) return;
     setLoginLoading(true);
-    await new Promise((r) => setTimeout(r, 1600));
+    const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: loginEmail, password: loginPass }),
+    });
+    const data = await res.json();
     setLoginLoading(false);
-    if (loginPass !== "demo1234") {
-      showAlert("error", "Invalid email or password. Try demo@jzai.store / demo1234");
+    if (!res.ok) {
+      showAlert("error", data.error || "Invalid email or password.");
     } else {
-      showAlert("success", "Signed in! Redirecting to dashboard…");
+      localStorage.setItem("jzai_user", JSON.stringify(data.user));
+      showAlert("success", "Signed in! Redirecting…");
       setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
     }
   };
