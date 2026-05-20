@@ -1,5 +1,5 @@
 "use client";
-
+import Navbar from "@/components/Navbar";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 
@@ -115,7 +115,6 @@ function getInitials(name: string): string {
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function CreateChatbot() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [navScrolled, setNavScrolled] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [deploying, setDeploying] = useState(false);
   const [success, setSuccess] = useState<SuccessData | null>(null);
@@ -154,13 +153,6 @@ export default function CreateChatbot() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
-
-  // Nav scroll
-  useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
@@ -732,25 +724,7 @@ export default function CreateChatbot() {
         }
       `}</style>
 
-      {/* ── NAV ── */}
-      <nav className={`cc-nav${navScrolled ? " scrolled" : ""}`}>
-        <Link href="/" className="cc-nav-logo">JZ<span>AI</span></Link>
-        <div className="cc-nav-links">
-          <Link href="/">Home</Link>
-          <Link href="/services">Services</Link>
-          <a href="#" className="active">Create Chatbot</a>
-          <Link href="/#process">Process</Link>
-          <Link href="/#about">About</Link>
-        </div>
-        <div className="cc-nav-right">
-          <button className="cc-toggle" onClick={toggleTheme} title="Toggle theme">
-            <div className="cc-toggle-thumb">
-              <span>{theme === "dark" ? "🌙" : "☀️"}</span>
-            </div>
-          </button>
-          <Link href="/#contact" className="cc-nav-cta">Get in Touch</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ── HERO ── */}
       <section className="cc-hero">
