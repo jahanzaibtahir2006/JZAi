@@ -125,9 +125,19 @@ export default function AuthPage() {
     if (signupPass !== signupConfirm) { setSignupConfirmErr("Passwords do not match."); valid = false; }
     if (!valid) return;
     setSignupLoading(true);
-    await new Promise((r) => setTimeout(r, 1800));
+    const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: `${signupFirst} ${signupLast}`, email: signupEmail, password: signupPass }),
+    });
+    const data = await res.json();
     setSignupLoading(false);
-    showAlert("success", "Account created! Check your email to verify.");
+    if (!res.ok) {
+      showAlert("error", data.error || "Signup failed.");
+    } else {
+      showAlert("success", "Account created! Please sign in.");
+      setTimeout(() => setTab("login"), 1500);
+    }
   };
 
   const handleForgot = () => {
