@@ -136,10 +136,13 @@ export default function Dashboard() {
     );
   };
 
-  const deleteBot = (id: string) => {
-    setBots((prev) => prev.filter((b) => b.id !== id));
-    setDeleteConfirm("");
-  };
+  const deleteBot = async (id: string) => {
+  await fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`, {
+    method: "DELETE",
+  });
+  setBots((prev) => prev.filter((b) => b.id !== id));
+  setDeleteConfirm("");
+};
 
   const totalStats = {
     bots: bots.length,
@@ -690,10 +693,13 @@ export default function Dashboard() {
                 <div className="db-toggle-thumb">{theme === "dark" ? "🌙" : "☀️"}</div>
               </button>
             </div>
-            <button className="db-logout-btn">
-              <span className="db-nav-icon">🚪</span>
-              Sign Out
-            </button>
+            <button className="db-logout-btn" onClick={() => {
+  localStorage.removeItem("jzai_user");
+  window.location.href = "/auth";
+}}>
+  <span className="db-nav-icon">🚪</span>
+  Sign Out
+</button>
           </div>
         </aside>
 
@@ -941,7 +947,19 @@ export default function Dashboard() {
                       <span className="db-save-success">{settingsSaved ? "✓ Changes saved!" : ""}</span>
                       <button
                         className="db-settings-save"
-                        onClick={() => { setSettingsSaved(true); setTimeout(() => setSettingsSaved(false), 3000); }}
+                        onClick={async () => {
+  const userStr = localStorage.getItem("jzai_user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  if (!user) return;
+  await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: user.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
+  });
+  localStorage.setItem("jzai_user", JSON.stringify({ ...user, name: settingsName, email: settingsEmail }));
+  setSettingsSaved(true);
+  setTimeout(() => setSettingsSaved(false), 3000);
+}}
                       >Save Changes</button>
                     </div>
                   </div>
@@ -976,7 +994,22 @@ export default function Dashboard() {
                       <span className="db-save-success">{pwSaved ? "✓ Password updated!" : ""}</span>
                       <button
                         className="db-settings-save"
-                        onClick={() => { setPwSaved(true); setCurrentPw(""); setNewPw(""); setConfirmPw(""); setTimeout(() => setPwSaved(false), 3000); }}
+                        onClick={async () => {
+  const userStr = localStorage.getItem("jzai_user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  if (!user) return;
+  if (newPw !== confirmPw) { alert("Passwords do not match"); return; }
+  const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: user.id, currentPassword: currentPw, newPassword: newPw }),
+  });
+  const data = await res.json();
+  if (!res.ok) { alert(data.error || "Failed"); return; }
+  setPwSaved(true);
+  setCurrentPw(""); setNewPw(""); setConfirmPw("");
+  setTimeout(() => setPwSaved(false), 3000);
+}}
                       >Update Password</button>
                     </div>
                   </div>
