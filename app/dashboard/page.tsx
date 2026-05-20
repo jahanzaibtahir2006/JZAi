@@ -201,7 +201,7 @@ export default function Dashboard() {
           border-right:1px solid var(--border);
           display:flex;flex-direction:column;
           position:fixed;top:0;left:0;bottom:0;z-index:50;
-          overflow-y:auto;
+          overflow:hidden;
           transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),background var(--transition-theme),border-color var(--transition-theme);
         }
         .db-sidebar-top{
@@ -228,7 +228,7 @@ export default function Dashboard() {
         }
         .db-user-name{font-size:14px;font-weight:600;color:var(--text);}
         .db-user-email{font-size:11px;color:var(--text2);margin-top:2px;}
-        .db-nav{flex:0;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+        .db-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
         .db-nav-item{
           display:flex;align-items:center;gap:12px;
           padding:11px 14px;border-radius:8px;
