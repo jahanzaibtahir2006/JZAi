@@ -31,7 +31,8 @@ export default function Navbar() {
           <Link href="/services">Services</Link>
           <a href="#process">Process</a>
           <a href="/#faq">FAQ</a>
-          <a href="#contact" className="nav-cta">Get in Touch</a>
+          <Link href="/auth" style={{ color: 'var(--text2)', fontWeight: 500, fontSize: '14px', textDecoration: 'none' }}>Login</Link>
+          <Link href="/create-chatbot" className="nav-cta">Create Chatbot</Link>
         </div>
         <div className="nav-right">
           <button
@@ -53,6 +54,8 @@ export default function Navbar() {
         <a href="#contact" onClick={() => setMobileOpen(false)} style={{ color: 'var(--red)', fontWeight: 600 }}>
           Get in Touch
         </a>
+        <Link href="/auth" onClick={() => setMobileOpen(false)} style={{ color: 'var(--text2)', fontWeight: 500 }}>Login</Link>
+        <Link href="/create-chatbot" onClick={() => setMobileOpen(false)} style={{ color: 'var(--red)', fontWeight: 600 }}>Create Chatbot</Link>
       </div>
     </>
   )
