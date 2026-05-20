@@ -248,6 +248,7 @@ export default function Dashboard() {
           padding:16px 12px;
           border-top:1px solid var(--border);
           display:flex;flex-direction:column;gap:8px;
+          margin-top:auto;
         }
         .db-toggle-row{
           display:flex;align-items:center;justify-content:space-between;
