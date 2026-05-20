@@ -64,10 +64,10 @@ const MOCK_BOTS: Bot[] = [
 ];
 
 const MOCK_USER = {
-  name: "Jazib Zaman",
-  email: "jazib@jzai.store",
-  company: "JZAI",
-  joined: "April 2026",
+  name: "Loading...",
+  email: "",
+  company: "",
+  joined: "",
   avatar: "JZ",
 };
 
@@ -105,6 +105,15 @@ export default function Dashboard() {
   useEffect(() => {
     const saved = (localStorage.getItem("theme") as "dark" | "light") || "dark";
     setTheme(saved);
+    const userStr = localStorage.getItem("jzai_user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      MOCK_USER.name = user.name || "User";
+      MOCK_USER.email = user.email || "";
+      MOCK_USER.avatar = user.name ? user.name.slice(0,2).toUpperCase() : "JZ";
+    } else {
+      window.location.href = "/auth";
+    }
   }, []);
 
   useEffect(() => {
