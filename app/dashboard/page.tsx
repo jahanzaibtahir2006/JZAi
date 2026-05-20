@@ -201,6 +201,7 @@ export default function Dashboard() {
           border-right:1px solid var(--border);
           display:flex;flex-direction:column;
           position:fixed;top:0;left:0;bottom:0;z-index:50;
+          overflow-y:auto;
           transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),background var(--transition-theme),border-color var(--transition-theme);
         }
         .db-sidebar-top{
