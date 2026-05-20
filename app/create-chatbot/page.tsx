@@ -99,14 +99,14 @@ const PLANS = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function generateBotId(): string {
-  return "jzai_" + Math.random().toString(36).substr(2, 8);
-}
-
+// FIX 1: getInitials — safe against empty/undefined name, no crash on empty words
 function getInitials(name: string): string {
+  if (!name || !name.trim()) return "JZ";
   return name
-    .split(" ")
-    .map((w) => w[0])
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0] ?? "")
+    .filter(Boolean)
     .join("")
     .toUpperCase()
     .slice(0, 2) || "JZ";
@@ -117,10 +117,15 @@ export default function CreateChatbot() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [currentStep, setCurrentStep] = useState(1);
   const [deploying, setDeploying] = useState(false);
+  const [deployError, setDeployError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessData | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan>({ name: "Starter", price: "$29/mo" });
   const [dragOver, setDragOver] = useState(false);
+
+  // FIX 2: per-step validation errors
+  const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
@@ -154,10 +159,12 @@ export default function CreateChatbot() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
-
   const updateForm = (key: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+    // Clear error for this field when user starts typing
+    if (stepErrors[key]) {
+      setStepErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+    }
   };
 
   const toggleLeadField = (field: string) => {
@@ -174,13 +181,41 @@ export default function CreateChatbot() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // FIX 3: step-level validation before advancing
+  const validateStep = (step: number): boolean => {
+    const errors: Record<string, string> = {};
+    if (step === 1) {
+      if (!form.botName.trim()) errors.botName = "Bot name is required.";
+      if (!form.industry) errors.industry = "Please select an industry.";
+    }
+    if (step === 3) {
+      if (!form.greetMsg.trim()) errors.greetMsg = "Greeting message is required.";
+    }
+    if (step === 4) {
+      if (!form.notifyEmail.trim()) errors.notifyEmail = "Notify email is required.";
+      if (!form.fullName.trim()) errors.fullName = "Full name is required.";
+    }
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNextStep = (nextStep: number) => {
+    if (validateStep(currentStep)) goStep(nextStep);
+  };
+
+  // FIX 4: handleFiles — skip duplicates by name
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
-    const newFiles: UploadedFile[] = Array.from(files).map((f) => ({
-      name: f.name,
-      id: Math.random().toString(36).substr(2, 6),
-    }));
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    setUploadedFiles((prev) => {
+      const existingNames = new Set(prev.map((f) => f.name));
+      const newFiles: UploadedFile[] = Array.from(files)
+        .filter((f) => !existingNames.has(f.name))
+        .map((f) => ({
+          name: f.name,
+          id: Math.random().toString(36).substr(2, 6),
+        }));
+      return [...prev, ...newFiles];
+    });
   }, []);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -189,31 +224,43 @@ export default function CreateChatbot() {
     handleFiles(e.dataTransfer.files);
   };
 
+  // FIX 5: submitForm — try/catch + finally, real botId from API, error shown to user
   const submitForm = async () => {
+    if (!validateStep(4)) return;
     setDeploying(true);
-    const userStr = localStorage.getItem("jzai_user");
-    const user = userStr ? JSON.parse(userStr) : null;
-    const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-  user_id: user?.id || 1,
-  name: form.botName || "My Chatbot",
-  industry: form.industry,
-  color: form.brandColor,
-  language: form.botLang,
-  plan: selectedPlan.name,
-}),
-    });
-    const data = await res.json();
-    setDeploying(false);
-    if (res.ok) {
+    setDeployError(null);
+    try {
+      const userStr = localStorage.getItem("jzai_user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user?.id || 1,
+          name: form.botName || "My Chatbot",
+          industry: form.industry,
+          color: form.brandColor,
+          language: form.botLang,
+          plan: selectedPlan.name,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || `Server error (${res.status})`);
+      }
+      // FIX 6: use real bot ID from API response, fallback to generated only if absent
+      const botId = data?.id ? String(data.id) : ("jzai_" + Math.random().toString(36).substr(2, 8));
       setSuccess({
         botName: form.botName || "My Chatbot",
-        botId: generateBotId(),
+        botId,
         plan: `${selectedPlan.name} — ${selectedPlan.price}`,
         email: form.notifyEmail || "—",
       });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setDeployError(message);
+    } finally {
+      setDeploying(false);
     }
   };
 
@@ -221,7 +268,6 @@ export default function CreateChatbot() {
   const previewInitials = getInitials(previewName);
   const previewGreet = form.greetMsg || "Hey! 👋 How can I help you today?";
 
-  // Derived plan price for badge
   const planPriceDisplay = (() => {
     const p = PLANS.find((p) => p.name === selectedPlan.name);
     if (!p) return "$29";
@@ -251,6 +297,7 @@ export default function CreateChatbot() {
           --grid-line:rgba(232,25,60,0.04);
           --stroke-text-color:rgba(245,245,247,0.25);
           --footer-bg:#13131a;--shadow:rgba(0,0,0,0.4);
+          --error:#ff4d4f;--error-dim:rgba(255,77,79,0.1);
         }
         [data-theme="light"]{
           --bg:#fafafa;--bg2:#f0f0f5;--bg3:#e8e8f0;--bg4:#dddde8;
@@ -264,6 +311,7 @@ export default function CreateChatbot() {
           --grid-line:rgba(208,16,46,0.05);
           --stroke-text-color:rgba(15,15,20,0.2);
           --footer-bg:#f0f0f5;--shadow:rgba(0,0,0,0.08);
+          --error:#cc0000;--error-dim:rgba(204,0,0,0.07);
         }
 
         body{
@@ -447,6 +495,9 @@ export default function CreateChatbot() {
         .cc-input:focus,.cc-textarea:focus,.cc-select:focus{
           border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim);
         }
+        .cc-input.error,.cc-select.error{
+          border-color:var(--error);box-shadow:0 0 0 3px var(--error-dim);
+        }
         .cc-input::placeholder,.cc-textarea::placeholder{color:var(--text3);}
         .cc-textarea{resize:none;min-height:110px;}
         .cc-select{
@@ -456,6 +507,7 @@ export default function CreateChatbot() {
           padding-right:40px;
         }
         .cc-hint{font-size:12px;color:var(--text3);margin-top:7px;}
+        .cc-error-msg{font-size:12px;color:var(--error);margin-top:6px;font-weight:500;}
         .cc-input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 
         .cc-color-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px;}
@@ -541,6 +593,13 @@ export default function CreateChatbot() {
         .cc-btn-next:disabled{opacity:0.7;cursor:not-allowed;transform:none;}
         .cc-btn-arrow{font-size:16px;transition:transform 0.2s;}
         .cc-btn-next:hover .cc-btn-arrow{transform:translateX(4px);}
+
+        .cc-deploy-error{
+          margin:0 36px 20px;padding:12px 16px;
+          background:var(--error-dim);border:1px solid var(--error);
+          border-radius:8px;font-size:13px;color:var(--error);
+          display:flex;align-items:center;gap:8px;
+        }
 
         .cc-plan-option{
           background:var(--bg2);border:1.5px solid var(--border);
@@ -779,26 +838,30 @@ export default function CreateChatbot() {
                     <div className="cc-field">
                       <label className="cc-label">Bot Name <span className="req">*</span></label>
                       <input
-                        className="cc-input"
+                        className={`cc-input${stepErrors.botName ? " error" : ""}`}
                         type="text"
                         placeholder="e.g. Aria, SupportBot, JZ Assistant…"
                         value={form.botName}
                         onChange={(e) => updateForm("botName", e.target.value)}
                       />
-                      <div className="cc-hint">This is what users will see in the chat window.</div>
+                      {stepErrors.botName
+                        ? <div className="cc-error-msg">⚠ {stepErrors.botName}</div>
+                        : <div className="cc-hint">This is what users will see in the chat window.</div>
+                      }
                     </div>
 
                     <div className="cc-input-row">
                       <div className="cc-field">
                         <label className="cc-label">Industry <span className="req">*</span></label>
                         <select
-                          className="cc-select"
+                          className={`cc-select${stepErrors.industry ? " error" : ""}`}
                           value={form.industry}
                           onChange={(e) => updateForm("industry", e.target.value)}
                         >
                           <option value="" disabled>Select industry</option>
                           {INDUSTRIES.map((i) => <option key={i}>{i}</option>)}
                         </select>
+                        {stepErrors.industry && <div className="cc-error-msg">⚠ {stepErrors.industry}</div>}
                       </div>
                       <div className="cc-field">
                         <label className="cc-label">Language</label>
@@ -853,7 +916,8 @@ export default function CreateChatbot() {
 
                   <div className="cc-form-footer">
                     <span style={{ fontSize: 13, color: "var(--text2)" }}>Step 1 of 4</span>
-                    <button className="cc-btn-next" onClick={() => goStep(2)}>
+                    {/* FIX: validate before advancing */}
+                    <button className="cc-btn-next" onClick={() => handleNextStep(2)}>
                       Continue <span className="cc-btn-arrow">→</span>
                     </button>
                   </div>
@@ -940,7 +1004,7 @@ export default function CreateChatbot() {
 
                   <div className="cc-form-footer">
                     <button className="cc-btn-back" onClick={() => goStep(1)}>← Back</button>
-                    <button className="cc-btn-next" onClick={() => goStep(3)}>
+                    <button className="cc-btn-next" onClick={() => handleNextStep(3)}>
                       Continue <span className="cc-btn-arrow">→</span>
                     </button>
                   </div>
@@ -958,12 +1022,13 @@ export default function CreateChatbot() {
                     <div className="cc-field">
                       <label className="cc-label">Greeting Message <span className="req">*</span></label>
                       <input
-                        className="cc-input"
+                        className={`cc-input${stepErrors.greetMsg ? " error" : ""}`}
                         type="text"
                         placeholder="Hey! 👋 I'm Aria — how can I help you today?"
                         value={form.greetMsg}
                         onChange={(e) => updateForm("greetMsg", e.target.value)}
                       />
+                      {stepErrors.greetMsg && <div className="cc-error-msg">⚠ {stepErrors.greetMsg}</div>}
                     </div>
 
                     <div className="cc-field">
@@ -1021,7 +1086,7 @@ export default function CreateChatbot() {
 
                   <div className="cc-form-footer">
                     <button className="cc-btn-back" onClick={() => goStep(2)}>← Back</button>
-                    <button className="cc-btn-next" onClick={() => goStep(4)}>
+                    <button className="cc-btn-next" onClick={() => handleNextStep(4)}>
                       Continue <span className="cc-btn-arrow">→</span>
                     </button>
                   </div>
@@ -1063,25 +1128,29 @@ export default function CreateChatbot() {
                     <div className="cc-field">
                       <label className="cc-label">Notify Email <span className="req">*</span></label>
                       <input
-                        className="cc-input"
+                        className={`cc-input${stepErrors.notifyEmail ? " error" : ""}`}
                         type="email"
                         placeholder="you@yourcompany.com"
                         value={form.notifyEmail}
                         onChange={(e) => updateForm("notifyEmail", e.target.value)}
                       />
-                      <div className="cc-hint">We'll send lead notifications and your embed code here.</div>
+                      {stepErrors.notifyEmail
+                        ? <div className="cc-error-msg">⚠ {stepErrors.notifyEmail}</div>
+                        : <div className="cc-hint">We'll send lead notifications and your embed code here.</div>
+                      }
                     </div>
 
                     <div className="cc-input-row">
                       <div className="cc-field">
                         <label className="cc-label">Full Name <span className="req">*</span></label>
                         <input
-                          className="cc-input"
+                          className={`cc-input${stepErrors.fullName ? " error" : ""}`}
                           type="text"
                           placeholder="Your name"
                           value={form.fullName}
                           onChange={(e) => updateForm("fullName", e.target.value)}
                         />
+                        {stepErrors.fullName && <div className="cc-error-msg">⚠ {stepErrors.fullName}</div>}
                       </div>
                       <div className="cc-field">
                         <label className="cc-label">Company / Brand</label>
@@ -1095,6 +1164,13 @@ export default function CreateChatbot() {
                       </div>
                     </div>
                   </div>
+
+                  {/* FIX: API error shown to user */}
+                  {deployError && (
+                    <div className="cc-deploy-error">
+                      ⚠ {deployError}
+                    </div>
+                  )}
 
                   <div className="cc-form-footer">
                     <button className="cc-btn-back" onClick={() => goStep(3)}>← Back</button>
