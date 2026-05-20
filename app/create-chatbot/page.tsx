@@ -197,11 +197,13 @@ export default function CreateChatbot() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user_id: user?.id || 1,
-        name: form.botName || "My Chatbot",
-        industry: form.industry,
-        color: form.brandColor,
-      }),
+  user_id: user?.id || 1,
+  name: form.botName || "My Chatbot",
+  industry: form.industry,
+  color: form.brandColor,
+  language: form.botLang,
+  plan: selectedPlan.name,
+}),
     });
     const data = await res.json();
     setDeploying(false);
@@ -1207,7 +1209,7 @@ export default function CreateChatbot() {
             ))}
           </div>
           <div className="cc-success-btns">
-            <a href="#" className="cc-btn-primary-l">Go to Dashboard →</a>
+            <a href="/dashboard" className="cc-btn-primary-l">Go to Dashboard →</a>
             <Link href="/" className="cc-btn-ghost-l">Back to Home</Link>
           </div>
         </div>
