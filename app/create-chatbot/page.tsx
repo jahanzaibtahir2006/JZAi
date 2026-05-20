@@ -197,17 +197,30 @@ export default function CreateChatbot() {
     handleFiles(e.dataTransfer.files);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     setDeploying(true);
-    setTimeout(() => {
+    const userStr = localStorage.getItem("jzai_user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user?.id || 1,
+        name: form.botName || "My Chatbot",
+        industry: form.industry,
+        color: form.brandColor,
+      }),
+    });
+    const data = await res.json();
+    setDeploying(false);
+    if (res.ok) {
       setSuccess({
         botName: form.botName || "My Chatbot",
         botId: generateBotId(),
         plan: `${selectedPlan.name} — ${selectedPlan.price}`,
         email: form.notifyEmail || "—",
       });
-      setDeploying(false);
-    }, 1800);
+    }
   };
 
   const previewName = form.botName || "My Chatbot";
