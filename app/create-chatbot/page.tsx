@@ -232,11 +232,16 @@ export default function CreateChatbot() {
     try {
       const userStr = localStorage.getItem("jzai_user");
       const user = userStr ? JSON.parse(userStr) : null;
+      if (!user?.id) {
+  setDeployError("Please login first.");
+  setDeploying(false);
+  return;
+}
       const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user?.id || 1,
+          user_id: user.id,
           name: form.botName || "My Chatbot",
           industry: form.industry,
           color: form.brandColor,
@@ -933,7 +938,7 @@ export default function CreateChatbot() {
                     <div className="cc-form-sub">Upload documents, paste your content, or add URLs — your bot will learn from all of it.</div>
 
                     <div className="cc-field">
-                      <label className="cc-label">Business Description <span className="req">*</span></label>
+                      <label className="cc-label">Business Description</label>
                       <textarea
                         className="cc-textarea"
                         placeholder="Describe what your business does, your products/services, target audience, USPs… The more detail, the smarter your bot."
@@ -1249,7 +1254,9 @@ export default function CreateChatbot() {
                 <div className="cc-plan-ico">🚀</div>
                 <div>
                   <div className="cc-plan-badge-name">{selectedPlan.name} Plan</div>
-                  <div className="cc-plan-badge-sub">500 msgs/mo · 1 bot · Lead capture</div>
+                  <div className="cc-plan-badge-sub">
+                    {PLANS.find(p => p.name === selectedPlan.name)?.features.slice(0, 3).join(" · ")}
+                  </div>
                 </div>
                 <div className="cc-plan-badge-price">{planPriceDisplay}</div>
               </div>
