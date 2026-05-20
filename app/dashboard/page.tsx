@@ -14,7 +14,7 @@ interface Bot {
   conversations: number;
   leads: number;
   messages: number;
-  createdAt: string;
+  created_at_display: string;
   color: string;
 }
 
@@ -26,6 +26,7 @@ interface UserData {
   company: string;
   joined: string;
   avatar: string;
+  plan: string;
 }
 
 type ActiveSection = "overview" | "bots" | "settings";
@@ -63,13 +64,14 @@ export default function Dashboard() {
 
   // FIX #1: User data React state mein — sidebar re-render hoga properly
   const [user, setUser] = useState<UserData>({
-    id: "",
-    name: "",
-    email: "",
-    company: "",
-    joined: "",
-    avatar: "JZ",
-  });
+  id: "",
+  name: "",
+  email: "",
+  company: "",
+  joined: "",
+  avatar: "JZ",
+  plan: "Starter", // ✅ add karo
+});
 
   // FIX #2: Settings form state — user state se initialize hogi useEffect mein
   const [settingsName, setSettingsName] = useState("");
@@ -80,6 +82,7 @@ export default function Dashboard() {
   const [confirmPw, setConfirmPw] = useState("");
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [pwSaved, setPwSaved] = useState(false);
+  const [pwError, setPwError] = useState("");
 
   // FIX #3 & #4 ke liye error state
   const [deleteError, setDeleteError] = useState("");
@@ -93,13 +96,14 @@ export default function Dashboard() {
     if (userStr) {
       const parsed = JSON.parse(userStr);
       const loadedUser: UserData = {
-        id: parsed.id || "",
-        name: parsed.name || "User",
-        email: parsed.email || "",
-        company: parsed.company || "",
-        joined: parsed.joined || "",
-        avatar: parsed.name ? parsed.name.slice(0, 2).toUpperCase() : "JZ",
-      };
+  id: parsed.id || "",
+  name: parsed.name || "User",
+  email: parsed.email || "",
+  company: parsed.company || "",
+  joined: parsed.joined || "",
+  avatar: parsed.name ? parsed.name.slice(0, 2).toUpperCase() : "JZ",
+  plan: parsed.plan || "Starter", // ✅ add karo
+};
       // FIX #1: React state update — sidebar re-render karega
       setUser(loadedUser);
 
@@ -739,7 +743,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="db-topbar-right">
-              <div className="db-plan-chip">🚀 Pro Plan</div>
+              <div className="db-plan-chip">🚀 {user.plan || "Starter"} Plan</div>
               <Link href="/create-chatbot" className="db-new-bot-btn">
                 + New Bot
               </Link>
@@ -847,7 +851,7 @@ export default function Dashboard() {
                           </div>
                           <div className="db-bot-info">
                             <div className="db-bot-name">{bot.name}</div>
-                            <div className="db-bot-meta">{bot.industry} · {bot.language} · {bot.createdAt}</div>
+                            <div className="db-bot-meta">{bot.industry} · {bot.language} · {bot.created_at_display}</div>
                           </div>
                           <div className={`db-bot-status ${bot.status}`}>{bot.status}</div>
                         </div>
@@ -963,30 +967,29 @@ export default function Dashboard() {
                     <div className="db-settings-footer">
                       <span className="db-save-success">{settingsSaved ? "✓ Changes saved!" : ""}</span>
                       <button
-                        className="db-settings-save"
-                        onClick={async () => {
-                          const userStr = localStorage.getItem("jzai_user");
-                          const storedUser = userStr ? JSON.parse(userStr) : null;
-                          if (!storedUser) return;
-                          await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: storedUser.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
-                          });
-                          const updatedUser = { ...storedUser, name: settingsName, email: settingsEmail, company: settingsCompany };
-                          localStorage.setItem("jzai_user", JSON.stringify(updatedUser));
-                          // FIX #1 & #2: Save ke baad React user state bhi update — sidebar re-render karega
-                          setUser((prev) => ({
-                            ...prev,
-                            name: settingsName,
-                            email: settingsEmail,
-                            company: settingsCompany,
-                            avatar: settingsName ? settingsName.slice(0, 2).toUpperCase() : prev.avatar,
-                          }));
-                          setSettingsSaved(true);
-                          setTimeout(() => setSettingsSaved(false), 3000);
-                        }}
-                      >Save Changes</button>
+                      className="db-settings-save"
+                      onClick={async () => {
+                        const userStr = localStorage.getItem("jzai_user");
+                        const storedUser = userStr ? JSON.parse(userStr) : null;
+                        if (!storedUser) return;
+                        await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: storedUser.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
+                        });
+                        const updatedUser = { ...storedUser, name: settingsName, email: settingsEmail, company: settingsCompany };
+                        localStorage.setItem("jzai_user", JSON.stringify(updatedUser));
+                        setUser((prev) => ({
+                          ...prev,
+                          name: settingsName,
+                          email: settingsEmail,
+                          company: settingsCompany,
+                          avatar: settingsName ? settingsName.slice(0, 2).toUpperCase() : prev.avatar,
+                        }));
+                        setSettingsSaved(true);
+                        setTimeout(() => setSettingsSaved(false), 3000);
+                      }}
+                    >Save Changes</button>
                     </div>
                   </div>
 
@@ -1016,27 +1019,37 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="db-settings-footer">
-                      <span className="db-save-success">{pwSaved ? "✓ Password updated!" : ""}</span>
-                      <button
-                        className="db-settings-save"
-                        onClick={async () => {
-                          const userStr = localStorage.getItem("jzai_user");
-                          const storedUser = userStr ? JSON.parse(userStr) : null;
-                          if (!storedUser) return;
-                          if (newPw !== confirmPw) { alert("Passwords do not match"); return; }
-                          const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: storedUser.id, currentPassword: currentPw, newPassword: newPw }),
-                          });
-                          const data = await res.json();
-                          if (!res.ok) { alert(data.error || "Failed"); return; }
-                          setPwSaved(true);
-                          setCurrentPw(""); setNewPw(""); setConfirmPw("");
-                          setTimeout(() => setPwSaved(false), 3000);
-                        }}
-                      >Update Password</button>
-                    </div>
+                    <span className="db-save-success">
+                      {pwSaved ? "✓ Password updated!" : ""}
+                      {pwError ? <span style={{color:"var(--red)",fontSize:13}}>⚠️ {pwError}</span> : ""}
+                    </span>
+                    <button
+                      className="db-settings-save"
+                      onClick={async () => {
+                        setPwError("");
+                        const userStr = localStorage.getItem("jzai_user");
+                        const storedUser = userStr ? JSON.parse(userStr) : null;
+                        if (!storedUser) return;
+                        if (newPw !== confirmPw) {
+                          setPwError("Passwords do not match.");
+                          return;
+                        }
+                        const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: storedUser.id, currentPassword: currentPw, newPassword: newPw }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          setPwError(data.error || "Password update failed.");
+                          return;
+                        }
+                        setPwSaved(true);
+                        setCurrentPw(""); setNewPw(""); setConfirmPw("");
+                        setTimeout(() => setPwSaved(false), 3000);
+                      }}
+                    >Update Password</button>
+                  </div>
                   </div>
 
                   <div className="db-settings-card db-danger-zone">
