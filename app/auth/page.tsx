@@ -463,8 +463,8 @@ export default function AuthPage() {
                 </button>
 
                 <div className="divider">or continue with</div>
-                <button className="btn-google" onClick={() => showAlert("error", "Google OAuth coming soon.")}>
-                  <GoogleIcon /> Continue with Google
+                <button className="btn-google" disabled style={{opacity:0.5, cursor:"not-allowed"}}>
+                  <GoogleIcon /> Continue with Google (Coming Soon)
                 </button>
                 <div className="terms-text">
                   Don't have an account?{" "}
