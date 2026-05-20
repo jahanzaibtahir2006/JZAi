@@ -18,62 +18,31 @@ interface Bot {
   color: string;
 }
 
+// FIX #1: User object React state mein — MOCK_USER aur mutable object hata diya
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  joined: string;
+  avatar: string;
+}
+
 type ActiveSection = "overview" | "bots" | "settings";
 
-// ── Mock Data ──────────────────────────────────────────────────────────────
-const MOCK_BOTS: Bot[] = [
-  {
-    id: "jzai_a3f8d21c",
-    name: "Aria",
-    industry: "SaaS / Tech",
-    language: "English",
-    plan: "Pro",
-    status: "active",
-    conversations: 342,
-    leads: 87,
-    messages: 2840,
-    createdAt: "May 2, 2026",
-    color: "#e8193c",
-  },
-  {
-    id: "jzai_b7c91e44",
-    name: "SupportBot",
-    industry: "E-Commerce",
-    language: "English",
-    plan: "Starter",
-    status: "active",
-    conversations: 128,
-    leads: 31,
-    messages: 960,
-    createdAt: "May 10, 2026",
-    color: "#6366f1",
-  },
-  {
-    id: "jzai_c2d45f80",
-    name: "LeadHunter",
-    industry: "Real Estate",
-    language: "Urdu",
-    plan: "Starter",
-    status: "paused",
-    conversations: 54,
-    leads: 12,
-    messages: 310,
-    createdAt: "May 15, 2026",
-    color: "#10b981",
-  },
-];
-
-const MOCK_USER = {
-  name: "Loading...",
-  email: "",
-  company: "",
-  joined: "",
-  avatar: "JZ",
-};
+// FIX #6: MOCK_BOTS dead code tha — remove kar diya
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function getInitials(name: string): string {
-  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+// FIX #5: getInitials crash karta tha agar name empty/undefined ho
+function getInitials(name?: string): string {
+  if (!name || name.trim() === "") return "??";
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0] ?? "")
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function copyToClipboard(text: string, setCopied: (id: string) => void, id: string) {
@@ -92,29 +61,60 @@ export default function Dashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Settings form state
-  const [settingsName, setSettingsName] = useState(MOCK_USER.name);
-  const [settingsEmail, setSettingsEmail] = useState(MOCK_USER.email);
-  const [settingsCompany, setSettingsCompany] = useState(MOCK_USER.company);
+  // FIX #1: User data React state mein — sidebar re-render hoga properly
+  const [user, setUser] = useState<UserData>({
+    id: "",
+    name: "",
+    email: "",
+    company: "",
+    joined: "",
+    avatar: "JZ",
+  });
+
+  // FIX #2: Settings form state — user state se initialize hogi useEffect mein
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsEmail, setSettingsEmail] = useState("");
+  const [settingsCompany, setSettingsCompany] = useState("");
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [pwSaved, setPwSaved] = useState(false);
 
+  // FIX #3 & #4 ke liye error state
+  const [deleteError, setDeleteError] = useState("");
+  const [toggleError, setToggleError] = useState("");
+
   useEffect(() => {
     const saved = (localStorage.getItem("theme") as "dark" | "light") || "dark";
     setTheme(saved);
+
     const userStr = localStorage.getItem("jzai_user");
     if (userStr) {
-      const user = JSON.parse(userStr);
-      MOCK_USER.name = user.name || "User";
-      MOCK_USER.email = user.email || "";
-      MOCK_USER.avatar = user.name ? user.name.slice(0,2).toUpperCase() : "JZ";
-      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots?user_id=${user.id}`)
-        .then(r => r.json())
-        .then(data => {
+      const parsed = JSON.parse(userStr);
+      const loadedUser: UserData = {
+        id: parsed.id || "",
+        name: parsed.name || "User",
+        email: parsed.email || "",
+        company: parsed.company || "",
+        joined: parsed.joined || "",
+        avatar: parsed.name ? parsed.name.slice(0, 2).toUpperCase() : "JZ",
+      };
+      // FIX #1: React state update — sidebar re-render karega
+      setUser(loadedUser);
+
+      // FIX #2: Settings form bhi ab sahi data se initialize hogi
+      setSettingsName(loadedUser.name);
+      setSettingsEmail(loadedUser.email);
+      setSettingsCompany(loadedUser.company);
+
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots?user_id=${parsed.id}`)
+        .then((r) => r.json())
+        .then((data) => {
           if (data.bots) setBots(data.bots);
+        })
+        .catch(() => {
+          // Bots load fail ho — silent fail, empty state dikhega
         });
     } else {
       window.location.href = "/auth";
@@ -128,21 +128,55 @@ export default function Dashboard() {
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
-  const toggleBotStatus = (id: string) => {
-    setBots((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, status: b.status === "active" ? "paused" : "active" } : b
-      )
-    );
+  // FIX #3: toggleBotStatus — pehle API call, success pe state update
+  const toggleBotStatus = async (id: string) => {
+    setToggleError("");
+    const bot = bots.find((b) => b.id === id);
+    if (!bot) return;
+    const newStatus = bot.status === "active" ? "paused" : "active";
+    try {
+      const res = await fetch(
+        `https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToggleError(data.error || "Status update failed. Please try again.");
+        return;
+      }
+      // API success ke baad local state update
+      setBots((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+      );
+    } catch {
+      setToggleError("Network error. Status not updated.");
+    }
   };
 
+  // FIX #4: deleteBot — error handling add ki, UI sirf success pe update hogi
   const deleteBot = async (id: string) => {
-  await fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`, {
-    method: "DELETE",
-  });
-  setBots((prev) => prev.filter((b) => b.id !== id));
-  setDeleteConfirm("");
-};
+    setDeleteError("");
+    try {
+      const res = await fetch(
+        `https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error || "Delete failed. Please try again.");
+        return; // modal band nahi hoga, error dikhega
+      }
+      // Success — ab UI update karo
+      setBots((prev) => prev.filter((b) => b.id !== id));
+      setDeleteConfirm("");
+    } catch {
+      setDeleteError("Network error. Bot not deleted.");
+    }
+  };
 
   const totalStats = {
     bots: bots.length,
@@ -194,10 +228,8 @@ export default function Dashboard() {
         @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:0.5;}}
         @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
 
-        /* ── LAYOUT ── */
         .db-wrap{display:flex;min-height:100vh;}
 
-        /* ── SIDEBAR ── */
         .db-sidebar{
           width:260px;flex-shrink:0;
           background:var(--card-bg);
@@ -282,13 +314,11 @@ export default function Dashboard() {
         }
         .db-logout-btn:hover{background:rgba(232,25,60,0.08);color:var(--red);}
 
-        /* ── MAIN ── */
         .db-main{
           margin-left:260px;flex:1;
           display:flex;flex-direction:column;min-height:100vh;
         }
 
-        /* ── TOPBAR ── */
         .db-topbar{
           padding:20px 40px;
           border-bottom:1px solid var(--border);
@@ -314,10 +344,8 @@ export default function Dashboard() {
         }
         .db-new-bot-btn:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 6px 20px var(--red-glow);}
 
-        /* ── CONTENT ── */
         .db-content{padding:36px 40px;flex:1;animation:fadeUp 0.5s ease both;}
 
-        /* ── SECTION LABEL ── */
         .db-section-label{
           font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
           color:var(--red);margin-bottom:20px;
@@ -325,7 +353,6 @@ export default function Dashboard() {
         }
         .db-section-label::before{content:'';width:24px;height:1px;background:var(--red);}
 
-        /* ── STATS GRID ── */
         .db-stats-grid{
           display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
           margin-bottom:40px;
@@ -352,7 +379,6 @@ export default function Dashboard() {
           margin-top:8px;display:flex;align-items:center;gap:4px;
         }
 
-        /* ── RECENT ACTIVITY ── */
         .db-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px;}
         .db-card{
           background:var(--card-bg);border:1px solid var(--border);
@@ -376,7 +402,6 @@ export default function Dashboard() {
         .db-activity-text{font-size:13px;color:var(--text);flex:1;}
         .db-activity-time{font-size:11px;color:var(--text3);}
 
-        /* ── BOTS GRID ── */
         .db-bots-header{
           display:flex;align-items:center;justify-content:space-between;
           margin-bottom:24px;
@@ -430,7 +455,6 @@ export default function Dashboard() {
         .db-bot-stat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);}
         .db-bot-stat-label{font-size:10px;color:var(--text2);margin-top:2px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
 
-        /* embed code */
         .db-embed-wrap{padding:16px 20px;}
         .db-embed-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
         .db-embed-code{
@@ -453,7 +477,6 @@ export default function Dashboard() {
         .db-copy-btn:hover{border-color:var(--red);color:var(--red);}
         .db-copy-btn.copied{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#22c55e;}
 
-        /* bot actions */
         .db-bot-actions{
           padding:12px 20px;
           display:flex;gap:8px;
@@ -481,7 +504,13 @@ export default function Dashboard() {
         }
         .db-action-delete:hover{background:rgba(232,25,60,0.08);border-color:rgba(232,25,60,0.3);color:var(--red);}
 
-        /* delete confirm */
+        /* FIX #3 & #4: Error messages */
+        .db-error-msg{
+          font-size:12px;color:var(--red);margin-top:6px;
+          padding:6px 10px;background:var(--red-dim);
+          border-radius:6px;border:1px solid rgba(232,25,60,0.2);
+        }
+
         .db-delete-overlay{
           position:fixed;inset:0;background:rgba(0,0,0,0.6);
           backdrop-filter:blur(4px);z-index:200;
@@ -514,7 +543,6 @@ export default function Dashboard() {
         }
         .db-modal-delete:hover{background:var(--red-dark);}
 
-        /* empty state */
         .db-empty{
           text-align:center;padding:80px 40px;
           background:var(--card-bg);border:1px dashed var(--border);
@@ -524,7 +552,6 @@ export default function Dashboard() {
         .db-empty-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;}
         .db-empty-sub{font-size:14px;color:var(--text2);margin-bottom:28px;}
 
-        /* ── SETTINGS ── */
         .db-settings-grid{display:flex;flex-direction:column;gap:24px;}
         .db-settings-card{
           background:var(--card-bg);border:1px solid var(--border);
@@ -571,10 +598,7 @@ export default function Dashboard() {
         }
         .db-save-success{font-size:13px;color:#22c55e;font-weight:500;}
 
-        /* danger zone */
-        .db-danger-zone{
-          border-color:rgba(232,25,60,0.2);
-        }
+        .db-danger-zone{border-color:rgba(232,25,60,0.2);}
         .db-danger-header{background:rgba(232,25,60,0.04);}
         .db-danger-title{color:var(--red) !important;}
         .db-danger-btn{
@@ -586,7 +610,6 @@ export default function Dashboard() {
         }
         .db-danger-btn:hover{background:rgba(232,25,60,0.08);}
 
-        /* plan badge */
         .db-plan-chip{
           display:inline-flex;align-items:center;gap:6px;
           background:var(--red-dim);border:1px solid rgba(232,25,60,0.2);
@@ -595,7 +618,6 @@ export default function Dashboard() {
           text-transform:uppercase;
         }
 
-        /* mobile hamburger */
         .db-hamburger{
           display:none;background:none;border:none;
           color:var(--text);font-size:20px;cursor:pointer;
@@ -624,22 +646,23 @@ export default function Dashboard() {
 
       {/* Delete Confirm Modal */}
       {deleteConfirm && (
-        <div className="db-delete-overlay" onClick={() => setDeleteConfirm("")}>
+        <div className="db-delete-overlay" onClick={() => { setDeleteConfirm(""); setDeleteError(""); }}>
           <div className="db-delete-modal" onClick={(e) => e.stopPropagation()}>
             <div className="db-delete-modal-icon">🗑️</div>
             <div className="db-delete-modal-title">Delete this bot?</div>
             <div className="db-delete-modal-sub">
               This action cannot be undone. The bot, its conversations, and all lead data will be permanently deleted.
             </div>
-            <div className="db-delete-modal-btns">
-              <button className="db-modal-cancel" onClick={() => setDeleteConfirm("")}>Cancel</button>
+            {/* FIX #4: Error message modal mein dikhega */}
+            {deleteError && <div className="db-error-msg">⚠️ {deleteError}</div>}
+            <div className="db-delete-modal-btns" style={{ marginTop: deleteError ? 16 : 0 }}>
+              <button className="db-modal-cancel" onClick={() => { setDeleteConfirm(""); setDeleteError(""); }}>Cancel</button>
               <button className="db-modal-delete" onClick={() => deleteBot(deleteConfirm)}>Yes, Delete</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Sidebar overlay on mobile */}
       {sidebarOpen && (
         <div
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 49 }}
@@ -654,11 +677,12 @@ export default function Dashboard() {
             <Link href="/" className="db-logo">JZ<span>AI</span></Link>
           </div>
 
+          {/* FIX #1: user React state se aa raha hai — re-render hoga */}
           <div className="db-user-block">
-            <div className="db-avatar">{MOCK_USER.avatar}</div>
+            <div className="db-avatar">{user.avatar}</div>
             <div>
-              <div className="db-user-name">{MOCK_USER.name}</div>
-              <div className="db-user-email">{MOCK_USER.email}</div>
+              <div className="db-user-name">{user.name}</div>
+              <div className="db-user-email">{user.email}</div>
             </div>
           </div>
 
@@ -694,18 +718,17 @@ export default function Dashboard() {
               </button>
             </div>
             <button className="db-logout-btn" onClick={() => {
-  localStorage.removeItem("jzai_user");
-  window.location.href = "/auth";
-}}>
-  <span className="db-nav-icon">🚪</span>
-  Sign Out
-</button>
+              localStorage.removeItem("jzai_user");
+              window.location.href = "/auth";
+            }}>
+              <span className="db-nav-icon">🚪</span>
+              Sign Out
+            </button>
           </div>
         </aside>
 
         {/* ── MAIN ── */}
         <main className="db-main">
-          {/* Topbar */}
           <div className="db-topbar">
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <button className="db-hamburger" onClick={() => setSidebarOpen(true)}>☰</button>
@@ -723,15 +746,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Content */}
           <div className="db-content" key={activeSection}>
 
             {/* ── OVERVIEW ── */}
             {activeSection === "overview" && (
               <>
                 <div className="db-section-label">Overview</div>
-
-                {/* Stats */}
                 <div className="db-stats-grid">
                   {[
                     { icon: "🤖", val: totalStats.bots, label: "Active Bots", change: "+1 this month" },
@@ -748,9 +768,7 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* Two col */}
                 <div className="db-two-col">
-                  {/* Recent Bots */}
                   <div className="db-card">
                     <div className="db-card-header">
                       <div className="db-card-title">Your Bots</div>
@@ -776,7 +794,6 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Recent Activity */}
                   <div className="db-card">
                     <div className="db-card-header">
                       <div className="db-card-title">Recent Activity</div>
@@ -810,6 +827,9 @@ export default function Dashboard() {
                   <Link href="/create-chatbot" className="db-new-bot-btn">+ Create New Bot</Link>
                 </div>
 
+                {/* FIX #3: Toggle error message */}
+                {toggleError && <div className="db-error-msg" style={{ marginBottom: 16 }}>⚠️ {toggleError}</div>}
+
                 {bots.length === 0 ? (
                   <div className="db-empty">
                     <div className="db-empty-icon">🤖</div>
@@ -821,7 +841,6 @@ export default function Dashboard() {
                   <div className="db-bots-grid">
                     {bots.map((bot, i) => (
                       <div key={bot.id} className="db-bot-card" style={{ animationDelay: `${i * 0.08}s` }}>
-                        {/* Top */}
                         <div className="db-bot-card-top">
                           <div className="db-bot-avatar" style={{ background: bot.color }}>
                             {getInitials(bot.name)}
@@ -833,7 +852,6 @@ export default function Dashboard() {
                           <div className={`db-bot-status ${bot.status}`}>{bot.status}</div>
                         </div>
 
-                        {/* Stats row */}
                         <div className="db-bot-stats">
                           <div className="db-bot-stat">
                             <div className="db-bot-stat-val">{bot.conversations}</div>
@@ -849,7 +867,6 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        {/* Embed code */}
                         <div className="db-embed-wrap">
                           <div className="db-embed-label">Embed Code</div>
                           <div className="db-embed-code" title={embedCode(bot.id)}>
@@ -863,13 +880,13 @@ export default function Dashboard() {
                           </button>
                         </div>
 
-                        {/* Actions */}
                         <div className="db-bot-actions">
                           <Link
                             href={`/create-chatbot?edit=${bot.id}`}
                             className="db-action-btn db-action-edit"
                             style={{ textDecoration: "none" }}
                           >✏️ Edit</Link>
+                          {/* FIX #3: toggleBotStatus ab API call karta hai */}
                           <button
                             className={`db-action-btn db-action-toggle ${bot.status === "active" ? "active-btn" : "paused-btn"}`}
                             onClick={() => toggleBotStatus(bot.id)}
@@ -878,7 +895,7 @@ export default function Dashboard() {
                           </button>
                           <button
                             className="db-action-btn db-action-delete"
-                            onClick={() => setDeleteConfirm(bot.id)}
+                            onClick={() => { setDeleteConfirm(bot.id); setDeleteError(""); }}
                           >🗑️</button>
                         </div>
                       </div>
@@ -894,7 +911,6 @@ export default function Dashboard() {
                 <div className="db-section-label">Account Settings</div>
                 <div className="db-settings-grid">
 
-                  {/* Profile */}
                   <div className="db-settings-card">
                     <div className="db-settings-header">
                       <div className="db-settings-title">Profile Information</div>
@@ -904,6 +920,7 @@ export default function Dashboard() {
                       <div className="db-settings-row">
                         <div className="db-settings-field">
                           <label className="db-settings-label">Full Name</label>
+                          {/* FIX #2: settingsName ab user state se initialize hoti hai */}
                           <input
                             className="db-settings-input"
                             type="text"
@@ -936,7 +953,7 @@ export default function Dashboard() {
                           <input
                             className="db-settings-input"
                             type="text"
-                            value={MOCK_USER.joined}
+                            value={user.joined}
                             readOnly
                             style={{ opacity: 0.6, cursor: "default" }}
                           />
@@ -948,23 +965,31 @@ export default function Dashboard() {
                       <button
                         className="db-settings-save"
                         onClick={async () => {
-  const userStr = localStorage.getItem("jzai_user");
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!user) return;
-  await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: user.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
-  });
-  localStorage.setItem("jzai_user", JSON.stringify({ ...user, name: settingsName, email: settingsEmail }));
-  setSettingsSaved(true);
-  setTimeout(() => setSettingsSaved(false), 3000);
-}}
+                          const userStr = localStorage.getItem("jzai_user");
+                          const storedUser = userStr ? JSON.parse(userStr) : null;
+                          if (!storedUser) return;
+                          await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: storedUser.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
+                          });
+                          const updatedUser = { ...storedUser, name: settingsName, email: settingsEmail, company: settingsCompany };
+                          localStorage.setItem("jzai_user", JSON.stringify(updatedUser));
+                          // FIX #1 & #2: Save ke baad React user state bhi update — sidebar re-render karega
+                          setUser((prev) => ({
+                            ...prev,
+                            name: settingsName,
+                            email: settingsEmail,
+                            company: settingsCompany,
+                            avatar: settingsName ? settingsName.slice(0, 2).toUpperCase() : prev.avatar,
+                          }));
+                          setSettingsSaved(true);
+                          setTimeout(() => setSettingsSaved(false), 3000);
+                        }}
                       >Save Changes</button>
                     </div>
                   </div>
 
-                  {/* Password */}
                   <div className="db-settings-card">
                     <div className="db-settings-header">
                       <div className="db-settings-title">Change Password</div>
@@ -995,26 +1020,25 @@ export default function Dashboard() {
                       <button
                         className="db-settings-save"
                         onClick={async () => {
-  const userStr = localStorage.getItem("jzai_user");
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!user) return;
-  if (newPw !== confirmPw) { alert("Passwords do not match"); return; }
-  const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: user.id, currentPassword: currentPw, newPassword: newPw }),
-  });
-  const data = await res.json();
-  if (!res.ok) { alert(data.error || "Failed"); return; }
-  setPwSaved(true);
-  setCurrentPw(""); setNewPw(""); setConfirmPw("");
-  setTimeout(() => setPwSaved(false), 3000);
-}}
+                          const userStr = localStorage.getItem("jzai_user");
+                          const storedUser = userStr ? JSON.parse(userStr) : null;
+                          if (!storedUser) return;
+                          if (newPw !== confirmPw) { alert("Passwords do not match"); return; }
+                          const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: storedUser.id, currentPassword: currentPw, newPassword: newPw }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) { alert(data.error || "Failed"); return; }
+                          setPwSaved(true);
+                          setCurrentPw(""); setNewPw(""); setConfirmPw("");
+                          setTimeout(() => setPwSaved(false), 3000);
+                        }}
                       >Update Password</button>
                     </div>
                   </div>
 
-                  {/* Danger Zone */}
                   <div className="db-settings-card db-danger-zone">
                     <div className="db-settings-header db-danger-header">
                       <div className="db-settings-title db-danger-title">Danger Zone</div>
