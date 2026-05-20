@@ -87,7 +87,7 @@ function copyToClipboard(text: string, setCopied: (id: string) => void, id: stri
 export default function Dashboard() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeSection, setActiveSection] = useState<ActiveSection>("overview");
-  const [bots, setBots] = useState<Bot[]>(MOCK_BOTS);
+  const [bots, setBots] = useState<Bot[]>([]);
   const [copiedId, setCopiedId] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -111,6 +111,11 @@ export default function Dashboard() {
       MOCK_USER.name = user.name || "User";
       MOCK_USER.email = user.email || "";
       MOCK_USER.avatar = user.name ? user.name.slice(0,2).toUpperCase() : "JZ";
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots?user_id=${user.id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.bots) setBots(data.bots);
+        });
     } else {
       window.location.href = "/auth";
     }
