@@ -228,7 +228,7 @@ export default function Dashboard() {
         }
         .db-user-name{font-size:14px;font-weight:600;color:var(--text);}
         .db-user-email{font-size:11px;color:var(--text2);margin-top:2px;}
-        .db-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+        .db-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:static;width:auto;background:transparent;border:none;backdrop-filter:none;}
         .db-nav-item{
           display:flex;align-items:center;gap:12px;
           padding:11px 14px;border-radius:8px;
