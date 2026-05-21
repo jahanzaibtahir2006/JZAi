@@ -63,14 +63,27 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // FIX #1: User data React state mein — sidebar re-render hoga properly
-  const [user, setUser] = useState<UserData>({
-  id: "",
-  name: "",
-  email: "",
-  company: "",
-  joined: "",
-  avatar: "JZ",
-  plan: "Starter", // ✅ add karo
+  // ✅ Naya — pehle hi localStorage se read karo
+const [user, setUser] = useState<UserData>(() => {
+  if (typeof window === "undefined") return {
+    id: "", name: "", email: "", company: "",
+    joined: "", avatar: "JZ", plan: "Starter",
+  };
+  const str = localStorage.getItem("jzai_user");
+  if (!str) return {
+    id: "", name: "", email: "", company: "",
+    joined: "", avatar: "JZ", plan: "Starter",
+  };
+  const p = JSON.parse(str);
+  return {
+    id: p.id || "",
+    name: p.name || "",
+    email: p.email || "",
+    company: p.company || "",
+    joined: p.joined || "",
+    avatar: p.name ? p.name.slice(0, 2).toUpperCase() : "JZ",
+    plan: p.plan || "Starter",
+  };
 });
 
   // FIX #2: Settings form state — user state se initialize hogi useEffect mein
