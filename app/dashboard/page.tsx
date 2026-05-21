@@ -743,7 +743,13 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="db-topbar-right">
-              <div className="db-plan-chip">🚀 {user.plan || "Starter"} Plan</div>
+              <div
+                className="db-plan-chip"
+                style={{cursor: "pointer"}}
+                onClick={() => setActiveSection("settings")}
+                title="View plan">
+                🚀 {user.plan || "Starter"} Plan
+              </div>
               <Link href="/create-chatbot" className="db-new-bot-btn">
                 + New Bot
               </Link>
