@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ function copyToClipboard(text: string, setCopied: (id: string) => void, id: stri
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────
-export default function Dashboard() {
+function DashboardInner() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<ActiveSection>(
@@ -1086,5 +1086,13 @@ const [user, setUser] = useState<UserData>({
         </main>
       </div>
     </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div style={{background:"#050507",minHeight:"100vh"}} />}>
+      <DashboardInner />
+    </Suspense>
   );
 }
