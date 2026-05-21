@@ -1346,18 +1346,7 @@ if (amountDetect && leadStep === null) {
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
 
-    setTimeout(function(){
-  msgs.style.scrollBehavior = 'smooth';
-  var msgHeight = wrap.offsetHeight;
-  var availHeight = msgs.clientHeight;
-  if (msgHeight < availHeight * 0.6) {
-    msgs.scrollTop = msgs.scrollHeight;
-  } else {
-    msgs.scrollTop = wrap.offsetTop - 16;
-  }
-  updateScrollBtn();
-}, 100);
-  }
+  
   function renderMsg(role, text, doScroll) {
   var wrap = document.createElement('div');
   wrap.className = 'nxc-msg nxc-' + role;
@@ -1386,18 +1375,24 @@ if (amountDetect && leadStep === null) {
   if (doScroll) {
     setTimeout(function(){
       msgs.style.scrollBehavior = 'smooth';
-      var msgHeight = wrap.offsetHeight;
-      var availHeight = msgs.clientHeight;
-      if (msgHeight < availHeight * 0.6) {
-        // Short message — poora dikhao
+      if (role === 'user') {
+        // User message — hamesha bottom
         msgs.scrollTop = msgs.scrollHeight;
       } else {
-        msgs.scrollTop = wrap.offsetTop - 16;
+        // Bot message — last user message ka top dikhao
+        var allMsgs = msgs.querySelectorAll('.nxc-msg');
+        var lastUser = null;
+        allMsgs.forEach(function(m) {
+          if (m.classList.contains('nxc-user')) lastUser = m;
+        });
+        var scrollTarget = lastUser ? lastUser : wrap;
+        var rect = scrollTarget.getBoundingClientRect();
+        var msgsRect = msgs.getBoundingClientRect();
+        msgs.scrollTop = msgs.scrollTop + (rect.top - msgsRect.top) - 16;
       }
       updateScrollBtn();
-    }, 100);
+    }, 150);
   }
-}
   
   function addMsg(role, text){
     renderMsg(role, text, true);
