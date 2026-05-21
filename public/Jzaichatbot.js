@@ -1348,9 +1348,15 @@ if (amountDetect && leadStep === null) {
 
     setTimeout(function(){
   msgs.style.scrollBehavior = 'smooth';
-  msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
+  var msgHeight = wrap.offsetHeight;
+  var availHeight = msgs.clientHeight;
+  if (msgHeight < availHeight * 0.6) {
+    msgs.scrollTop = msgs.scrollHeight;
+  } else {
+    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - (msgs.clientHeight / 3.5);
+  }
   updateScrollBtn();
-}, 400);
+}, 100);
   }
   function renderMsg(role, text, doScroll) {
   var wrap = document.createElement('div');
@@ -1380,9 +1386,17 @@ if (amountDetect && leadStep === null) {
   if (doScroll) {
     setTimeout(function(){
       msgs.style.scrollBehavior = 'smooth';
-      msgs.scrollTop = msgs.scrollHeight;
+      var msgHeight = wrap.offsetHeight;
+      var availHeight = msgs.clientHeight;
+      if (msgHeight < availHeight * 0.6) {
+        // Short message — poora dikhao
+        msgs.scrollTop = msgs.scrollHeight;
+      } else {
+        // Long message — 3.5 tak scroll
+        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - (msgs.clientHeight / 3.5);
+      }
       updateScrollBtn();
-    }, 50);
+    }, 100);
   }
 }
   
