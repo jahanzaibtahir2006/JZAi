@@ -226,48 +226,68 @@ export default function CreateChatbot() {
 
   // FIX 5: submitForm — try/catch + finally, real botId from API, error shown to user
   const submitForm = async () => {
-    if (!validateStep(4)) return;
-    setDeploying(true);
-    setDeployError(null);
-    try {
-      const userStr = localStorage.getItem("jzai_user");
-      const user = userStr ? JSON.parse(userStr) : null;
-      if (!user?.id) {
-  setDeployError("Please login first.");
-  setDeploying(false);
-  return;
-}
-      const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.id,
-          name: form.botName || "My Chatbot",
-          industry: form.industry,
-          color: form.brandColor,
-          language: form.botLang,
-          plan: selectedPlan.name,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || `Server error (${res.status})`);
-      }
-      // FIX 6: use real bot ID from API response, fallback to generated only if absent
-      const botId = data?.id ? String(data.id) : ("jzai_" + Math.random().toString(36).substr(2, 8));
-      setSuccess({
-        botName: form.botName || "My Chatbot",
-        botId,
-        plan: `${selectedPlan.name} — ${selectedPlan.price}`,
-        email: form.notifyEmail || "—",
-      });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-      setDeployError(message);
-    } finally {
+  if (!validateStep(4)) return;
+  setDeploying(true);
+  setDeployError(null);
+  try {
+    const userStr = localStorage.getItem("jzai_user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user?.id) {
+      setDeployError("Please login first.");
       setDeploying(false);
+      return;
     }
-  };
+
+    const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/bots", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // ── Existing fields ──
+        user_id:  user.id,
+        name:     form.botName || "My Chatbot",
+        industry: form.industry,
+        color:    form.brandColor,
+        language: form.botLang,
+        plan:     selectedPlan.name,
+
+        // ── Naye fields (Step 2) ──
+        business_desc: form.businessDesc,
+        faqs:          form.faqs,
+
+        // ── Naye fields (Step 3) ──
+        greeting_msg: form.greetMsg,
+        tone:         form.tone,
+        role:         form.role,
+        lead_fields:  form.leadFields,   // array hai — worker JSON.stringify karega
+        fallback_msg: form.fallbackMsg,
+
+        // ── Naye fields (Step 4) ──
+        notify_email: form.notifyEmail,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error || data?.message || `Server error (${res.status})`);
+    }
+
+    const botId = data?.id
+      ? String(data.id)
+      : ("jzai_" + Math.random().toString(36).substr(2, 8));
+
+    setSuccess({
+      botName: form.botName || "My Chatbot",
+      botId,
+      plan:  `${selectedPlan.name} — ${selectedPlan.price}`,
+      email: form.notifyEmail || "—",
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+    setDeployError(message);
+  } finally {
+    setDeploying(false);
+  }
+};
 
   const previewName = form.botName || "My Chatbot";
   const previewInitials = getInitials(previewName);
