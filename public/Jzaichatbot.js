@@ -1348,12 +1348,9 @@ if (amountDetect && leadStep === null) {
 
     setTimeout(function(){
   msgs.style.scrollBehavior = 'smooth';
-  var wrapTop = wrap.getBoundingClientRect().top;
-  var msgsTop = msgs.getBoundingClientRect().top;
-  var relativeTop = wrapTop - msgsTop;
-  msgs.scrollTop = msgs.scrollTop + relativeTop - (msgs.clientHeight / 3.5);
+  msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
   updateScrollBtn();
-}, 100);
+}, 400);
 
   function renderMsg(role, text, doScroll) {
   var wrap = document.createElement('div');
