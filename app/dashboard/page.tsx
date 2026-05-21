@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
@@ -56,7 +57,9 @@ function copyToClipboard(text: string, setCopied: (id: string) => void, id: stri
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeSection, setActiveSection] = useState<ActiveSection>("overview");
+  const searchParams = useSearchParams();
+  const [activeSection, setActiveSection] = useState<ActiveSection>(
+  (searchParams.get("tab") as ActiveSection) || "overview");
   const [bots, setBots] = useState<Bot[]>([]);
   const [copiedId, setCopiedId] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -130,7 +133,11 @@ const [user, setUser] = useState<UserData>({
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
-
+  const changeSection = (section: ActiveSection) => {
+  setActiveSection(section);
+  window.history.pushState({}, "", `/dashboard?tab=${section}`);
+  setSidebarOpen(false);
+  };
   // FIX #3: toggleBotStatus — pehle API call, success pe state update
   const toggleBotStatus = async (id: string) => {
     setToggleError("");
@@ -698,8 +705,7 @@ const [user, setUser] = useState<UserData>({
               <button
                 key={item.id}
                 className={`db-nav-item${activeSection === item.id ? " active" : ""}`}
-                onClick={() => { setActiveSection(item.id as ActiveSection); setSidebarOpen(false); }}
-              >
+                onClick={() => changeSection(item.id as ActiveSection)}>
                 <span className="db-nav-icon">{item.icon}</span>
                 {item.label}
               </button>
@@ -783,7 +789,7 @@ const [user, setUser] = useState<UserData>({
                       <div className="db-card-title">Your Bots</div>
                       <button
                         style={{ fontSize: 12, color: "var(--red)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
-                        onClick={() => setActiveSection("bots")}
+                        onClick={() => changeSection("bots")}
                       >View all →</button>
                     </div>
                     <div className="db-card-body">
