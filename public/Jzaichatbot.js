@@ -1353,7 +1353,7 @@ if (amountDetect && leadStep === null) {
   if (msgHeight < availHeight * 0.6) {
     msgs.scrollTop = msgs.scrollHeight;
   } else {
-    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - 16;
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   updateScrollBtn();
 }, 100);
@@ -1392,7 +1392,7 @@ if (amountDetect && leadStep === null) {
         // Short message — poora dikhao
         msgs.scrollTop = msgs.scrollHeight;
       } else {
-        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - 16;
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
       updateScrollBtn();
     }, 100);
