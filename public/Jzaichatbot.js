@@ -1353,7 +1353,7 @@ if (amountDetect && leadStep === null) {
   if (msgHeight < availHeight * 0.6) {
     msgs.scrollTop = msgs.scrollHeight;
   } else {
-    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - (msgs.clientHeight / 3.5);
+    msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - 16;
   }
   updateScrollBtn();
 }, 100);
