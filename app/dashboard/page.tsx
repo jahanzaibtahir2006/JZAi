@@ -18,7 +18,14 @@ interface Bot {
   created_at_display: string;
   color: string;
 }
-
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  bot_name: string;
+  created_at: string;
+}
 // FIX #1: User object React state mein — MOCK_USER aur mutable object hata diya
 interface UserData {
   id: string;
@@ -30,7 +37,7 @@ interface UserData {
   plan: string;
 }
 
-type ActiveSection = "overview" | "bots" | "settings";
+type ActiveSection = "overview" | "bots" | "leads" | "settings";
 
 // FIX #6: MOCK_BOTS dead code tha — remove kar diya
 
@@ -61,6 +68,7 @@ function DashboardInner() {
   const [activeSection, setActiveSection] = useState<ActiveSection>(
   (searchParams.get("tab") as ActiveSection) || "overview");
   const [bots, setBots] = useState<Bot[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [copiedId, setCopiedId] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -114,14 +122,11 @@ const [user, setUser] = useState<UserData>({
       setSettingsEmail(loadedUser.email);
       setSettingsCompany(loadedUser.company);
 
-      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots?user_id=${parsed.id}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.bots) setBots(data.bots);
-        })
-        .catch(() => {
-          // Bots load fail ho — silent fail, empty state dikhega
-        });
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/leads?user_id=${parsed.id}`)
+          .then((r) => r.json())
+          .then((data) => { if (data.leads) setLeads(data.leads); })
+          .catch(() => {});
+      
     } else {
       window.location.href = "/auth";
     }
@@ -700,6 +705,7 @@ const [user, setUser] = useState<UserData>({
             {[
               { id: "overview", icon: "📊", label: "Overview" },
               { id: "bots", icon: "🤖", label: "My Bots" },
+              { id: "leads", icon: "🎯", label: "Leads" },
               { id: "settings", icon: "⚙️", label: "Settings" },
             ].map((item) => (
               <button
@@ -744,6 +750,7 @@ const [user, setUser] = useState<UserData>({
               <div className="db-topbar-title">
                 {activeSection === "overview" && "Dashboard"}
                 {activeSection === "bots" && "My Bots"}
+                {activeSection === "leads" && "Leads"}
                 {activeSection === "settings" && "Settings"}
               </div>
             </div>
@@ -920,6 +927,43 @@ const [user, setUser] = useState<UserData>({
               </>
             )}
 
+            {/* ── LEADS ── */}
+{activeSection === "leads" && (
+  <>
+    <div className="db-section-label">Leads ({leads.length})</div>
+    {leads.length === 0 ? (
+      <div className="db-empty">
+        <div className="db-empty-icon">🎯</div>
+        <div className="db-empty-title">No leads yet</div>
+        <div className="db-empty-sub">Leads captured via your bots will appear here.</div>
+      </div>
+    ) : (
+      <div style={{ background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg2)" }}>
+              {["Name", "Email", "Phone", "Bot", "Date"].map((h) => (
+                <th key={h} style={{ padding: "12px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text2)" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {leads.map((lead) => (
+              <tr key={lead.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td style={{ padding: "14px 20px", fontSize: 14, color: "var(--text)", fontWeight: 600 }}>{lead.name || "—"}</td>
+                <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--text2)" }}>{lead.email || "—"}</td>
+                <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--text2)" }}>{lead.phone || "—"}</td>
+                <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--red)" }}>{lead.bot_name}</td>
+                <td style={{ padding: "14px 20px", fontSize: 12, color: "var(--text3)" }}>{lead.created_at}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </>
+)}
+            
             {/* ── SETTINGS ── */}
             {activeSection === "settings" && (
               <>
