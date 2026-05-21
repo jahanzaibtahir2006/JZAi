@@ -1555,7 +1555,7 @@
 
     var av = document.createElement('div');
     av.className = 'nxc-avatar';
-    av.textContent = role === 'bot' ? 'JZ' : 'U';
+    av.textContent = role === 'bot' ? 'JZ' : 'You';
 
     var col = document.createElement('div');
     col.className = 'nxc-msg-col';
