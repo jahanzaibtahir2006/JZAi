@@ -1346,13 +1346,14 @@ if (amountDetect && leadStep === null) {
     var sBtn = document.getElementById('nxc-scroll-btn');
     if(sBtn) msgs.appendChild(sBtn);
 
-    // ✅ SCROLL FIX — renderMsg jaise same pattern
     setTimeout(function(){
-      msgs.style.scrollBehavior = 'smooth';
-      msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
-      updateScrollBtn();
-    }, 400);
-  }
+  msgs.style.scrollBehavior = 'smooth';
+  var wrapTop = wrap.getBoundingClientRect().top;
+  var msgsTop = msgs.getBoundingClientRect().top;
+  var relativeTop = wrapTop - msgsTop;
+  msgs.scrollTop = msgs.scrollTop + relativeTop - (msgs.clientHeight / 3.5);
+  updateScrollBtn();
+}, 100);
 
   function renderMsg(role, text, doScroll) {
   var wrap = document.createElement('div');
