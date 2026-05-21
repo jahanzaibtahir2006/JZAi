@@ -1393,7 +1393,7 @@ if (amountDetect && leadStep === null) {
       updateScrollBtn();
     }, 150);
   }
-  
+  }
   function addMsg(role, text){
     renderMsg(role, text, true);
     chatHistory.push({role:role, text:text}); saveHistory(chatHistory);
