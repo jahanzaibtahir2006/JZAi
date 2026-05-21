@@ -1392,8 +1392,7 @@ if (amountDetect && leadStep === null) {
         // Short message — poora dikhao
         msgs.scrollTop = msgs.scrollHeight;
       } else {
-        // Long message — 3.5 tak scroll
-        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - (msgs.clientHeight / 3.5);
+        msgs.scrollTop = wrap.offsetTop - msgs.offsetTop + msgs.scrollTop - 16;
       }
       updateScrollBtn();
     }, 100);
