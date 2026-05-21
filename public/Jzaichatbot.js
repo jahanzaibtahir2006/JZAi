@@ -1351,7 +1351,7 @@ if (amountDetect && leadStep === null) {
   msgs.scrollTop = wrap.offsetTop - msgs.offsetTop - msgs.clientHeight/3.5;
   updateScrollBtn();
 }, 400);
-
+  }
   function renderMsg(role, text, doScroll) {
   var wrap = document.createElement('div');
   wrap.className = 'nxc-msg nxc-' + role;
