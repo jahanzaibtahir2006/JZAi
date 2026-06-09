@@ -1,0 +1,1436 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
+import { useTheme } from '@/components/ThemeProvider';
+import DashboardSkeleton from "@/components/DashboardSkeleton";
+
+
+// ── Types ──────────────────────────────────────────────────────────────────
+interface Bot {
+  id: string;
+  name: string;
+  industry: string;
+  language: string;
+  plan: string;
+  status: "active" | "paused";
+  conversations: number;
+  leads: number;
+  messages: number;
+  created_at_display: string;
+  color: string;
+}
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  bot_name: string;
+  created_at: string;
+}
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  joined: string;
+  avatar: string;
+  plan: string;
+  trial_end: string;
+}
+
+type ActiveSection = "overview" | "bots" | "leads" | "conversations" | "settings";
+
+// FIX #6: MOCK_BOTS dead code tha — remove kar diya
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+// FIX #5: getInitials crash karta tha agar name empty/undefined ho
+function getInitials(name?: string): string {
+  if (!name || name.trim() === "") return "??";
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0] ?? "")
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function copyToClipboard(text: string, setCopied: (id: string) => void, id: string) {
+  navigator.clipboard.writeText(text).then(() => {
+    setCopied(id);
+    setTimeout(() => setCopied(""), 2000);
+  });
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────
+function DashboardInner() {
+  const { theme, toggleTheme } = useTheme();
+  const searchParams = useSearchParams();
+  const [activeSection, setActiveSection] = useState<ActiveSection>(
+  (searchParams.get("tab") as ActiveSection) || "overview");
+  const [bots, setBots] = useState<Bot[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [conversations, setConversations] = useState<{id:string;bot_name:string;user_message:string;ai_reply:string;session_id:string;page_url:string;created_at:string}[]>([]);
+  const [copiedId, setCopiedId] = useState("");
+  const [stats, setStats] = useState({active_bots: 0,total_bots: 0,total_conversations: 0,leads_captured: 0,messages_sent: 0,recent_activity: [] as {bot_name: string; created_at: string}[],});
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoutModal, setLogoutModal] = useState(false)
+  const [activeBot, setActiveBot] = useState<string | null>(null)
+
+const [user, setUser] = useState<UserData>({
+  id: "",
+  name: "",
+  email: "",
+  company: "",
+  joined: "",
+  avatar: "JZ",
+  plan: "Starter",
+  trial_end: "",
+});
+
+  // FIX #2: Settings form state — user state se initialize hogi useEffect mein
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsEmail, setSettingsEmail] = useState("");
+  const [settingsCompany, setSettingsCompany] = useState("");
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  const [pwSaved, setPwSaved] = useState(false);
+  const [pwError, setPwError] = useState("");
+
+  // FIX #3 & #4 ke liye error state
+  const [deleteError, setDeleteError] = useState("");
+  const [toggleError, setToggleError] = useState("");
+
+  const [deleteAccountModal, setDeleteAccountModal] = useState(false);
+  const [deleteAccountPw, setDeleteAccountPw] = useState("");
+  const [deleteAccountError, setDeleteAccountError] = useState("");
+  const [seenLeads, setSeenLeads] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+
+  useEffect(() => {
+  const userStr = localStorage.getItem("jzai_user");
+    
+    if (userStr) {
+      const parsed = JSON.parse(userStr);
+      const loadedUser: UserData = {
+  id: parsed.id || "",
+  name: parsed.name || "User",
+  email: parsed.email || "",
+  company: parsed.company || "",
+  joined: parsed.joined || "",
+  avatar: parsed.name ? parsed.name.slice(0, 2).toUpperCase() : "JZ",
+  plan: parsed.plan || "Starter",
+  trial_end: parsed.trial_end || "",
+};
+      // FIX #1: React state update — sidebar re-render karega
+      setUser(loadedUser);
+
+      // FIX #2: Settings form bhi ab sahi data se initialize hogi
+      setSettingsName(loadedUser.name);
+      setSettingsEmail(loadedUser.email);
+      setSettingsCompany(loadedUser.company);
+
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/bots?user_id=${parsed.id}`)
+        .then((r) => r.json())
+        .then((data) => { if (data.bots) setBots(data.bots); })
+        .catch(() => {})
+        .finally(() => setIsLoading(false));
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/stats?user_id=${parsed.id}`)
+        .then((r) => r.json())
+        .then((data) => setStats(data))
+        .catch(() => {});
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/conversations?user_id=${parsed.id}`)
+        .then((r) => r.json())
+        .then((data) => { if (data.conversations) setConversations(data.conversations); })
+        .catch(() => {});
+      fetch(`https://jzai-saas.jahanzaibtahir2006.workers.dev/leads?user_id=${parsed.id}`)
+          .then((r) => r.json())
+          .then((data) => { if (data.leads) setLeads(data.leads); })
+          .catch(() => {});
+      
+    } else {
+      window.location.href = "/auth";
+    }
+  }, []);
+
+
+  const changeSection = (section: ActiveSection) => {
+  setActiveSection(section);
+  window.history.pushState({}, "", `/dashboard?tab=${section}`);
+  setSidebarOpen(false);
+  };
+  // FIX #3: toggleBotStatus — pehle API call, success pe state update
+  const toggleBotStatus = async (id: string) => {
+    setToggleError("");
+    const bot = bots.find((b) => b.id === id);
+    if (!bot) return;
+    const newStatus = bot.status === "active" ? "paused" : "active";
+    try {
+      const res = await fetch(
+        `https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToggleError(data.error || "Status update failed. Please try again.");
+        return;
+      }
+      // API success ke baad local state update
+      setBots((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+      );
+    } catch {
+      setToggleError("Network error. Status not updated.");
+    }
+  };
+
+  // FIX #4: deleteBot — error handling add ki, UI sirf success pe update hogi
+  const deleteBot = async (id: string) => {
+    setDeleteError("");
+    try {
+      const userStr = localStorage.getItem("jzai_user");
+      const storedUser = userStr ? JSON.parse(userStr) : null;
+      const res = await fetch(
+        `https://jzai-saas.jahanzaibtahir2006.workers.dev/bots/${id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: storedUser?.id }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error || "Delete failed. Please try again.");
+        return; // modal band nahi hoga, error dikhega
+      }
+      // Success — ab UI update karo
+      setBots((prev) => prev.filter((b) => b.id !== id));
+      setDeleteConfirm("");
+    } catch {
+      setDeleteError("Network error. Bot not deleted.");
+    }
+  };
+
+  const totalStats = {
+    bots: bots.length,
+    conversations: bots.reduce((a, b) => a + b.conversations, 0),
+    leads: bots.reduce((a, b) => a + b.leads, 0),
+    messages: bots.reduce((a, b) => a + b.messages, 0),
+  };
+
+const embedCode = (botId: string) =>
+  `<sc` + `ript src="https://cdn.jzai.store/widget.js" data-bot="${botId}" async></sc` + `ript>`;
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        :root{--transition-theme:0.4s cubic-bezier(0.4,0,0.2,1);}
+
+        [data-theme="dark"]{
+          --bg:#050507;--bg2:#0d0d12;--bg3:#13131a;--bg4:#1c1c26;
+          --red:#e8193c;--red-dark:#a01028;
+          --red-glow:rgba(232,25,60,0.18);--red-dim:rgba(232,25,60,0.08);
+          --text:#f5f5f7;--text2:#8a8a9a;--text3:#5a5a6a;
+          --border:#2a2a35;--border2:rgba(232,25,60,0.12);
+          --card-bg:#13131a;--card-hover:#0d0d12;
+          --toggle-bg:#1c1c26;--toggle-border:#2a2a35;
+          --shadow:rgba(0,0,0,0.4);
+        }
+        [data-theme="light"]{
+          --bg:#fafafa;--bg2:#f0f0f5;--bg3:#e8e8f0;--bg4:#dddde8;
+          --red:#d0102e;--red-dark:#a01028;
+          --red-glow:rgba(208,16,46,0.12);--red-dim:rgba(208,16,46,0.07);
+          --text:#0f0f14;--text2:#5a5a6a;--text3:#9a9aaa;
+          --border:#d8d8e4;--border2:rgba(208,16,46,0.15);
+          --card-bg:#ffffff;--card-hover:#f5f5fc;
+          --toggle-bg:#e8e8f0;--toggle-border:#d0d0dc;
+          --shadow:rgba(0,0,0,0.08);
+        }
+
+        body{
+          font-family:'DM Sans',sans-serif;
+          background:var(--bg);color:var(--text);
+          overflow-x:hidden;
+          transition:background var(--transition-theme),color var(--transition-theme);
+        }
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:0.5;}}
+        @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+
+        .db-skeleton{
+          background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+          background-size:200% 100%;
+          animation:shimmer 1.5s infinite;
+          border-radius:8px;
+        }
+        .db-skeleton-card{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:14px;padding:24px;
+        }
+        .db-wrap{display:flex;min-height:100vh;}
+
+        .db-sidebar{
+          width:260px;flex-shrink:0;
+          background:var(--card-bg);
+          border-right:1px solid var(--border);
+          display:flex;flex-direction:column;
+          position:fixed;top:0;left:0;bottom:0;z-index:50;
+          overflow-y:auto;
+          transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),background var(--transition-theme),border-color var(--transition-theme);
+        }
+        .db-sidebar-top{
+          padding:28px 24px 24px;
+          border-bottom:1px solid var(--border);
+          display:flex;align-items:center;justify-content:space-between;
+          position:sticky;
+          top:0;           
+          background:var(--card-bg);
+          z-index:10;      
+        }
+        .db-logo{
+          font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+          letter-spacing:-0.5px;color:var(--text);text-decoration:none;
+        }
+        .db-logo span{color:var(--red);}
+        .db-user-block{
+          padding:20px 24px;
+          border-bottom:1px solid var(--border);
+          display:flex;align-items:center;gap:12px;
+        }
+        .db-avatar{
+          width:38px;height:38px;border-radius:50%;
+          background:var(--red);color:#fff;
+          font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+          display:flex;align-items:center;justify-content:center;
+          flex-shrink:0;
+        }
+        .db-user-name{font-size:14px;font-weight:600;color:var(--text);}
+        .db-user-email{font-size:11px;color:var(--text2);margin-top:2px;}
+        .db-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:static;width:auto;background:transparent;border:none;backdrop-filter:none;}
+        .db-nav-item{
+          display:flex;align-items:center;gap:12px;
+          padding:11px 14px;border-radius:8px;
+          font-size:14px;font-weight:500;color:var(--text2);
+          cursor:pointer;transition:background 0.2s,color 0.2s;
+          border:none;background:transparent;font-family:'DM Sans',sans-serif;
+          width:100%;text-align:left;
+        }
+        .db-nav-item:hover{background:var(--bg2);color:var(--text);}
+        .db-nav-item.active{
+          background:var(--red-dim);color:var(--red);
+          border:1px solid rgba(232,25,60,0.2);
+        }
+        .db-nav-icon{font-size:16px;width:20px;text-align:center;}
+        .db-nav-divider{height:1px;background:var(--border);margin:8px 0;}
+        .db-sidebar-bottom{
+          padding:16px 12px;
+          border-top:1px solid var(--border);
+          display:flex;flex-direction:column;gap:8px;
+          margin-top:auto;
+        }
+        .db-toggle-row{
+          display:flex;align-items:center;justify-content:space-between;
+          padding:8px 14px;
+        }
+        .db-toggle-label{font-size:13px;color:var(--text2);}
+        .db-toggle{
+          position:relative;width:44px;height:24px;
+          background:var(--toggle-bg);border:1.5px solid var(--toggle-border);
+          border-radius:12px;cursor:pointer;
+          display:flex;align-items:center;padding:0 3px;
+          outline:none;transition:background var(--transition-theme);
+        }
+        .db-toggle-thumb{
+          width:16px;height:16px;border-radius:50%;background:var(--red);
+          font-size:9px;display:flex;align-items:center;justify-content:center;
+          transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+          box-shadow:0 2px 6px var(--shadow);
+        }
+        [data-theme="light"] .db-toggle-thumb{transform:translateX(20px);}
+        .db-logout-btn{
+          display:flex;align-items:center;gap:12px;
+          padding:11px 14px;border-radius:8px;
+          font-size:14px;font-weight:500;color:var(--text2);
+          cursor:pointer;transition:background 0.2s,color 0.2s;
+          border:none;background:transparent;font-family:'DM Sans',sans-serif;
+          width:100%;text-align:left;
+        }
+        .db-logout-btn:hover{background:rgba(232,25,60,0.08);color:var(--red);}
+
+        .db-main{
+          margin-left:260px;flex:1;
+          display:flex;flex-direction:column;min-height:100vh;
+        }
+
+        .db-topbar{
+          padding:20px 40px;
+          border-bottom:1px solid var(--border);
+          display:flex;align-items:center;justify-content:space-between;
+          background:var(--card-bg);
+          position:sticky;top:0;z-index:30;
+          backdrop-filter:blur(12px);
+          transition:background var(--transition-theme),border-color var(--transition-theme);
+        }
+        .db-topbar-title{
+          font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+          letter-spacing:-0.5px;color:var(--text);
+        }
+        .db-topbar-right{display:flex;align-items:center;gap:16px;}
+        .db-new-bot-btn{
+          background:var(--red);color:#fff;border:none;
+          border-radius:8px;padding:10px 20px;
+          font-size:13px;font-weight:600;cursor:pointer;
+          font-family:'DM Sans',sans-serif;
+          display:inline-flex;align-items:center;gap:8px;
+          transition:background 0.2s,transform 0.2s,box-shadow 0.2s;
+          text-decoration:none;
+        }
+        .db-new-bot-btn:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 6px 20px var(--red-glow);}
+
+        .db-content{padding:36px 40px;flex:1;animation:fadeUp 0.5s ease both;}
+
+        .db-section-label{
+          font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+          color:var(--red);margin-bottom:20px;
+          display:flex;align-items:center;gap:10px;
+        }
+        .db-section-label::before{content:'';width:24px;height:1px;background:var(--red);}
+
+        .db-stats-grid{
+          display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
+          margin-bottom:40px;
+        }
+        .db-stat-card{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:14px;padding:24px;
+          transition:border-color 0.2s,transform 0.2s;
+          animation:fadeUp 0.5s ease both;
+        }
+        .db-stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+        .db-stat-card:nth-child(1){animation-delay:0.05s;}
+        .db-stat-card:nth-child(2){animation-delay:0.1s;}
+        .db-stat-card:nth-child(3){animation-delay:0.15s;}
+        .db-stat-card:nth-child(4){animation-delay:0.2s;}
+        .db-stat-icon{font-size:22px;margin-bottom:14px;}
+        .db-stat-val{
+          font-family:'Syne',sans-serif;font-size:32px;font-weight:800;
+          letter-spacing:-1px;color:var(--text);margin-bottom:4px;
+        }
+        .db-stat-label{font-size:12px;color:var(--text2);font-weight:500;}
+        .db-stat-change{
+          font-size:11px;color:#22c55e;font-weight:600;
+          margin-top:8px;display:flex;align-items:center;gap:4px;
+        }
+
+        .db-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px;}
+        .db-card{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:14px;overflow:hidden;
+          animation:fadeUp 0.5s ease 0.25s both;
+        }
+        .db-card-header{
+          padding:18px 24px;border-bottom:1px solid var(--border);
+          display:flex;align-items:center;justify-content:space-between;
+        }
+        .db-card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+        .db-card-body{padding:16px 24px;}
+        .db-activity-item{
+          display:flex;align-items:center;gap:12px;
+          padding:10px 0;border-bottom:1px solid var(--border);
+        }
+        .db-activity-item:last-child{border-bottom:none;}
+        .db-activity-dot{
+          width:8px;height:8px;border-radius:50%;flex-shrink:0;
+        }
+        .db-activity-text{font-size:13px;color:var(--text);flex:1;}
+        .db-activity-time{font-size:11px;color:var(--text3);}
+
+        .db-bots-header{
+          display:flex;align-items:center;justify-content:space-between;
+          margin-bottom:24px;
+        }
+        .db-bots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;}
+        .db-bot-card{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:14px;overflow:hidden;
+          transition:border-color 0.2s,transform 0.2s;
+          animation:fadeUp 0.5s ease both;
+        }
+        .db-bot-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+        .db-bot-card-top{
+          padding:20px 24px;
+          display:flex;align-items:flex-start;gap:14px;
+        }
+        .db-bot-avatar{
+          width:44px;height:44px;border-radius:12px;
+          display:flex;align-items:center;justify-content:center;
+          font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+          color:#fff;flex-shrink:0;
+        }
+        .db-bot-info{flex:1;}
+        .db-bot-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;}
+        .db-bot-meta{font-size:12px;color:var(--text2);}
+        .db-bot-status{
+          display:inline-flex;align-items:center;gap:5px;
+          font-size:11px;font-weight:600;padding:4px 10px;
+          border-radius:20px;
+        }
+        .db-bot-status.active{
+          background:rgba(34,197,94,0.1);color:#22c55e;
+          border:1px solid rgba(34,197,94,0.2);
+        }
+        .db-bot-status.paused{
+          background:var(--red-dim);color:var(--red);
+          border:1px solid rgba(232,25,60,0.2);
+        }
+        .db-bot-status::before{
+          content:'';width:5px;height:5px;border-radius:50%;background:currentColor;
+        }
+        .db-bot-stats{
+          display:grid;grid-template-columns:1fr 1fr 1fr;
+          border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+        }
+        .db-bot-stat{
+          padding:14px;text-align:center;
+          border-right:1px solid var(--border);
+        }
+        .db-bot-stat:last-child{border-right:none;}
+        .db-bot-stat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);}
+        .db-bot-stat-label{font-size:10px;color:var(--text2);margin-top:2px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+
+        .db-embed-wrap{padding:16px 20px;}
+        .db-embed-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
+        .db-embed-code{
+          background:var(--bg2);border:1px solid var(--border);
+          border-radius:8px;padding:10px 14px;
+          font-family:monospace;font-size:11px;color:var(--text2);
+          white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+          cursor:pointer;transition:border-color 0.2s;
+        }
+        .db-embed-code:hover{border-color:var(--red);}
+        .db-copy-btn{
+          margin-top:8px;width:100%;
+          background:var(--bg2);border:1px solid var(--border);
+          color:var(--text2);border-radius:6px;padding:8px;
+          font-size:12px;font-weight:600;cursor:pointer;
+          font-family:'DM Sans',sans-serif;
+          transition:border-color 0.2s,color 0.2s,background 0.2s;
+          display:flex;align-items:center;justify-content:center;gap:6px;
+        }
+        .db-copy-btn:hover{border-color:var(--red);color:var(--red);}
+        .db-copy-btn.copied{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#22c55e;}
+
+        .db-bot-actions{
+          padding:12px 20px;
+          display:flex;gap:8px;
+        }
+        .db-action-btn{
+          flex:1;padding:9px;border-radius:7px;
+          font-size:12px;font-weight:600;cursor:pointer;
+          font-family:'DM Sans',sans-serif;
+          display:flex;align-items:center;justify-content:center;gap:6px;
+          transition:background 0.2s,border-color 0.2s,color 0.2s;
+        }
+        .db-action-edit{
+          background:var(--bg2);border:1px solid var(--border);color:var(--text2);
+        }
+        .db-action-edit:hover{border-color:rgba(232,25,60,0.3);color:var(--text);}
+        .db-action-toggle.active-btn{
+          background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#22c55e;
+        }
+        .db-action-toggle.paused-btn{
+          background:var(--red-dim);border:1px solid rgba(232,25,60,0.2);color:var(--red);
+        }
+        .db-action-delete{
+          background:transparent;border:1px solid var(--border);color:var(--text3);
+          flex:0;padding:9px 12px;
+        }
+        .db-action-delete:hover{background:rgba(232,25,60,0.08);border-color:rgba(232,25,60,0.3);color:var(--red);}
+
+        /* FIX #3 & #4: Error messages */
+        .db-error-msg{
+          font-size:12px;color:var(--red);margin-top:6px;
+          padding:6px 10px;background:var(--red-dim);
+          border-radius:6px;border:1px solid rgba(232,25,60,0.2);
+        }
+
+        .db-delete-overlay{
+          position:fixed;inset:0;background:rgba(0,0,0,0.6);
+          backdrop-filter:blur(4px);z-index:200;
+          display:flex;align-items:center;justify-content:center;
+          animation:fadeUp 0.2s ease;
+        }
+        .db-delete-modal{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:16px;padding:32px;max-width:400px;width:90%;
+          text-align:center;
+        }
+        .db-delete-modal-icon{font-size:36px;margin-bottom:16px;}
+        .db-delete-modal-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;}
+        .db-delete-modal-sub{font-size:14px;color:var(--text2);margin-bottom:28px;line-height:1.6;}
+        .db-delete-modal-btns{display:flex;gap:12px;}
+        .db-modal-cancel{
+          flex:1;padding:11px;border-radius:8px;
+          background:transparent;border:1px solid var(--border);
+          color:var(--text2);font-size:14px;font-weight:500;
+          cursor:pointer;font-family:'DM Sans',sans-serif;
+          transition:border-color 0.2s,color 0.2s;
+        }
+        .db-modal-cancel:hover{border-color:rgba(232,25,60,0.3);color:var(--text);}
+        .db-modal-delete{
+          flex:1;padding:11px;border-radius:8px;
+          background:var(--red);border:none;
+          color:#fff;font-size:14px;font-weight:600;
+          cursor:pointer;font-family:'DM Sans',sans-serif;
+          transition:background 0.2s;
+        }
+        .db-modal-delete:hover{background:var(--red-dark);}
+
+        .db-empty{
+          text-align:center;padding:80px 40px;
+          background:var(--card-bg);border:1px dashed var(--border);
+          border-radius:16px;
+        }
+        .db-empty-icon{font-size:48px;margin-bottom:16px;}
+        .db-empty-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;}
+        .db-empty-sub{font-size:14px;color:var(--text2);margin-bottom:28px;}
+
+        .db-settings-grid{display:flex;flex-direction:column;gap:24px;}
+        .db-settings-card{
+          background:var(--card-bg);border:1px solid var(--border);
+          border-radius:14px;overflow:hidden;
+          animation:fadeUp 0.5s ease both;
+        }
+        .db-settings-card:nth-child(2){animation-delay:0.1s;}
+        .db-settings-card:nth-child(3){animation-delay:0.2s;}
+        .db-settings-header{
+          padding:20px 28px;border-bottom:1px solid var(--border);
+        }
+        .db-settings-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text);}
+        .db-settings-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+        .db-settings-body{padding:24px 28px;}
+        .db-settings-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .db-settings-field{display:flex;flex-direction:column;gap:8px;}
+        .db-settings-label{
+          font-size:11px;font-weight:700;letter-spacing:1px;
+          text-transform:uppercase;color:var(--text2);
+        }
+        .db-settings-input{
+          background:var(--bg2);border:1px solid var(--border);
+          border-radius:8px;padding:11px 14px;
+          font-size:14px;font-family:'DM Sans',sans-serif;
+          color:var(--text);outline:none;
+          transition:border-color 0.2s,box-shadow 0.2s;
+        }
+        .db-settings-input:focus{
+          border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim);
+        }
+        .db-settings-input::placeholder{color:var(--text3);}
+        .db-settings-save{
+          background:var(--red);color:#fff;border:none;
+          border-radius:8px;padding:11px 24px;
+          font-size:13px;font-weight:600;cursor:pointer;
+          font-family:'DM Sans',sans-serif;
+          transition:background 0.2s,transform 0.2s;
+          display:inline-flex;align-items:center;gap:8px;
+        }
+        .db-settings-save:hover{background:var(--red-dark);transform:translateY(-1px);}
+        .db-settings-footer{
+          padding:16px 28px;border-top:1px solid var(--border);
+          display:flex;align-items:center;justify-content:space-between;
+        }
+        .db-save-success{font-size:13px;color:#22c55e;font-weight:500;}
+
+        .db-danger-zone{border-color:rgba(232,25,60,0.2);}
+        .db-danger-header{background:rgba(232,25,60,0.04);}
+        .db-danger-title{color:var(--red) !important;}
+        .db-danger-btn{
+          background:transparent;border:1px solid var(--red);
+          color:var(--red);border-radius:8px;padding:10px 20px;
+          font-size:13px;font-weight:600;cursor:pointer;
+          font-family:'DM Sans',sans-serif;
+          transition:background 0.2s;
+        }
+        .db-danger-btn:hover{background:rgba(232,25,60,0.08);}
+
+        .db-plan-chip{
+          display:inline-flex;align-items:center;gap:6px;
+          background:var(--red-dim);border:1px solid rgba(232,25,60,0.2);
+          color:var(--red);font-size:11px;font-weight:700;
+          padding:3px 10px;border-radius:20px;letter-spacing:0.5px;
+          text-transform:uppercase;
+        }
+
+        .db-hamburger{
+          display:none;background:none;border:none;
+          color:var(--text);font-size:20px;cursor:pointer;
+          padding:4px;
+        }
+
+        @media(max-width:1000px){
+          .db-stats-grid{grid-template-columns:1fr 1fr;}
+          .db-two-col{grid-template-columns:1fr;}
+        }
+        @media(max-width:768px){
+          .db-sidebar{transform:translateX(-100%);}
+          .db-sidebar.open{transform:translateX(0);}
+          .db-main{margin-left:0;}
+          .db-topbar{padding:16px 20px;}
+          .db-content{padding:24px 20px;}
+          .db-hamburger{display:flex;}
+          .db-stats-grid{grid-template-columns:1fr 1fr;}
+          .db-settings-row{grid-template-columns:1fr;}
+        }
+        @media(max-width:480px){
+          .db-stats-grid{grid-template-columns:1fr;}
+          .db-bots-grid{grid-template-columns:1fr;}
+        }
+      `}</style>
+
+      {/* Delete Confirm Modal */}
+      {deleteConfirm && (
+        <div className="db-delete-overlay" onClick={() => { setDeleteConfirm(""); setDeleteError(""); }}>
+          <div className="db-delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="db-delete-modal-icon">🗑️</div>
+            <div className="db-delete-modal-title">Delete this bot?</div>
+            <div className="db-delete-modal-sub">
+              This action cannot be undone. The bot, its conversations, and all lead data will be permanently deleted.
+            </div>
+            {/* FIX #4: Error message modal mein dikhega */}
+            {deleteError && <div className="db-error-msg">⚠️ {deleteError}</div>}
+            <div className="db-delete-modal-btns" style={{ marginTop: deleteError ? 16 : 0 }}>
+              <button className="db-modal-cancel" onClick={() => { setDeleteConfirm(""); setDeleteError(""); }}>Cancel</button>
+              <button className="db-modal-delete" onClick={() => deleteBot(deleteConfirm)}>Yes, Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+            {logoutModal && (
+            <div className="db-delete-overlay" onClick={() => setLogoutModal(false)}>
+              <div className="db-delete-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="db-delete-modal-icon">🚪</div>
+                <div className="db-delete-modal-title">Sign Out?</div>
+                <div className="db-delete-modal-sub">
+                  Are you sure you want to sign out of your account?
+                </div>
+                <div className="db-delete-modal-btns">
+                  <button className="db-modal-cancel" onClick={() => setLogoutModal(false)}>Cancel</button>
+                  <button className="db-modal-delete" onClick={() => {
+                    localStorage.removeItem("jzai_user");
+                    window.location.href = "/auth";
+                  }}>Yes, Sign Out</button>
+                </div>
+              </div>
+            </div>
+          )}
+            {deleteAccountModal && (
+        <div className="db-delete-overlay" onClick={() => setDeleteAccountModal(false)}>
+          <div className="db-delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="db-delete-modal-icon">⚠️</div>
+            <div className="db-delete-modal-title">Delete Your Account?</div>
+            <div className="db-delete-modal-sub">
+              This action cannot be undone. All your bots, conversations, and leads will be permanently deleted.
+            </div>
+            <input
+              className="db-settings-input"
+              type="password"
+              placeholder="Enter your password"
+              value={deleteAccountPw}
+              onChange={(e) => setDeleteAccountPw(e.target.value)}
+              style={{ marginBottom: 12 }}
+            />
+            {deleteAccountError && (
+              <div className="db-error-msg">⚠️ {deleteAccountError}</div>
+            )}
+            <div className="db-delete-modal-btns" style={{ marginTop: 16 }}>
+              <button className="db-modal-cancel" onClick={() => {
+                setDeleteAccountModal(false);
+                setDeleteAccountPw("");
+                setDeleteAccountError("");
+              }}>Cancel</button>
+              <button className="db-modal-delete" onClick={async () => {
+                setDeleteAccountError("");
+                const userStr = localStorage.getItem("jzai_user");
+                const storedUser = userStr ? JSON.parse(userStr) : null;
+                if (!storedUser) return;
+                const res = await fetch(
+                  "https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/delete-account",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: storedUser.id, password: deleteAccountPw }),
+                  }
+                );
+                const data = await res.json();
+                if (!res.ok) {
+                  setDeleteAccountError(data.error || "Delete failed.");
+                  return;
+                }
+                localStorage.removeItem("jzai_user");
+                window.location.href = "/auth";
+              }}>Yes, Delete Everything</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {sidebarOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 49 }}  
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div className="db-wrap">
+        {/* ── SIDEBAR ── */}
+        <aside className={`db-sidebar${sidebarOpen ? " open" : ""}`}>
+          <div className="db-sidebar-top">
+            <Link href="/" className="db-logo">JZ<span>AI</span></Link>
+          </div>
+
+          {/* FIX #1: user React state se aa raha hai — re-render hoga */}
+          <div className="db-user-block">
+            <div className="db-avatar">{user.avatar}</div>
+            <div>
+              <div className="db-user-name">{user.name}</div>
+              <div className="db-user-email">{user.email}</div>
+            </div>
+          </div>
+
+          <nav className="db-nav">
+            {[
+              { id: "overview", icon: "📊", label: "Overview" },
+              { id: "bots", icon: "🤖", label: "My Bots" },
+              { id: "leads", icon: "🎯", label: "Leads" },
+              { id: "conversations", icon: "💬", label: "Conversations" },
+              { id: "settings", icon: "⚙️", label: "Settings" },
+            ].map((item) => (
+              <button
+                key={item.id}
+                className={`db-nav-item${activeSection === item.id ? " active" : ""}`}
+                onClick={() => changeSection(item.id as ActiveSection)}>
+                <span className="db-nav-icon">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+
+            <div className="db-nav-divider" />
+
+            <Link href="/create-chatbot" className="db-nav-item" style={{ textDecoration: "none" }}>
+              <span className="db-nav-icon">✨</span>
+              New Chatbot
+            </Link>
+          </nav>
+
+          <div className="db-sidebar-bottom">
+            <div className="db-toggle-row">
+              <span className="db-toggle-label">{theme === "dark" ? "🌙 Dark" : "☀️ Light"} Mode</span>
+              <button className="db-toggle" onClick={toggleTheme}>
+                <div className="db-toggle-thumb">{theme === "dark" ? "🌙" : "☀️"}</div>
+              </button>
+            </div>
+            <button className="db-logout-btn" onClick={() => setLogoutModal(true)}>
+              <span className="db-nav-icon">🚪</span>
+              Sign Out
+            </button>
+          </div>
+        </aside>
+
+        {/* ── MAIN ── */}
+        <main className="db-main">
+          <div className="db-topbar">
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <button className="db-hamburger" onClick={() => setSidebarOpen(true)}>☰</button>
+              <div className="db-topbar-title">
+                {activeSection === "overview" && "Dashboard"}
+                {activeSection === "bots" && "My Bots"}
+                {activeSection === "leads" && "Leads"}
+                {activeSection === "settings" && "Settings"}
+                {activeSection === "conversations" && "Conversations"}
+              </div>
+            </div>
+            <div className="db-topbar-right">
+
+           <div className="db-plan-chip"
+                style={{cursor: "pointer"}}
+                onClick={() => window.location.href = "/pricing"}
+                title="View plan">
+                🚀 {user.plan || "Starter"} Plan
+              </div>
+              <Link href="/create-chatbot" className="db-new-bot-btn">
+                + New Bot
+              </Link>
+            </div>
+          </div>
+
+          <div className="db-content" key={activeSection}>
+             {/* ── TRIAL BANNER ── */}
+
+            {isLoading ? <DashboardSkeleton /> : null}
+
+              {user.plan === "trial" && (() => {
+              const daysLeft = user.trial_end
+                ? Math.max(0, Math.ceil((new Date(user.trial_end).getTime() - Date.now()) / 86400000))
+                : 0;
+              const expired = daysLeft === 0;
+              return (
+                <div style={{
+                  marginBottom: 24, padding: "14px 20px",
+                  background: expired ? "rgba(232,25,60,0.08)" : "rgba(245,158,11,0.08)",
+                  border: `1px solid ${expired ? "rgba(232,25,60,0.3)" : "rgba(245,158,11,0.3)"}`,
+                  borderRadius: 10, display: "flex", alignItems: "center",
+                  justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontSize: 20 }}>{expired ? "⛔" : "⏳"}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: expired ? "var(--red)" : "#f59e0b" }}>
+                        {expired ? "Trial Expired" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left in your free trial`}
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 2 }}>
+                        {expired ? "Upgrade to continue using your chatbot." : "Upgrade to Starter or Pro to keep your chatbot running."}
+                      </div>
+                    </div>
+                  </div>
+                  <a href="/pricing" style={{
+                    background: "var(--red)", color: "#fff",
+                    padding: "9px 18px", borderRadius: 8,
+                    fontSize: 13, fontWeight: 600,
+                    textDecoration: "none", whiteSpace: "nowrap",
+                  }}>Upgrade Now →</a>
+                </div>
+              );
+            })()}
+
+
+            {/* ── OVERVIEW ── */}
+            {activeSection === "overview" && (
+              <>
+                <div className="db-section-label">Overview</div>
+                <div className="db-stats-grid">
+                {[
+                  { icon: "🤖", val: stats.active_bots, label: "Active Bots", change: `${stats.total_bots} total`, tab: "bots" },
+                  { icon: "💬", val: stats.total_conversations, label: "Total Conversations", change: "Real time", tab: "conversations" },
+                  { icon: "🎯", val: stats.leads_captured, label: "Leads Captured", change: "Real time", tab: "leads" },
+                  { icon: "📨", val: stats.messages_sent.toLocaleString(), label: "Messages Sent", change: "Real time", tab: "bots" },
+                ].map((s, i) => (
+                  <div key={i} className="db-stat-card" 
+                    onClick={() => changeSection(s.tab as ActiveSection)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="db-stat-icon">{s.icon}</div>
+                    <div className="db-stat-val">{s.val}</div>
+                    <div className="db-stat-label">{s.label}</div>
+                    <div className="db-stat-change">↑ {s.change}</div>
+                  </div>
+                ))}
+              </div>
+
+                <div className="db-two-col">
+                  <div className="db-card">
+                    <div className="db-card-header">
+                      <div className="db-card-title">Your Bots</div>
+                      <button
+                        style={{ fontSize: 12, color: "var(--red)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
+                        onClick={() => changeSection("bots")}
+                      >View all →</button>
+                    </div>
+                    <div className="db-card-body">
+                      {bots.map((bot) => (
+                        <div key={bot.id} className="db-activity-item">
+                          <div
+                            className="db-activity-dot"
+                            style={{ background: bot.color, width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "Syne, sans-serif", flexShrink: 0 }}
+                          >{getInitials(bot.name)}</div>
+                          <div className="db-activity-text">
+                            <div style={{ fontWeight: 600 }}>{bot.name}</div>
+                            <div style={{ fontSize: 11, color: "var(--text2)" }}>{bot.industry} · {bot.conversations} conversations</div>
+                          </div>
+                          <div className={`db-bot-status ${bot.status}`}>{bot.status}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="db-card">
+                    <div className="db-card-header">
+                      <div className="db-card-title">Recent Activity</div>
+                    </div>
+                    <div className="db-card-body">
+                     {(stats.recent_activity.length > 0 ? stats.recent_activity : []).map((a, i) => (
+                      <div key={i} className="db-activity-item">
+                        <div className="db-activity-dot" style={{ background: ["#22c55e","#e8193c","#6366f1","#f59e0b","#0ea5e9"][i % 5] }} />
+                        <div className="db-activity-text">New lead via {a.bot_name}</div>
+                        <div className="db-activity-time">{new Date(a.created_at).toLocaleTimeString()}</div>
+                      </div>
+                    ))}
+                    {stats.recent_activity.length === 0 && (
+                      <div className="db-activity-item">
+                        <div className="db-activity-dot" style={{ background: "#8a8a9a" }} />
+                        <div className="db-activity-text">No recent activity yet</div>
+                      </div>
+                    )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── MY BOTS ── */}
+            {activeSection === "bots" && (
+              <>
+                <div className="db-bots-header">
+                  <div className="db-section-label" style={{ margin: 0 }}>My Bots ({bots.length})</div>
+                  <Link href="/create-chatbot" className="db-new-bot-btn">+ Create New Bot</Link>
+                </div>
+
+                {/* FIX #3: Toggle error message */}
+                {toggleError && <div className="db-error-msg" style={{ marginBottom: 16 }}>⚠️ {toggleError}</div>}
+
+                {bots.length === 0 ? (
+                  <div className="db-empty">
+                    <div className="db-empty-icon">🤖</div>
+                    <div className="db-empty-title">No bots yet</div>
+                    <div className="db-empty-sub">Create your first AI chatbot and start capturing leads automatically.</div>
+                    <Link href="/create-chatbot" className="db-new-bot-btn" style={{ display: "inline-flex" }}>+ Create Your First Bot</Link>
+                  </div>
+                ) : (
+                  <div className="db-bots-grid">
+                    {bots.map((bot, i) => (
+                      <div key={bot.id} className="db-bot-card" style={{ animationDelay: `${i * 0.08}s` }}>
+                        <div className="db-bot-card-top">
+                          <div className="db-bot-avatar" style={{ background: bot.color }}>
+                            {getInitials(bot.name)}
+                          </div>
+                          <div className="db-bot-info">
+                            <div className="db-bot-name">{bot.name}</div>
+                            <div className="db-bot-meta">{bot.industry} · {bot.language} · {bot.created_at_display}</div>
+                          </div>
+                          <div className={`db-bot-status ${bot.status}`}>{bot.status}</div>
+                        </div>
+
+                        <div className="db-bot-stats">
+                          <div className="db-bot-stat">
+                            <div className="db-bot-stat-val">{bot.conversations}</div>
+                            <div className="db-bot-stat-label">Convos</div>
+                          </div>
+                          <div className="db-bot-stat">
+                            <div className="db-bot-stat-val">{bot.leads}</div>
+                            <div className="db-bot-stat-label">Leads</div>
+                          </div>
+                          <div className="db-bot-stat">
+                            <div className="db-bot-stat-val">{bot.messages}</div>
+                            <div className="db-bot-stat-label">Messages</div>
+                          </div>
+                        </div>
+
+                        <div className="db-embed-wrap">
+                          <div className="db-embed-label">Embed Code</div>
+                          <div className="db-embed-code" title={embedCode(bot.id)}>
+                            {embedCode(bot.id)}
+                          </div>
+                          <button
+                            className={`db-copy-btn${copiedId === bot.id ? " copied" : ""}`}
+                            onClick={() => copyToClipboard(embedCode(bot.id), setCopiedId, bot.id)}
+                          >
+                            {copiedId === bot.id ? "✓ Copied!" : "📋 Copy Embed Code"}
+                          </button>
+                        </div>
+
+                        <div className="db-bot-actions">
+                          <Link
+                            href={`/create-chatbot?edit=${bot.id}`}
+                            className="db-action-btn db-action-edit"
+                            style={{ textDecoration: "none" }}
+                          >✏️ Edit</Link>
+                          {/* FIX #3: toggleBotStatus ab API call karta hai */}
+                          <button
+                            className={`db-action-btn db-action-toggle ${bot.status === "active" ? "active-btn" : "paused-btn"}`}
+                            onClick={() => toggleBotStatus(bot.id)}
+                          >
+                            {bot.status === "active" ? "⏸ Pause" : "▶ Resume"}
+                          </button>
+                          <button
+                            className="db-action-btn db-action-delete"
+                            onClick={() => { setDeleteConfirm(bot.id); setDeleteError(""); }}
+                          >🗑️</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+{activeSection === "conversations" && (
+  <>
+    <div className="db-section-label">Conversations ({conversations.length})</div>
+    {conversations.length === 0 ? (
+      <div className="db-empty">
+        <div className="db-empty-icon">💬</div>
+        <div className="db-empty-title">No conversations yet</div>
+        <div className="db-empty-sub">Conversations from your bots will appear here.</div>
+      </div>
+    ) : (
+      <>
+        {/* Bot Tabs */}
+        <div style={{
+          display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24,
+        }}>
+          {bots.filter(bot => conversations.some(cv => cv.bot_name === bot.name)).map((bot) => {
+            const count = conversations.filter(cv => cv.bot_name === bot.name).length;
+            const isActive = activeBot === bot.id || (!activeBot && bots.indexOf(bot) === 0);
+            return (
+              <button key={bot.id} onClick={() => setActiveBot(bot.id)} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "12px 20px", borderRadius: 10, cursor: "pointer",
+                border: isActive ? `2px solid ${bot.color}` : "2px solid var(--border)",
+                background: isActive ? `${bot.color}15` : "var(--card-bg)",
+                transition: "all 0.2s", fontFamily: "DM Sans, sans-serif",
+              }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: bot.color, display: "flex", alignItems: "center",
+                  justifyContent: "center", fontSize: 12, fontWeight: 800,
+                  color: "#fff", fontFamily: "Syne, sans-serif",
+                }}>{getInitials(bot.name)}</div>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{
+                    fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: 13,
+                    color: isActive ? bot.color : "var(--text)",
+                  }}>{bot.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text2)" }}>{count} conversations</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active Bot Conversations */}
+        {(() => {
+          const currentBot = bots.find(b => b.id === activeBot) || bots.find(b => conversations.some(cv => cv.bot_name === b.name));
+          if (!currentBot) return null;
+          const botConvs = conversations.filter(cv => cv.bot_name === currentBot.name);
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {botConvs.map((cv) => (
+                <div key={cv.id} style={{
+                  background: "var(--card-bg)",
+                  border: `1px solid ${currentBot.color}33`,
+                  borderRadius: 12, overflow: "hidden",
+                }}>
+                  <div style={{
+                    padding: "10px 16px", borderBottom: "1px solid var(--border)",
+                    background: "var(--bg2)", display: "flex", alignItems: "center",
+                    justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: currentBot.color }} />
+                      <span style={{ fontSize: 12, color: "var(--text2)" }}>Session #{cv.session_id.slice(-8)}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text3)" }}>{cv.created_at}</div>
+                  </div>
+                  <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {/* User message */}
+                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: "var(--bg3)", border: "1px solid var(--border)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 13, flexShrink: 0,
+                    }}>👤</div>
+                    <div style={{
+                      background: `${currentBot.color}18`,
+                      border: `1px solid ${currentBot.color}33`,
+                      borderRadius: "4px 10px 10px 10px", padding: "8px 12px",
+                      fontSize: 13, color: "var(--text)", maxWidth: "80%",
+                    }}>{cv.user_message}</div>
+                  </div>
+                  {/* Bot reply */}
+                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start", justifyContent: "flex-end" }}>
+                    <div style={{
+                      background: "var(--bg2)", border: "1px solid var(--border)",
+                      borderRadius: "10px 4px 10px 10px", padding: "8px 12px",
+                      fontSize: 13, color: "var(--text)", maxWidth: "80%",
+                    }}>{cv.ai_reply}</div>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: currentBot.color,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0,
+                      fontFamily: "Syne, sans-serif",
+                    }}>{getInitials(currentBot.name)}</div>
+                  </div>
+                </div>
+                  {cv.page_url && (
+                    <div style={{
+                      padding: "8px 16px", borderTop: "1px solid var(--border)",
+                      fontSize: 11, color: "var(--text3)",
+                    }}>📍 {cv.page_url}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </>
+    )}
+  </>
+)}
+            {/* ── LEADS ── */}
+            {activeSection === "leads" && (
+              <>
+                <div className="db-section-label">Leads ({leads.length})</div>
+                {leads.length === 0 ? (
+                  <div className="db-empty">
+                    <div className="db-empty-icon">🎯</div>
+                    <div className="db-empty-title">No leads yet</div>
+                    <div className="db-empty-sub">Leads captured via your bots will appear here.</div>
+                  </div>
+                ) : (
+                  <div style={{ background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg2)" }}>
+                          {["Name", "Email", "Phone", "Bot", "Date"].map((h) => (
+                            <th key={h} style={{ padding: "12px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text2)" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leads.map((lead) => (
+                          <tr key={lead.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                            <td style={{ padding: "14px 20px", fontSize: 14, color: "var(--text)", fontWeight: 600 }}>{lead.name || "—"}</td>
+                            <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--text2)" }}>{lead.email || "—"}</td>
+                            <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--text2)" }}>{lead.phone || "—"}</td>
+                            <td style={{ padding: "14px 20px", fontSize: 13, color: "var(--red)" }}>{lead.bot_name}</td>
+                            <td style={{ padding: "14px 20px", fontSize: 12, color: "var(--text3)" }}>{new Date(lead.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+                        
+            {/* ── SETTINGS ── */}
+            {activeSection === "settings" && (
+              <>
+                <div className="db-section-label">Account Settings</div>
+                <div className="db-settings-grid">
+
+                  <div className="db-settings-card">
+                    <div className="db-settings-header">
+                      <div className="db-settings-title">Profile Information</div>
+                      <div className="db-settings-sub">Update your name, email, and company details.</div>
+                    </div>
+                    <div className="db-settings-body">
+                      <div className="db-settings-row">
+                        <div className="db-settings-field">
+                          <label className="db-settings-label">Full Name</label>
+                          {/* FIX #2: settingsName ab user state se initialize hoti hai */}
+                          <input
+                            className="db-settings-input"
+                            type="text"
+                            value={settingsName}
+                            onChange={(e) => setSettingsName(e.target.value)}
+                          />
+                        </div>
+                        <div className="db-settings-field">
+                          <label className="db-settings-label">Email Address</label>
+                          <input
+                            className="db-settings-input"
+                            type="email"
+                            value={settingsEmail}
+                            onChange={(e) => setSettingsEmail(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="db-settings-row">
+                        <div className="db-settings-field">
+                          <label className="db-settings-label">Company / Brand</label>
+                          <input
+                            className="db-settings-input"
+                            type="text"
+                            value={settingsCompany}
+                            onChange={(e) => setSettingsCompany(e.target.value)}
+                          />
+                        </div>
+                        <div className="db-settings-field">
+                          <label className="db-settings-label">Member Since</label>
+                          <input
+                            className="db-settings-input"
+                            type="text"
+                            value={user.joined}
+                            readOnly
+                            style={{ opacity: 0.6, cursor: "default" }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="db-settings-footer">
+                      <span className="db-save-success">{settingsSaved ? "✓ Changes saved!" : ""}</span>
+                      <button
+                      className="db-settings-save"
+                      onClick={async () => {
+                        const userStr = localStorage.getItem("jzai_user");
+                        const storedUser = userStr ? JSON.parse(userStr) : null;
+                        if (!storedUser) return;
+                        await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/update", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: storedUser.id, name: settingsName, email: settingsEmail, company: settingsCompany }),
+                        });
+                        const updatedUser = { ...storedUser, name: settingsName, email: settingsEmail, company: settingsCompany };
+                        localStorage.setItem("jzai_user", JSON.stringify(updatedUser));
+                        setUser((prev) => ({
+                          ...prev,
+                          name: settingsName,
+                          email: settingsEmail,
+                          company: settingsCompany,
+                          avatar: settingsName ? settingsName.slice(0, 2).toUpperCase() : prev.avatar,
+                        }));
+                        setSettingsSaved(true);
+                        setTimeout(() => setSettingsSaved(false), 3000);
+                      }}
+                    >Save Changes</button>
+                    </div>
+                  </div>
+
+                  <div className="db-settings-card">
+                    <div className="db-settings-header">
+                      <div className="db-settings-title">Change Password</div>
+                      <div className="db-settings-sub">Keep your account secure with a strong password.</div>
+                    </div>
+                    <div className="db-settings-body">
+                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                        {[
+                          { label: "Current Password", val: currentPw, set: setCurrentPw },
+                          { label: "New Password", val: newPw, set: setNewPw },
+                          { label: "Confirm New Password", val: confirmPw, set: setConfirmPw },
+                        ].map((f) => (
+                          <div key={f.label} className="db-settings-field">
+                            <label className="db-settings-label">{f.label}</label>
+                            <input
+                              className="db-settings-input"
+                              type="password"
+                              value={f.val}
+                              placeholder="••••••••"
+                              onChange={(e) => f.set(e.target.value)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="db-settings-footer">
+                    <span className="db-save-success">
+                      {pwSaved ? "✓ Password updated!" : ""}
+                      {pwError ? <span style={{color:"var(--red)",fontSize:13}}>⚠️ {pwError}</span> : ""}
+                    </span>
+                    <button
+                      className="db-settings-save"
+                      onClick={async () => {
+                        setPwError("");
+                        const userStr = localStorage.getItem("jzai_user");
+                        const storedUser = userStr ? JSON.parse(userStr) : null;
+                        if (!storedUser) return;
+                        if (newPw !== confirmPw) {
+                          setPwError("Passwords do not match.");
+                          return;
+                        }
+                        const res = await fetch("https://jzai-saas.jahanzaibtahir2006.workers.dev/auth/change-password", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: storedUser.id, currentPassword: currentPw, newPassword: newPw }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          setPwError(data.error || "Password update failed.");
+                          return;
+                        }
+                        setPwSaved(true);
+                        setCurrentPw(""); setNewPw(""); setConfirmPw("");
+                        setTimeout(() => setPwSaved(false), 3000);
+                      }}
+                    >Update Password</button>
+                  </div>
+                  </div>
+                  {/* YOUR PLAN CARD */}
+                  <div className="db-settings-card">
+                    <div className="db-settings-header">
+                      <div className="db-settings-title">Your Plan</div>
+                      <div className="db-settings-sub">Manage your subscription and upgrade anytime.</div>
+                    </div>
+                    <div className="db-settings-body">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>
+                            {user.plan || "Starter"} Plan
+                          </div>
+                          <div style={{ fontSize: 13, color: "var(--text2)" }}>
+                            {user.plan === "Pro"
+                              ? "5 bots · 5,000 messages/mo · Analytics"
+                              : "1 bot · 500 messages/mo · Lead capture"}
+                          </div>
+                        </div>
+                        
+                          <a href="/pricing"
+                          style={{
+                            background: "var(--red)", color: "#fff",
+                            padding: "10px 20px", borderRadius: 8,
+                            fontSize: 13, fontWeight: 600,
+                            textDecoration: "none", whiteSpace: "nowrap",
+                          }}
+                        >
+                          {user.plan === "Pro" ? "Manage Plan →" : "Upgrade to Pro →"}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="db-settings-card db-danger-zone">
+                    <div className="db-settings-header db-danger-header">
+                      <div className="db-settings-title db-danger-title">Danger Zone</div>
+                      <div className="db-settings-sub">Irreversible actions — proceed with caution.</div>
+                    </div>
+                    <div className="db-settings-body">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>Delete Account</div>
+                          <div style={{ fontSize: 13, color: "var(--text2)" }}>Permanently delete your account and all associated data.</div>
+                        </div>
+                        <button className="db-danger-btn" onClick={() => setDeleteAccountModal(true)}>Delete Account</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div style={{background:"#050507",minHeight:"100vh"}} />}>
+      <DashboardInner />
+    </Suspense>
+  );
+}
