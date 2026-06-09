@@ -4,6 +4,7 @@ import Image from 'next/image'
 export default function Footer() {
   return (
     <>
+      
       <footer style={{ opacity: 0, animation: "fadeUp 0.8s ease 0.1s forwards" }}>
         <div className="footer-brand">
           <Link href="/" className="nav-logo" style={{ display: 'block', marginBottom: 14 }}>
