@@ -1,43 +1,18 @@
 'use client'
-import { createContext, useContext, useEffect, useState } from 'react'
 
-const ThemeContext = createContext({
-  theme: 'dark' as 'dark' | 'light',
-  toggleTheme: () => {},
-})
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import type { ThemeProviderProps } from 'next-themes'
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-
-  useEffect(() => {
-    const saved = (localStorage.getItem('jzai-theme') as 'dark' | 'light') || 'dark'
-    setTheme(saved)
-    document.documentElement.setAttribute('data-theme', saved)
-  }, [])
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('jzai-theme', theme)
-  }, [theme])
-
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === 'jzai-theme') {
-        const val = (e.newValue as 'dark' | 'light') || 'dark'
-        setTheme(val)
-      }
-    }
-    window.addEventListener('storage', handler)
-    return () => window.removeEventListener('storage', handler)
-  }, [])
-
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
-
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem
+      disableTransitionOnChange={false}
+      {...props}
+    >
       {children}
-    </ThemeContext.Provider>
+    </NextThemesProvider>
   )
 }
-
-export const useTheme = () => useContext(ThemeContext)
