@@ -6,9 +6,7 @@
   X-XSS-Protection: 1; mode=block
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   X-DNS-Prefetch-Control: on
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jzai.store cdn.paddle.com static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://jzai-saas.jahanzaibtahir2006.workers.dev https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev https://api.openai.com https://*.paddle.com; frame-src https://*.paddle.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
-/dashboard/*
-  Cache-Control: no-store, no-cache, must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jzai.store cdn.paddle.com sandbox-cdn.paddle.com static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.paddle.com sandbox-cdn.paddle.com; style-src-elem 'self' 'unsafe-inline' fonts.googleapis.com cdn.paddle.com sandbox-cdn.paddle.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://jzai-saas.jahanzaibtahir2006.workers.dev https://small-wildflower-c0d4.jahanzaibtahir2006.workers.dev https://api.openai.com https://*.paddle.com; frame-src https://*.paddle.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'  Cache-Control: no-store, no-cache, must-revalidate
 /*.js
   Cache-Control: public, max-age=31536000, immutable
 /*.css
