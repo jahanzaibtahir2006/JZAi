@@ -1,59 +1,44 @@
 'use client'
+import { useTheme } from './ThemeProvider'
+import { useState } from 'react'
 
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+export default function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const [flashing, setFlashing] = useState(false)
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
-
-  if (!mounted) {
-    return (
-      <div className="w-9 h-9 rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)]" />
-    )
+  function updateFavicon(t: 'dark' | 'light') {
+    const jColor = t === 'dark' ? '#ffffff' : '#050507'
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <text y="87" font-size="75" font-family="Palatino, serif" font-weight="900">
+        <tspan fill="${jColor}">J</tspan><tspan fill="#E8001E">Z</tspan>
+      </text>
+    </svg>`
+    const favicon = document.querySelector("link[rel='icon']") as HTMLLinkElement
+    if (favicon) favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svg)
   }
 
-  const isDark = theme === 'dark'
+  function toggle() {
+    setFlashing(true)
+    setTimeout(() => setFlashing(false), 300)
+    updateFavicon(theme === 'dark' ? 'light' : 'dark')
+    toggleTheme()
+  }
 
   return (
-    <button
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="
-        relative w-9 h-9 rounded-xl
-        border border-[var(--border-default)]
-        bg-[var(--bg-surface)]
-        backdrop-blur-sm
-        flex items-center justify-center
-        text-[var(--text-secondary)]
-        hover:text-[var(--text-primary)]
-        hover:border-[var(--border-strong)]
-        hover:bg-[var(--bg-surface-hover)]
-        transition-all duration-200
-        cursor-pointer
-      "
-    >
-      {isDark ? (
-        /* Sun icon */
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      ) : (
-        /* Moon icon */
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      )}
-    </button>
+    <>
+      <div className={`theme-flash${flashing ? ' active' : ''}`}></div>
+      <button
+        className="theme-toggle"
+        onClick={toggle}
+        aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark mode'}
+        title="Toggle theme"
+      >
+        <span className="toggle-icon-dark">🌙</span>
+        <div className="toggle-thumb" id="toggleThumb">
+          <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+        </div>
+        <span className="toggle-icon-light">☀️</span>
+      </button>
+    </>
   )
 }
