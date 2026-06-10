@@ -1,202 +1,132 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ThemeToggle } from './ThemeToggle'
+import { usePathname, useRouter } from 'next/navigation'
+import ThemeToggle from './ThemeToggle'
+import Image from 'next/image'
 
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'How it Works', href: '#process' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'FAQ', href: '#faq' },
-]
-
-export function Navbar() {
+export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const handleFaqClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (pathname === '/pricing') {
+      document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      router.push('/#faq')
+    }
+  }
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const handleScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [mobileOpen])
+    setLoggedIn(!!localStorage.getItem('jzai_user'))
+  }, [pathname])
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const nav = document.getElementById('navbar')
+      if (nav && !nav.contains(e.target as Node)) setMobileOpen(false)
+    }
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
 
   return (
     <>
-      <header
-        className={`
-          fixed top-0 left-0 right-0 z-50
-          transition-all duration-300
-          ${scrolled
-            ? 'glass border-b border-[var(--border-subtle)] py-3'
-            : 'bg-transparent py-5'
-          }
-        `}
-      >
-        <div className="container flex items-center justify-between">
+      <style>{`
+        .nav-cta-new {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 22px;
+          border-radius: 40px;
+          background: var(--red);
+          color: #fff !important;
+          font-size: 14px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          text-decoration: none !important;
+          border: none;
+          box-shadow: 0 0 14px rgba(232,25,60,0.45), 0 0 28px rgba(232,25,60,0.18);
+          transition: box-shadow 0.3s, transform 0.2s, background 0.2s;
+          white-space: nowrap;
+        }
+        .nav-cta-new:hover {
+          background: var(--red-dark);
+          box-shadow: 0 0 22px rgba(232,25,60,0.65), 0 0 44px rgba(232,25,60,0.28);
+          transform: translateY(-1px);
+          color: #fff !important;
+        }
+      `}</style>
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="
-              w-8 h-8 rounded-lg
-              bg-[var(--brand-primary)]
-              flex items-center justify-center
-              shadow-[0_0_16px_rgba(108,99,255,0.5)]
-              group-hover:shadow-[0_0_24px_rgba(108,99,255,0.7)]
-              transition-shadow duration-200
-            ">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" opacity="0.9"/>
-                <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="font-display font-700 text-lg tracking-tight text-[var(--text-primary)]">
-              JZ<span className="gradient-text">AI</span>
-            </span>
+      <nav id="navbar" className={scrolled ? 'scrolled' : ''} style={{ opacity: 0, animation: 'fadeUp 0.6s ease 0.1s forwards' }}>
+        {/* LEFT — Logo + Links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
+        <Link href="/" className="nav-logo">JZ<span>AI</span></Link>
+          <div className="nav-links">
+            <a href={pathname === '/' ? '#process' : '/#process'}>Process</a>
+            <Link href="/pricing">Pricing</Link>
+            <a href="#faq" onClick={handleFaqClick} style={{ cursor: 'pointer' }}>FAQ</a>
+          </div>
+
+        </div>
+
+        {/* RIGHT */}
+        <div className="nav-right">
+          {loggedIn ? (
+            <Link href="/dashboard" style={{
+              color: 'var(--text2)', fontWeight: 500,
+              fontSize: '14px', textDecoration: 'none'
+            }}>Dashboard</Link>
+          ) : (
+            <Link href="/auth" style={{
+              color: 'var(--text2)', fontWeight: 500,
+              fontSize: '14px', textDecoration: 'none'
+            }}>Login</Link>
+          )}
+          <Link href="/create-chatbot" className="nav-cta-new">
+            ✦ Create Chatbot
           </Link>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="
-                  px-4 py-2 rounded-lg
-                  text-sm font-medium
-                  text-[var(--text-secondary)]
-                  hover:text-[var(--text-primary)]
-                  hover:bg-[var(--bg-surface)]
-                  transition-all duration-150
-                "
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
-            <Link href="/auth" className="btn-ghost text-sm py-2 px-4">
-              Sign in
-            </Link>
-            <Link href="/auth?tab=signup" className="btn-primary text-sm py-2 px-4">
-              Get started free
-            </Link>
-          </div>
-
-          {/* Mobile: theme toggle + hamburger */}
-          <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle />
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-              className="
-                w-9 h-9 rounded-xl
-                border border-[var(--border-default)]
-                bg-[var(--bg-surface)]
-                flex items-center justify-center
-                text-[var(--text-secondary)]
-                hover:text-[var(--text-primary)]
-                transition-colors duration-150
-              "
-            >
-              {mobileOpen ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-              )}
-            </button>
-          </div>
-
+          <ThemeToggle />
+          <button
+            className="hamburger"
+            aria-label="Toggle mobile menu"
+            onClick={() => setMobileOpen(v => !v)}
+          >
+            <span></span><span></span><span></span>
+          </button>
         </div>
-      </header>
+      </nav>
 
-      {/* Mobile menu overlay */}
-      <div
-        className={`
-          fixed inset-0 z-40 md:hidden
-          transition-all duration-300
-          ${mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}
-      >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-        />
-
-        {/* Drawer */}
-        <div className={`
-          absolute top-0 right-0 bottom-0 w-72
-          glass border-l border-[var(--border-subtle)]
-          flex flex-col
-          transition-transform duration-300
-          ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}>
-          <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-            <span className="font-display font-700 text-lg text-[var(--text-primary)]">
-              JZ<span className="gradient-text">AI</span>
-            </span>
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
-
-          <nav className="flex flex-col p-4 gap-1 flex-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="
-                  px-4 py-3 rounded-xl
-                  text-sm font-medium
-                  text-[var(--text-secondary)]
-                  hover:text-[var(--text-primary)]
-                  hover:bg-[var(--bg-surface)]
-                  transition-all duration-150
-                "
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="p-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
-            <Link
-              href="/auth"
-              onClick={() => setMobileOpen(false)}
-              className="btn-ghost w-full justify-center text-sm"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/auth?tab=signup"
-              onClick={() => setMobileOpen(false)}
-              className="btn-primary w-full justify-center text-sm"
-            >
-              Get started free
-            </Link>
-          </div>
-        </div>
+      {/* Mobile Nav */}
+      <div className={`mobile-nav${mobileOpen ? ' open' : ''}`}>
+        <a href={pathname === '/' ? '#process' : '/#process'} onClick={() => setMobileOpen(false)}>Process</a>
+        <Link href="/pricing" onClick={() => setMobileOpen(false)}>Pricing</Link>
+        <a href="#faq" onClick={(e) => { handleFaqClick(e); setMobileOpen(false); }} style={{ cursor: 'pointer' }}>FAQ</a>
+        {loggedIn ? (
+          <Link href="/dashboard" onClick={() => setMobileOpen(false)}
+            style={{ color: 'var(--text2)', fontWeight: 500 }}>
+            Dashboard
+          </Link>
+        ) : (
+          <Link href="/auth" onClick={() => setMobileOpen(false)}
+            style={{ color: 'var(--text2)', fontWeight: 500 }}>
+            Login
+          </Link>
+        )}
+        <Link href="/create-chatbot" onClick={() => setMobileOpen(false)}
+          className="nav-cta-new" style={{ textAlign: 'center' }}>
+          ✦ Create Chatbot
+        </Link>
       </div>
     </>
   )
