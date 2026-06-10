@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import Footer from "@/components/Footer";
@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import { initializePaddle, Paddle } from "@paddle/paddle-js";
 import NumberFlow from "@number-flow/react";
 import confetti from "canvas-confetti";
-import { useRef } from "react";
 
 export default function Pricing() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
