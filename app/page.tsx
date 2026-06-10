@@ -1,22 +1,29 @@
-import Navbar from '@/components/Navbar'
-import Hero from '@/components/Hero'
-import Marquee from '@/components/Marquee'
-import Testimonials from '@/components/Testimonials'
-import Features from '@/components/features'
-import Process from '@/components/Process'
-import FAQ from '@/components/FAQ'
-import Footer from '@/components/Footer'
+import { Navbar } from '@/components/Navbar'
+import { Hero } from '@/components/Hero'
+import { Features } from '@/components/features'
+import { Process } from '@/components/Process'
+import { Marquee } from '@/components/Marquee'
+import { Testimonials } from '@/components/Testimonials'
+import { FAQ } from '@/components/FAQ'
+import { Footer } from '@/components/Footer'
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
+      {/* Animated background orbs — persists across sections */}
+      <div className="bg-mesh" aria-hidden />
+
       <Navbar />
-      <Hero />
-      <Marquee />
-      <Features />
-      <Testimonials />
-      <Process />
-      <FAQ />
+
+      <main>
+        <Hero />
+        <Marquee />
+        <Features />
+        <Process />
+        <Testimonials />
+        <FAQ />
+      </main>
+
       <Footer />
     </>
   )
