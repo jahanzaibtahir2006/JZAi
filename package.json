@@ -13,13 +13,16 @@
     "react": "^18",
     "react-dom": "^18",
     "@paddle/paddle-js": "^1.4.0",
-    "three": "^0.165.0"
+    "three": "^0.165.0",
+    "@number-flow/react": "^0.5.0",
+    "canvas-confetti": "^1.9.3"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/three": "^0.165.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/canvas-confetti": "^1.6.4"
   }
 }
