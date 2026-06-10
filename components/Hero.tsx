@@ -1,354 +1,141 @@
 'use client'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
-const CHAT_MESSAGES = [
-  { role: 'bot',  text: '👋 Hi! I\'m JZAI — What can I help you with?', delay: 500 },
-  { role: 'user', text: 'I need a chatbot for my online store', delay: 1800 },
-  { role: 'bot',  text: '🛍️ Perfect! I\'ll handle customer queries, returns & orders 24/7', delay: 3200 },
-  { role: 'user', text: 'Can it capture customer leads too?', delay: 5000 },
-  { role: 'bot',  text: '✅ Yes! Name, email & phone — all saved to your dashboard instantly', delay: 6400 },
-  { role: 'user', text: 'How smart is it really?', delay: 8000 },
-  { role: 'bot',  text: '🧠 Trained on YOUR business data — FAQs, products, policies. It answers like you!', delay: 9400 },
-  { role: 'user', text: 'Sounds complex to set up...', delay: 11200 },
-  { role: 'bot',  text: '⚡ Nope! 5 minutes. Fill details → copy 1 line of code → go live!', delay: 12600 },
-  { role: 'user', text: 'What if I need it in Urdu?', delay: 14200 },
-  { role: 'bot',  text: '🌍 Supports 50+ languages including Urdu, Arabic & Hindi!', delay: 15600 },
-  { role: 'user', text: 'How much does it cost?', delay: 17200 },
-  { role: 'bot',  text: '🎉 Start FREE for 7 days — no credit card. Plans from just $29/mo!', delay: 18600 },
-  { role: 'user', text: 'Okay I\'m convinced. Let\'s go! 🚀', delay: 20200 },
-  { role: 'bot',  text: '🔥 Amazing! Click "Create Your Chatbot" — your AI goes live today!', delay: 21400 },
+import Link from 'next/link'
+import { useEffect, useRef } from 'react'
+
+const stats = [
+  { value: '10x', label: 'Faster responses' },
+  { value: '3+', label: 'Channels unified' },
+  { value: '60%', label: 'Support cost saved' },
 ]
 
-export default function Hero() {
-  const [visibleMessages, setVisibleMessages] = useState<number[]>([])
-  const [scrollY, setScrollY] = useState(0)
-  const [typing, setTyping] = useState(false)
-  const [loopKey, setLoopKey] = useState(0)
+const channels = [
+  { name: 'WhatsApp', color: '#25D366', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  )},
+  { name: 'Instagram', color: '#E1306C', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+  )},
+  { name: 'Email', color: '#6C63FF', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+    </svg>
+  )},
+  { name: 'Facebook', color: '#1877F2', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  )},
+]
 
-  // Chat loop
+export function Hero() {
+  const badgeRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = []
-
-    CHAT_MESSAGES.forEach((msg, i) => {
-      if (msg.role === 'bot') {
-        timers.push(setTimeout(() => setTyping(true), msg.delay - 800))
-      } else {
-        timers.push(setTimeout(() => setTyping(false), msg.delay - 200))
-      }
-      timers.push(setTimeout(() => {
-        setTyping(false)
-        setVisibleMessages(prev => {
-          const next = [...prev, i]
-          setTimeout(() => {
-            const chatWindow = document.getElementById('chat-messages-window')
-            if (chatWindow) chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' })
-          }, 100)
-          return next
-        })
-      }, msg.delay))
+    const el = badgeRef.current
+    if (!el) return
+    el.style.opacity = '0'
+    el.style.transform = 'translateY(16px)'
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease'
+      el.style.opacity = '1'
+      el.style.transform = 'translateY(0)'
     })
-
-    timers.push(setTimeout(() => {
-      setVisibleMessages([])
-      setTyping(false)
-      setLoopKey(k => k + 1)
-    }, 27000))
-
-    return () => timers.forEach(clearTimeout)
-  }, [loopKey])
-
-  // Scroll
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Card tilt
-  useEffect(() => {
-    const card = document.getElementById('hero-mockup-card')
-    if (!card) return
-    const onMove = (e: MouseEvent) => {
-      const rx = (e.clientY / window.innerHeight - 0.5) * 20
-      const ry = (e.clientX / window.innerWidth - 0.5) * -20
-      card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`
-    }
-    const onLeave = () => { card.style.transform = '' }
-    window.addEventListener('mousemove', onMove)
-    card.addEventListener('mouseleave', onLeave)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      card.removeEventListener('mouseleave', onLeave)
-    }
   }, [])
 
   return (
-    <>
-      <style>{`
-        .hero-inner {
-          position: relative;
-          z-index: 2;
-          max-width: 1100px;
-          margin: 0 auto;
-          width: 100%;
-        }
-        .hero-heading-wrap { margin-bottom: 48px; }
-        .hero-bottom {
-          display: grid;
-          grid-template-columns: 1fr 380px;
-          gap: 48px;
-          align-items: center;
-        }
-        @media (max-width: 900px) {
-          .hero-bottom { grid-template-columns: 1fr; }
-          .hero-right { display: none; }
-        }
+    <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
 
-        /* ── Particles ── */
-        .particle {
-          position: absolute;
-          border-radius: 50%;
-          background: var(--red);
-          opacity: 0;
-          animation: floatParticle var(--dur) ease-in-out var(--delay) infinite;
-        }
-        @keyframes floatParticle {
-          0%   { opacity: 0; transform: translateY(0) scale(0); }
-          20%  { opacity: 0.5; }
-          80%  { opacity: 0.15; }
-          100% { opacity: 0; transform: translateY(-100px) scale(1.4); }
-        }
+      {/* Animated background grid */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(var(--border-subtle) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%)',
+        }} />
+      </div>
 
-        /* ── Chat Demo ── */
-        .chat-demo {
-          background: var(--card-bg);
-          border: 1px solid var(--border);
-          border-radius: 16px;
-          overflow: hidden;
-          box-shadow: 0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px var(--border2);
-          animation: floatCard 6s ease-in-out infinite;
-          width: 100%;
-        }
-        @keyframes floatCard {
-          0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-10px); }
-        }
-        .chat-demo-header {
-          padding: 12px 16px;
-          border-bottom: 1px solid var(--border);
-          display: flex; align-items: center; gap: 10px;
-          background: var(--bg2);
-        }
-        .chat-demo-avatar {
-          width: 30px; height: 30px; border-radius: 50%;
-          background: var(--red);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 12px; font-weight: 800; color: #fff;
-          font-family: 'Syne', sans-serif; flex-shrink: 0;
-        }
-        .chat-demo-name { font-size: 13px; font-weight: 600; color: var(--text); }
-        .chat-demo-status {
-          font-size: 11px; color: #22c55e;
-          display: flex; align-items: center; gap: 4px; margin-top: 1px;
-        }
-        .chat-demo-status::before {
-          content: ''; width: 5px; height: 5px;
-          background: #22c55e; border-radius: 50%;
-          animation: pulseDot 2s infinite;
-        }
-        .chat-demo-dots { display: flex; gap: 5px; margin-left: auto; }
-        .chat-demo-dots span { width: 9px; height: 9px; border-radius: 50%; }
-        .chat-messages {
-          height: 220px; overflow-y: auto;
-          padding: 14px; display: flex;
-          flex-direction: column; gap: 8px;
-          scrollbar-width: none; scroll-behavior: smooth;
-        }
-        .chat-messages::-webkit-scrollbar { display: none; }
-        .chat-msg {
-          max-width: 82%; padding: 8px 12px;
-          border-radius: 10px; font-size: 12px; line-height: 1.5;
-          animation: msgPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        @keyframes msgPop {
-          from { opacity: 0; transform: scale(0.88) translateY(6px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .chat-msg-bot {
-          background: var(--bg2); border: 1px solid var(--border);
-          color: var(--text); align-self: flex-start;
-          border-radius: 4px 10px 10px 10px;
-        }
-        .chat-msg-user {
-          background: var(--red); color: #fff;
-          align-self: flex-end; border-radius: 10px 4px 10px 10px;
-        }
-        .chat-typing {
-          display: flex; gap: 4px; align-items: center;
-          padding: 8px 12px; background: var(--bg2);
-          border: 1px solid var(--border);
-          border-radius: 4px 10px 10px 10px;
-          align-self: flex-start; animation: msgPop 0.3s ease;
-        }
-        .chat-typing span {
-          width: 5px; height: 5px; background: var(--text3);
-          border-radius: 50%; animation: typingBounce 1.2s infinite;
-        }
-        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
-        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingBounce {
-          0%,60%,100% { transform: translateY(0); }
-          30%          { transform: translateY(-5px); }
-        }
-        .chat-input-bar {
-          padding: 10px 14px; border-top: 1px solid var(--border);
-          display: flex; gap: 8px; align-items: center;
-          background: var(--bg2);
-        }
-        .chat-input-mock {
-          flex: 1; background: var(--card-bg);
-          border: 1px solid var(--border); border-radius: 8px;
-          padding: 7px 12px; font-size: 11px; color: var(--text3);
-        }
-        .chat-send-mock {
-          width: 28px; height: 28px; background: var(--red);
-          border-radius: 8px; display: flex;
-          align-items: center; justify-content: center;
-          color: #fff; font-size: 13px; flex-shrink: 0;
-        }
-        .hero-right {
-          position: relative;
-          animation: fadeUp 1s ease 0.8s both;
-        }
-        .hero-right::before {
-          content: ''; position: absolute; inset: -40px;
-          background: radial-gradient(ellipse 80% 80% at 50% 50%, var(--red-glow), transparent 70%);
-          pointer-events: none; z-index: 0;
-        }
-        .hero-right > * { position: relative; z-index: 1; }
-        .chat-badges {
-          display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
-        }
-        .chat-badge {
-          display: inline-flex; align-items: center; gap: 5px;
-          background: var(--card-bg); border: 1px solid var(--border);
-          border-radius: 20px; padding: 4px 10px;
-          font-size: 11px; font-weight: 600; color: var(--text2);
-          animation: fadeUp 0.5s ease both;
-        }
-        .chat-badge:nth-child(1) { animation-delay: 1.4s; }
-        .chat-badge:nth-child(2) { animation-delay: 1.6s; }
-        .chat-badge:nth-child(3) { animation-delay: 1.8s; }
-        .chat-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
-        .hero-stats {
-          display: flex; gap: 0; margin-top: 40px;
-          padding-top: 36px; border-top: 1px solid var(--border);
-          opacity: 0; animation: fadeIn 1s ease 1.2s forwards;
-        }
-        .stat-item { flex: 1; padding-right: 28px; border-right: 1px solid var(--border); }
-        .stat-item:last-child { border-right: none; padding-right: 0; padding-left: 28px; }
-        .stat-item:not(:first-child):not(:last-child) { padding-left: 28px; }
-      `}</style>
+      <div className="container relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
 
-      <section className="hero" id="home" style={{ position: 'relative', overflow: 'hidden' }}>
-
-        <div className="hero-bg" style={{ transform: `translateY(${scrollY * 0.4}px)` }} />
-        <div className="grid-overlay" style={{ transform: `translateY(${scrollY * 0.2}px)` }} />
-
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="particle" style={{
-            width: `${Math.random() * 3 + 2}px`,
-            height: `${Math.random() * 3 + 2}px`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            '--dur': `${Math.random() * 4 + 3}s`,
-            '--delay': `${Math.random() * 4}s`,
-          } as React.CSSProperties} />
-        ))}
-
-        <div className="hero-inner">
-          <div className="hero-heading-wrap" style={{ transform: `translateY(${scrollY * 0.15}px)`, transition: 'transform 0.1s linear' }}>
-            <div className="hero-eyebrow">AI Chatbot Platform</div>
-            <h1>
-              Build Your Own
-              <span className="line-red">AI Chatbot</span>
-              <span className="stroke-text">In Minutes.</span>
-            </h1>
+          {/* Badge */}
+          <div ref={badgeRef} className="inline-flex mb-6">
+            <span className="section-label">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)] animate-pulse" />
+              Now in beta — free for early adopters
+            </span>
           </div>
 
-          <div className="hero-bottom" style={{ gridTemplateColumns: '1fr 320px' }}>
-            <div>
-              <p className="hero-desc">
-                Train a custom AI chatbot on your business data — deploy it anywhere,
-                capture leads automatically, and let it work 24/7 while you focus on
-                what matters.
-              </p>
-              <div className="hero-actions">
-                <Link href="/create-chatbot" className="btn-primary">
-                  Create Your Chatbot <span className="btn-arrow">→</span>
-                </Link>
-                <Link href="/pricing" className="btn-ghost">View Pricing</Link>
-              </div>
-              <div className="hero-stats">
-                {[
-                  { num: '7', suffix: ' days', label: 'Free Trial' },
-                  { num: '5 min', suffix: '', label: 'Setup Time' },
-                  { num: '24/7', suffix: '', label: 'Always Online' },
-                ].map((s) => (
-                  <div className="stat-item" key={s.label}>
-                    <div className="stat-num">
-                      <span>{s.num}</span>
-                      {s.suffix && <span style={{ color: 'var(--text2)', fontSize: 18 }}>{s.suffix}</span>}
-                    </div>
-                    <div className="stat-label">{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Headline */}
+          <h1 className="
+            font-display text-5xl sm:text-6xl md:text-7xl font-800
+            leading-[1.08] tracking-tight mb-6
+            text-[var(--text-primary)]
+          ">
+            One inbox.
+            <br />
+            <span className="gradient-text-warm">Every conversation.</span>
+            <br />
+            Pure AI.
+          </h1>
 
-            <div className="hero-right" style={{ transform: `translateY(${scrollY * -0.08}px)`, transition: 'transform 0.1s linear' }}>
-              <div className="chat-demo" id="hero-mockup-card" style={{ transition: 'transform 0.1s ease' }}>
-                <div className="chat-demo-header">
-                  <div className="chat-demo-avatar">JZ</div>
-                  <div>
-                    <div className="chat-demo-name">JZAI Assistant</div>
-                    <div className="chat-demo-status">Online</div>
-                  </div>
-                  <div className="chat-demo-dots">
-                    <span style={{ background: '#ff5f57' }} />
-                    <span style={{ background: '#febc2e' }} />
-                    <span style={{ background: '#28c840' }} />
-                  </div>
-                </div>
-                <div className="chat-messages" id="chat-messages-window">
-                  {CHAT_MESSAGES.map((msg, i) =>
-                    visibleMessages.includes(i) ? (
-                      <div key={i} className={`chat-msg ${msg.role === 'bot' ? 'chat-msg-bot' : 'chat-msg-user'}`}>
-                        {msg.text}
-                      </div>
-                    ) : null
-                  )}
-                  {typing && (
-                    <div className="chat-typing">
-                      <span /><span /><span />
-                    </div>
-                  )}
-                </div>
-                <div className="chat-input-bar">
-                  <div className="chat-input-mock">Type a message…</div>
-                  <div className="chat-send-mock">→</div>
-                </div>
-              </div>
-              <div className="chat-badges">
-                <div className="chat-badge"><span className="chat-badge-dot" />Lead Capture</div>
-                <div className="chat-badge"><span className="chat-badge-dot" />AI Powered</div>
-                <div className="chat-badge"><span className="chat-badge-dot" />No Code</div>
-              </div>
-            </div>
+          {/* Subheadline */}
+          <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed">
+            JZAI unifies WhatsApp, Instagram, Facebook, and Email into one smart inbox — with an AI agent that handles support, qualifies leads, and automates workflows automatically.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
+            <Link href="/auth?tab=signup" className="btn-primary text-base px-8 py-3.5">
+              Start free — no card needed
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+            <Link href="#features" className="btn-ghost text-base px-8 py-3.5">
+              See how it works
+            </Link>
           </div>
+
+          {/* Channel badges */}
+          <div className="flex items-center justify-center gap-2 flex-wrap mb-16">
+            <span className="text-sm text-[var(--text-muted)] mr-1">Works with</span>
+            {channels.map((ch) => (
+              <div
+                key={ch.name}
+                className="glass-sm flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{ color: ch.color }}
+              >
+                {ch.icon}
+                <span className="text-xs font-medium text-[var(--text-secondary)]">{ch.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+            {stats.map((s) => (
+              <div key={s.label} className="glass-card p-4 text-center">
+                <div className="font-display text-2xl font-700 gradient-text mb-1">{s.value}</div>
+                <div className="text-xs text-[var(--text-muted)]">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{ background: 'linear-gradient(to bottom, transparent, var(--bg-base))' }}
+      />
+    </section>
   )
 }
