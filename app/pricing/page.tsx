@@ -5,6 +5,9 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { initializePaddle, Paddle } from "@paddle/paddle-js";
+import NumberFlow from "@number-flow/react";
+import confetti from "canvas-confetti";
+import { useRef } from "react";
 
 export default function Pricing() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
@@ -15,6 +18,7 @@ export default function Pricing() {
   const [calcAddons, setCalcAddons] = useState<string[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [paddle, setPaddle] = useState<Paddle | undefined>(undefined);
+  const switchRef = useRef<HTMLButtonElement>(null);
 
 useEffect(() => {
   initializePaddle({
@@ -464,14 +468,34 @@ const plans = [
               onClick={() => setBilling("monthly")}
             >Monthly</button>
             <button
+              ref={switchRef}
               className={`pr-bill-btn${billing === "yearly" ? " active" : ""}`}
-              onClick={() => setBilling("yearly")}
+              onClick={() => {
+                setBilling("yearly");
+                if (switchRef.current) {
+                  const rect = switchRef.current.getBoundingClientRect();
+                  confetti({
+                    particleCount: 60,
+                    spread: 70,
+                    origin: {
+                      x: rect.left / window.innerWidth,
+                      y: rect.top / window.innerHeight,
+                    },
+                    colors: ["#e8193c", "#ff6b6b", "#ffffff", "#a01028"],
+                    ticks: 200,
+                    gravity: 1.2,
+                    decay: 0.94,
+                    startVelocity: 30,
+                    shapes: ["circle"],
+                  });
+                }
+              }}
             >
               Yearly
               <span className="pr-save-badge">SAVE 20%</span>
             </button>
           </div>
-        </div>
+          </div>
       </section>
 
       {/* PLANS */}
@@ -498,7 +522,14 @@ const plans = [
                 <div className="pr-plan-price">
                   {price !== null ? (
                     <>
-                      <span className={`pr-price-num${isPopular ? " red" : ""}`}>${price}</span>
+                      <span className={`pr-price-num${isPopular ? " red" : ""}`}>
+                      <NumberFlow
+                        value={price ?? 0}
+                        format={{ style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }}
+                        transformTiming={{ duration: 500, easing: "ease-out" }}
+                        willChange
+                      />
+                    </span>
                       <span className="pr-price-suffix">/mo</span>
                       {originalPrice && billing === "yearly" && (
                         <span className="pr-price-original">${originalPrice}</span>
