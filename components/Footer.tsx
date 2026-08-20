@@ -6,7 +6,7 @@ export default function Footer() {
     <>
       
       <footer style={{ opacity: 0, animation: "fadeUp 0.8s ease 0.1s forwards" }}>
-        <script src="https://app.k2mailer.com/widget/assistant.js?v=3" data-bot="Jq0lKQJ0zu2SCSBKXR6wvOhgxKOfWQiuHuyZJvCw"></script>
+        <script src="https://app.k2mailer.com/widget/assistant.js?v=3" data-bot="rAlhy1s9qtHKo1SLeuz2Phfb5swIzBvpiF5xw93l"></script>
         <div className="footer-brand">
           <Link href="/" className="nav-logo" style={{ display: 'block', marginBottom: 14 }}>
             JZ<span>AI</span>
