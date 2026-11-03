@@ -269,7 +269,7 @@ export default function Hero() {
 
         <div className="hero-inner">
           <div className="hero-heading-wrap" style={{ transform: `translateY(${scrollY * 0.15}px)`, transition: 'transform 0.1s linear' }}>
-            <div className="hero-eyebrow">AI World</div>
+            <div className="hero-eyebrow">AI Chatbot Platform</div>
             <h1>
               Build Your Own
               <span className="line-red">AI Chatbot</span>
